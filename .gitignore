@@ -1,0 +1,78 @@
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local Codex/agent workspace metadata
+.agents/
+.codex/
+
+# Python caches and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Local Python environments
+.venv/
+venv/
+env/
+.conda/
+
+# Local secrets and machine-specific environment files
+.env
+.env.*
+*.pem
+*.key
+
+# Datasets must remain outside the source tree
+/data/
+/dataset/
+/datasets/
+
+# Checkpoints and learned model states
+/checkpoint/
+/checkpoints/
+*.ckpt
+*.pth
+*.pt
+
+# Experiment outputs and tracking directories
+/experiment/
+/experiments/
+/logs/
+/outputs/
+/runs/
+/wandb/
+/tensorboard/
+
+# Generated data and codec artifacts
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.bin
+
+# Runtime and Slurm logs
+*.log
+*.out
+*.err
+slurm-*.out
+slurm-*.err
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+/results.zip
