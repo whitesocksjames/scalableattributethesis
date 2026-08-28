@@ -75,7 +75,40 @@ class MultiscaleVAE(torch.nn.Module):
                 in_channels=args.channels+ref_channels, channels=args.channels, out_channels=args.channels,
                 block_type=args.block_type, block_layers=args.block_layers, kernel_size=args.kernel_size)
 
-    def forward(self, x, training=True, ref_set=None, lmb=None, encode=False, real_coding=None):
+    def _stage_count(self, max_residual_stages):
+        total = len(self.unpooling_list)
+        if max_residual_stages is None:
+            return total
+        if not 1 <= max_residual_stages <= total:
+            raise ValueError(
+                "max_residual_stages must be in [1, {}]".format(total))
+        return max_residual_stages
+
+    def prepare_next_scale(self, curr_x, curr_f, curr_dec, idx_scale,
+                           ref_set=None):
+        """Prepare decoder-known inputs for one native residual invocation."""
+        if not 0 <= idx_scale < len(self.unpooling_list):
+            raise IndexError("Residual stage index out of range")
+        assert (curr_x.C==curr_f.C).all()
+        if self.stage==1: upscaler = self.upscaler
+        if self.stage==3: upscaler = self.upscaler_list[idx_scale%self.stage]
+
+        curr_f = upscaler(ME.cat([curr_f, curr_x]))
+        curr_x = self.unpooling_list[idx_scale](curr_x)
+        curr_dec = self.unpooling_list[idx_scale](curr_dec)
+        assert (curr_f.C==curr_x.C).all()
+
+        stride_size = curr_x.tensor_stride
+        if ref_set is not None and str(stride_size) in ref_set:
+            curr_ref = ref_set[str(stride_size)]
+            assert (curr_ref.C==curr_x.C).all()
+            curr_f = self.inter_compensator(ME.cat([curr_f, curr_ref])) + curr_f
+
+        return curr_x, curr_f, curr_dec
+
+    def forward(self, x, training=True, ref_set=None, lmb=None, encode=False,
+                real_coding=None, max_residual_stages=None,
+                return_state=False):
         """
         """
         # Scalable thesis compatibility extension: allow deterministic symbol
@@ -117,31 +150,19 @@ class MultiscaleVAE(torch.nn.Module):
             dectime_list = []
             real_bits_list = []
 
-        for idx_scale, unpooling in enumerate(self.unpooling_list):
+        stage_count = self._stage_count(max_residual_stages)
+        for idx_scale in range(stage_count):
             if idx_scale==0:
                 curr_x = x_low
                 curr_f = self.linear_in(curr_x)
                 curr_dec = curr_f - curr_f
-            
-            assert (curr_x.C==curr_f.C).all()
-            if self.stage==1: upscaler = self.upscaler
-            if self.stage==3: upscaler = self.upscaler_list[idx_scale%self.stage]
 
-            curr_f = upscaler(ME.cat([curr_f, curr_x]))
-            curr_x = unpooling(curr_x)
-            curr_dec = unpooling(curr_dec)
-        
-            assert (curr_f.C==curr_x.C).all()
+            curr_x, curr_f, curr_dec = self.prepare_next_scale(
+                curr_x, curr_f, curr_dec, idx_scale, ref_set=ref_set)
 
             stride_size = curr_x.tensor_stride
 
             x_gt = x_set[str(stride_size)]
-            
-            ############### inter predictor
-            if ref_set is not None and str(stride_size) in ref_set:
-                curr_ref = ref_set[str(stride_size)]
-                assert (curr_ref.C==curr_x.C).all()
-                curr_f = self.inter_compensator(ME.cat([curr_f, curr_ref])) + curr_f
 
             if self.stage==1: VAE = self.VAE
             if self.stage==3: VAE = self.VAE_list[idx_scale%self.stage]
@@ -172,15 +193,22 @@ class MultiscaleVAE(torch.nn.Module):
             return enc_set_list, x_low, gpcc_bits
         else:
 
-            return {'gt_list':gt_list[::-1], 'out_list':out_list[::-1], 'x_low':x_low,
+            result = {'gt_list':gt_list[::-1], 'out_list':out_list[::-1], 'x_low':x_low,
                     'likelihood_list': likelihood_list[::-1],
                     'Qvalue_list':[Qlatent.F.round() for Qlatent in Qlatent_list][::-1], 'gpcc_bpp':gpcc_bpp,
                     'dectime':dectime_list,
                     'real_bits_list':real_bits_list, 
                     'curr_f': curr_f}
+            if return_state:
+                result['state'] = {
+                    'x': curr_x, 'f': curr_f, 'dec': curr_dec,
+                    'completed_residual_stages': stage_count,
+                }
+            return result
     
     @torch.no_grad()
-    def decode(self, x0, x_low, enc_set_list, ref_set=None, lmb=None):
+    def decode(self, x0, x_low, enc_set_list, ref_set=None, lmb=None,
+               max_residual_stages=None, return_state=False):
         # downscaling
         x0_low = x0
         for i, pooling in enumerate(self.pooling_list):
@@ -193,29 +221,17 @@ class MultiscaleVAE(torch.nn.Module):
         else: emb = None
 
         # downscaling
-        for idx_scale, unpooling in enumerate(self.unpooling_list):
+        stage_count = self._stage_count(max_residual_stages)
+        if len(enc_set_list) < stage_count:
+            raise ValueError("Not enough residual streams for requested prefix")
+        for idx_scale in range(stage_count):
             if idx_scale==0:
                 curr_x = x_low
                 curr_f = self.linear_in(curr_x)
                 curr_dec = curr_f - curr_f
-            
-            assert (curr_x.C==curr_f.C).all()
-            if self.stage==1: upscaler = self.upscaler
-            if self.stage==3: upscaler = self.upscaler_list[idx_scale%self.stage]
 
-            curr_f = upscaler(ME.cat([curr_f, curr_x]))
-            curr_x = unpooling(curr_x)
-            curr_dec = unpooling(curr_dec)
-        
-            assert (curr_f.C==curr_x.C).all()
-
-            stride_size = curr_x.tensor_stride
-
-            ############### inter predictor
-            if ref_set is not None and str(stride_size) in ref_set:
-                curr_ref = ref_set[str(stride_size)]
-                assert (curr_ref.C==curr_x.C).all()
-                curr_f = self.inter_compensator(ME.cat([curr_f, curr_ref])) + curr_f
+            curr_x, curr_f, curr_dec = self.prepare_next_scale(
+                curr_x, curr_f, curr_dec, idx_scale, ref_set=ref_set)
 
             if self.stage==1: VAE = self.VAE
             if self.stage==3: VAE = self.VAE_list[idx_scale%self.stage]
@@ -234,6 +250,8 @@ class MultiscaleVAE(torch.nn.Module):
             # assert (curr_f.F==enc_set['f_out'].F).all()
             # assert (curr_dec.F==enc_set['dec'].F).all()
         
+        if return_state:
+            return curr_x, curr_f, curr_dec
         return curr_x
     
     def test(self, x, ref_set=None, lmb=None):
