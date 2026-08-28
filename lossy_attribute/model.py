@@ -177,11 +177,10 @@ class MultiscaleVAE(torch.nn.Module):
                     'Qvalue_list':[Qlatent.F.round() for Qlatent in Qlatent_list][::-1], 'gpcc_bpp':gpcc_bpp,
                     'dectime':dectime_list,
                     'real_bits_list':real_bits_list, 
-                    'curr_f': curr_f, 'curr_dec': curr_dec}
+                    'curr_f': curr_f}
     
     @torch.no_grad()
-    def decode(self, x0, x_low, enc_set_list, ref_set=None, lmb=None,
-               return_feature=False, return_state=False):
+    def decode(self, x0, x_low, enc_set_list, ref_set=None, lmb=None):
         # downscaling
         x0_low = x0
         for i, pooling in enumerate(self.pooling_list):
@@ -235,11 +234,6 @@ class MultiscaleVAE(torch.nn.Module):
             # assert (curr_f.F==enc_set['f_out'].F).all()
             # assert (curr_dec.F==enc_set['dec'].F).all()
         
-        # Scalable thesis compatibility extension; preserve the legacy return.
-        if return_state:
-            return curr_x, curr_f, curr_dec
-        if return_feature:
-            return curr_x, curr_f
         return curr_x
     
     def test(self, x, ref_set=None, lmb=None):

@@ -13,11 +13,11 @@ import torch
 
 from data_utils.attribute.color_format import rgb2yuv, yuv2rgb
 from data_utils.attribute.inout import read_h5, write_ply_ascii
-from scalable_attribute.base_adapter import BaseAdapter
 from scalable_attribute.data import h5_files
 from scalable_attribute.evaluation import (
     aggregate_models, average_models, sample_identity)
 from scalable_attribute.reference_points import reference_point
+from scalable_attribute.unicorn_reference import ReleasedUnicornAttribute
 from third_party.pc_error_attr import pc_error
 
 
@@ -109,7 +109,7 @@ def main():
         os.symlink(args.gpcc_binary, gpcc_link)
     os.chdir(args.output_dir)
 
-    model = BaseAdapter(
+    model = ReleasedUnicornAttribute(
         args.base_checkpoint, args.base_scale, args.base_stage,
         args.base_vmode).cuda().eval()
     with open(args.file_list, encoding="utf-8") as handle:
@@ -132,7 +132,7 @@ def main():
         A = ME.SparseTensor(
             features=batched_feats, coordinates=batched_coords,
             tensor_stride=1, device="cuda")
-        B, _, bits = model.hard_reconstruct(A, base_lambda)
+        B, bits = model.hard_reconstruct(A, base_lambda)
         rec_rgb = yuv2rgb(torch.clamp(B.F.detach().cpu(), 0, 1), out_range=255)
         rec_rgb = np.clip(rec_rgb.round().int().numpy(), 0, 255)
         gt_path = os.path.join(metric_dir, "gt.ply")

@@ -1,3 +1,1 @@
-from scalable_attribute.config import EnhancementConfig
-
-__all__ = ["EnhancementConfig"]
+"""Shared thesis utilities and the canonical scalable Attribute namespace."""
