@@ -5,6 +5,8 @@ are field names, not formal thesis settings.
 """
 
 from sweep_utils import grid
+from scalable_attribute.reference_points import (
+    OFFICIAL_RWTT_REFERENCE_POINTS, reference_checkpoint)
 
 
 # Official V1's object test pairs 32k8k with 32768/16384/8192, 8k256 with
@@ -14,15 +16,21 @@ from sweep_utils import grid
 # RWTT interface smoke also validated it at lambda=2048. Therefore the thesis
 # default names that verified combination without restricting explicit overrides.
 BASE_CHECKPOINT_PROFILES = {
-    "thesis_rwtt_2k128": {
-        "checkpoint": (
-            "unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/"
-            "lossy_attribute/rwtt/2k128/epoch_last.pth"
-        ),
-        "validated_lambda": 2048,
-    },
+    rate_id: {
+        "checkpoint": reference_checkpoint(checkpoint_profile),
+        "validated_lambda": base_lambda,
+    }
+    for rate_id, checkpoint_profile, base_lambda
+    in OFFICIAL_RWTT_REFERENCE_POINTS
 }
-DEFAULT_BASE_PROFILE = "thesis_rwtt_2k128"
+# Preserve already-running checkpoints exactly, but never select this profile
+# implicitly for a future experiment.
+BASE_CHECKPOINT_PROFILES["legacy_running_2k128_l2048"] = {
+    "checkpoint": reference_checkpoint("2k128"),
+    "validated_lambda": 2048,
+    "legacy": True,
+}
+DEFAULT_BASE_PROFILE = None
 
 # Naming is an experiment concern, not scheduler logic. Keep only fields that
 # distinguish runs at a glance; resolved_args.json retains every CLI value.
@@ -37,6 +45,7 @@ EXPERIMENT_NAME_FIELDS = (
 # this list in the spec when the model CLI evolves; HPC code forwards it blindly.
 EVAL_INHERIT_TRAIN_ARGS = (
     "base_checkpoint", "base_lambda", "base_scale", "base_stage", "base_vmode",
+    "rd_lambda", "lr", "seed",
 )
 
 
@@ -51,6 +60,10 @@ ARCHITECTURE = {
 # TRAIN_COMMON = {**ARCHITECTURE, ...}
 TRAIN_COMMON = {
     **ARCHITECTURE,
+    # Provenance for the already-running 2026-08-19 coarse sweep. New studies
+    # must replace this with one of the official R01--R09 profiles and use its
+    # corresponding base_lambda.
+    "base_profile": "legacy_running_2k128_l2048",
     "base_lambda": 2048,
     "batch_size": 4,
     "num_workers": 0,
@@ -68,8 +81,9 @@ TRAIN_COMMON = {
 EVAL_COMMON = {
     "file_list": (
         "$WORK/scalable_attribute_thesis/datasets/RWTT/splits/"
-        "model_95_5_seed0/val_h5.txt"
+        "model_95_5_seed0/dev_val_models14_uniform_v1_h5.txt"
     ),
+    "base_profile_label": "legacy_running_2k128_l2048",
 }
 
 # Original one-epoch coarse screening, now with the fixed BS4 that passed the
@@ -84,4 +98,25 @@ TRAIN_EXPERIMENTS = grid(
     rd_lambda=[350, 1000, 2500],
     lr=[1e-4, 5e-5],
 )
-EVAL_EXPERIMENTS = []
+EVAL_EXPERIMENTS = [
+    {
+        "train_experiment": "b2048_rd350_lr0p0001_cz64",
+        "checkpoint_tag": "step3525",
+        "base_profile": "legacy_running_2k128_l2048",
+    },
+    {
+        "train_experiment": "b2048_rd350_lr5e-05_cz64",
+        "checkpoint_tag": "step3525",
+        "base_profile": "legacy_running_2k128_l2048",
+    },
+    {
+        "train_experiment": "b2048_rd1000_lr0p0001_cz64",
+        "checkpoint_tag": "step3525",
+        "base_profile": "legacy_running_2k128_l2048",
+    },
+    {
+        "train_experiment": "b2048_rd1000_lr5e-05_cz64",
+        "checkpoint_tag": "step3525",
+        "base_profile": "legacy_running_2k128_l2048",
+    },
+]

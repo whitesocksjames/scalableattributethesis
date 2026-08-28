@@ -9,7 +9,6 @@ import os
 import subprocess
 
 import numpy as np
-import open3d as o3d
 import pandas as pd
 # from pypcd import pypcd
 from tqdm import tqdm

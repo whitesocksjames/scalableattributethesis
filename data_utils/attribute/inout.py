@@ -2,9 +2,19 @@
 # Last update: 2023-01-07
 
 import os, sys
-import open3d as o3d
 import numpy as np
 import h5py
+
+
+def _require_open3d():
+    try:
+        import open3d as o3d
+    except ImportError as exc:
+        raise ImportError(
+            "Open3D is required for Open3D-backed PLY I/O, but it is not "
+            "installed. HDF5 and ASCII PLY I/O do not require Open3D."
+        ) from exc
+    return o3d
 
 def read_bin(filedir, dtype="float32"):
     # for kitti
@@ -101,6 +111,7 @@ def write_ply_ascii(filedir, coords, feats, dtype_coords='int32', dtype_feats='i
     return
 
 def read_ply_o3d(filedir, dtype_coords='int32', dtype_feats='int32'):
+    o3d = _require_open3d()
     pcd = o3d.io.read_point_cloud(filedir)
     coords = np.asarray(pcd.points).astype(dtype_coords)
     feats = (np.asarray(pcd.colors).astype('float32')*255).round()
@@ -110,6 +121,7 @@ def read_ply_o3d(filedir, dtype_coords='int32', dtype_feats='int32'):
     return coords, feats
 
 def write_ply_o3d(filedir, coords, feats, dtype_coords='int32'):
+    o3d = _require_open3d()
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(coords.astype(dtype_coords))
     pcd.colors = o3d.utility.Vector3dVector(feats.astype('float32')/255.)
@@ -126,4 +138,3 @@ def write_ply_o3d(filedir, coords, feats, dtype_coords='int32'):
     fo.writelines(lines)
 
     return
-

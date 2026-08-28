@@ -38,8 +38,15 @@ class ConditionalEnhancementLayer(torch.nn.Module):
         self.synthesis_transform = Backbone(
             scale=-c.analysis_scale, in_channels=c.latent_channels,
             out_channels=c.hidden_channels, **common)
+        synthesis_channels = {
+            "b_fu": fusion_channels,
+            "b": c.hidden_channels + c.attribute_channels,
+            "none": c.hidden_channels,
+        }[c.synthesis_condition]
+        self.synthesis_condition = c.synthesis_condition
+        self.zero_centered_synthesis = c.zero_centered_synthesis
         self.synthesis_fusion = Backbone(
-            scale=0, in_channels=fusion_channels,
+            scale=0, in_channels=synthesis_channels,
             out_channels=c.hidden_channels, **common)
         self.out_net = Backbone(
             scale=0,
@@ -75,11 +82,28 @@ class ConditionalEnhancementLayer(torch.nn.Module):
             sigma = self._align(sigma, target, "sigma")
         return mu, sigma
 
-    def _synthesis(self, y_hat, B, F_U):
+    def _decode_delta(self, y_hat, B, F_U):
         decoded = self.synthesis_transform(y_hat)
         decoded = self._align(decoded, B, "EL decoder")
-        fused = self.synthesis_fusion(ME.cat([decoded, B, F_U]))
-        delta_A = self.out_net(fused)
+        if self.synthesis_condition == "b_fu":
+            synthesis_input = ME.cat([decoded, B, F_U])
+        elif self.synthesis_condition == "b":
+            synthesis_input = ME.cat([decoded, B])
+        else:
+            synthesis_input = decoded
+        fused = self.synthesis_fusion(synthesis_input)
+        return self.out_net(fused)
+
+    def _synthesis(self, y_hat, B, F_U):
+        delta_A = self._decode_delta(y_hat, B, F_U)
+        if self.zero_centered_synthesis:
+            zero_y_hat = ME.SparseTensor(
+                features=torch.zeros_like(y_hat.F),
+                coordinate_map_key=y_hat.coordinate_map_key,
+                coordinate_manager=y_hat.coordinate_manager,
+                device=y_hat.device,
+            )
+            delta_A = delta_A - self._decode_delta(zero_y_hat, B, F_U)
         Full = B + delta_A
         return delta_A, Full
 

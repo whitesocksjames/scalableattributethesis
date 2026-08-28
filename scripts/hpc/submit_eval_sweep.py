@@ -82,7 +82,7 @@ def main():
                 require_exists=not (args.dry_run or args.afterok))
             run_dir = os.path.join(experiment_root, "eval", stable_tag)
             if not args.dry_run and os.path.exists(
-                    os.path.join(run_dir, "metrics.csv")):
+                    os.path.join(run_dir, "endpoint_summary.csv")):
                 raise RuntimeError(
                     "Completed eval output already exists: {}".format(run_dir))
             base_checkpoint = resolve_base_checkpoint(
@@ -94,6 +94,7 @@ def main():
                 "--base-checkpoint", base_checkpoint,
                 "--enhancement-checkpoint", checkpoint,
                 "--output-dir", run_dir,
+                "--experiment-name", name,
                 "--gpcc-binary", args.gpcc_binary,
             ]
             command.extend(experiment_cli(experiment))

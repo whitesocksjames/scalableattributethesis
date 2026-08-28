@@ -1,10 +1,20 @@
 # Jianqiang Wang (wangjq@smail.nju.edu.cn)
 # Last update: 2023-01-07
 
-import open3d as o3d
 import os, time
 import numpy as np
 import h5py
+
+
+def _require_open3d():
+    try:
+        import open3d as o3d
+    except ImportError as exc:
+        raise ImportError(
+            "Open3D is required for Open3D-backed PLY I/O, but it is not "
+            "installed. HDF5 and ASCII PLY I/O do not require Open3D."
+        ) from exc
+    return o3d
 
 def read_h5(filedir, dtype="int32"):
     pc = h5py.File(filedir, 'r')['data'][:]
@@ -51,12 +61,14 @@ def write_ply_ascii(filedir, coords, dtype='int32'):
     return
 
 def read_ply_o3d(filedir, dtype='int32'):
+    o3d = _require_open3d()
     pcd = o3d.io.read_point_cloud(filedir)
     coords = np.asarray(pcd.points).astype(dtype)
 
     return coords
 
 def write_ply_o3d(filedir, coords, dtype='int32', normal=False, knn=None):
+    o3d = _require_open3d()
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(coords.astype(dtype))
     if normal:

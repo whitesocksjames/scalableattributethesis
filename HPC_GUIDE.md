@@ -1,6 +1,17 @@
-# Thesis HPC 中文使用手册
+# FAU TinyGPU 中文使用手册
 
-这份手册用于日常操作。通常不需要手工登录 HPC：在本机修改 experiment spec 后，通过 SSH alias `tinyx` 完成 source sync、Slurm submission、状态查询、日志查看、取消和 retry。
+这份手册只用于 FAU TinyGPU。N30R3作为 primary training平台的规则见 [N30_GUIDE.md](N30_GUIDE.md)。Project-level dual-cluster policy见 [HPC.md](HPC.md)。
+
+当前默认分工：
+
+```text
+N30 RTX3090: primary training / architecture / ablation
+FAU TinyGPU: formal evaluation / reference / overflow
+```
+
+因此本手册中的 V100 training命令只表示显式 FAU run或历史protocol延续，不再代表project-default training。
+
+FAU日常操作通常不需要手工登录 HPC：在本机修改 experiment spec 后，通过 SSH alias `tinyx` 完成 source sync、Slurm submission、状态查询、日志查看、取消和 retry。
 
 稳定的 workspace 和 TinyGPU 规则见 [HPC.md](HPC.md)。
 
@@ -76,7 +87,7 @@ thpc submit-train --study STUDY_NAME --dry-run
 thpc submit-train --study STUDY_NAME --dry-run --verbose
 ```
 
-使用默认 V100 profile 正式提交：
+显式在 FAU 使用 V100 profile提交：
 
 ```bash
 thpc submit-train --study STUDY_NAME
@@ -117,7 +128,8 @@ thpc submit-eval --study STUDY_NAME --dry-run
 thpc submit-eval --study STUDY_NAME
 ```
 
-默认使用 RTX3080 hard-eval profile。添加 training dependency：
+默认使用`work,rtx3080,v100,a100 + gpu:1` hard-eval profile，由Slurm在
+全部TinyGPU GPU partitions中分配任意一张GPU。添加training dependency：
 
 ```bash
 thpc submit-eval --study STUDY_NAME --afterok TRAIN_JOB_ID
@@ -129,10 +141,10 @@ thpc submit-eval --study STUDY_NAME --afterok TRAIN_JOB_ID
 thpc submit-train --study STUDY_NAME --submit-eval-after-train
 ```
 
-调用链是：
+FAU optional dependency调用链是：
 
 ```text
-V100 training
+explicit FAU V100 training
     └── afterok
         └── RTX3080 hard evaluation
 ```
@@ -140,6 +152,22 @@ V100 training
 `latest` 只用于选择 checkpoint。提交 eval 时会先解析到实际文件，例如 `step_3525.pth`，结果写入 `eval/step_3525/`；以后 `latest` 改变也不会覆盖旧结果。
 
 开发和调参 validation 使用 RWTT Validation，最终 thesis Test 使用外部 8iVFB。没有明确 eval dataset 时应 fail fast，不允许 fallback 到完整 RWTT training root。
+
+### Unicorn 官方 9-point Reference
+
+作者 RWTT Attribute reference curve 使用固定的 R01--R09
+checkpoint/λ mapping，不能自行组合：
+
+```bash
+thpc submit-reference --study STUDY_NAME --dry-run
+thpc submit-reference --study STUDY_NAME --only R01
+thpc submit-reference --study STUDY_NAME
+```
+
+Reference只提交9个Full jobs，每个rate point是独立job，并使用
+`eval_all_gpu`从全部TinyGPU GPU partitions分配任意一张GPU。完整raw结果位于
+同一study的`reference_full/R01/`至`reference_full/R09/`。固定Dev14 curve
+之后直接由Full `per_h5.csv`在CPU上筛选和聚合，不重复hard coding。
 
 ## 5. Query、Result 和 Logs
 
@@ -280,7 +308,7 @@ $WORK/scalable_attribute_thesis/experiments/STUDY/EXPERIMENT/
 
 HPC tooling 把 `train.py` 和 `evaluate.py` 当作 black-box CLI，并把 generic key-value 转为 `--key value`。新增 model/training parameter 时，通常只改 model/entry point 和 `sweep_spec.py`；不要让 architecture semantics 渗入 scheduler layer。
 
-## 10. Resource Profiles
+## 10. FAU TinyGPU Resource Profiles
 
 | Profile | Partition | GRES | CPUs | Walltime | 用途 |
 |---|---|---|---:|---:|---|
@@ -289,8 +317,15 @@ HPC tooling 把 `train.py` 和 `evaluate.py` 当作 black-box CLI，并把 gener
 | `smoke_v100` | `v100` | `gpu:v100:1` | 4 | 30 min | V100 memory/throughput smoke |
 | `eval_rtx3080` | `work,rtx3080` | `gpu:rtx3080:1` | 8 | 4 hours | hard evaluation |
 | `smoke_rtx3080` | `work,rtx3080` | `gpu:rtx3080:1` | 8 | 30 min | RTX3080 smoke |
+| `eval_work_any` | `work,rtx3080` | `gpu:1` | 8 | 4 hours | 手动限制为RTX2080Ti或RTX3080 |
+| `smoke_work_any` | `work,rtx3080` | `gpu:1` | 8 | 30 min | 手动限制为RTX2080Ti或RTX3080 |
+| `eval_all_gpu` | `work,rtx3080,v100,a100` | `gpu:1` | 8 | 2 hours | 默认hard evaluation；任意TinyGPU GPU |
+| `smoke_all_gpu` | `work,rtx3080,v100,a100` | `gpu:1` | 8 | 30 min | 默认smoke；任意TinyGPU GPU |
 
-默认 policy：training 使用 V100；hard eval/smoke 使用 typed RTX3080 request。A100/2080Ti 只允许 explicit manual override，不做 automatic fallback。
+FAU默认policy：hard eval/smoke使用`work,rtx3080,v100,a100 + gpu:1`，允许
+任意TinyGPU GPU。只有明确要求FAU training、复现实验或延续既有V100 protocol时
+才使用typed V100；新训练默认转到N30 RTX3090。工具不自动迁移已提交jobs；
+改变pending请求必须显式取消并重新提交。
 
 ## 11. 原生 TinyGPU 命令（排障备用）
 
@@ -313,7 +348,7 @@ thpc queue
 # dry-run sweep
 thpc submit-train --study STUDY_NAME --dry-run
 
-# submit V100 training
+# explicit FAU V100 training（不是project-default training）
 thpc submit-train --study STUDY_NAME --profile train_v100_6h
 
 # experiment result

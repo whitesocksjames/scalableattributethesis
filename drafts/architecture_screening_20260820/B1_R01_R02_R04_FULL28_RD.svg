@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="690">
+<rect width="100%" height="100%" fill="#fafafa"/>
+<text x="610" y="27" text-anchor="middle" font-size="18" font-weight="bold">B1 Full28 universality evidence vs official Unicorn</text>
+<text x="610" y="48" text-anchor="middle" font-size="11">All B1 points use fixed step4/8; step is not lambda. Lines show Base to exact source Full.</text>
+<rect x="85" y="70" width="1095" height="540" fill="white" stroke="#999"/>
+<line x1="85.0" y1="70" x2="85.0" y2="610" stroke="#ddd"/>
+<text x="85.0" y="630" text-anchor="middle" font-size="11">0.03</text>
+<line x1="304.0" y1="70" x2="304.0" y2="610" stroke="#ddd"/>
+<text x="304.0" y="630" text-anchor="middle" font-size="11">0.36</text>
+<line x1="523.0" y1="70" x2="523.0" y2="610" stroke="#ddd"/>
+<text x="523.0" y="630" text-anchor="middle" font-size="11">0.69</text>
+<line x1="742.0" y1="70" x2="742.0" y2="610" stroke="#ddd"/>
+<text x="742.0" y="630" text-anchor="middle" font-size="11">1.02</text>
+<line x1="961.0" y1="70" x2="961.0" y2="610" stroke="#ddd"/>
+<text x="961.0" y="630" text-anchor="middle" font-size="11">1.35</text>
+<line x1="1180.0" y1="70" x2="1180.0" y2="610" stroke="#ddd"/>
+<text x="1180.0" y="630" text-anchor="middle" font-size="11">1.68</text>
+<line x1="85" y1="610.0" x2="1180" y2="610.0" stroke="#ddd"/>
+<text x="75" y="614.0" text-anchor="end" font-size="11">29.8</text>
+<line x1="85" y1="520.0" x2="1180" y2="520.0" stroke="#ddd"/>
+<text x="75" y="524.0" text-anchor="end" font-size="11">32.0</text>
+<line x1="85" y1="430.0" x2="1180" y2="430.0" stroke="#ddd"/>
+<text x="75" y="434.0" text-anchor="end" font-size="11">34.2</text>
+<line x1="85" y1="340.0" x2="1180" y2="340.0" stroke="#ddd"/>
+<text x="75" y="344.0" text-anchor="end" font-size="11">36.4</text>
+<line x1="85" y1="250.0" x2="1180" y2="250.0" stroke="#ddd"/>
+<text x="75" y="254.0" text-anchor="end" font-size="11">38.6</text>
+<line x1="85" y1="160.0" x2="1180" y2="160.0" stroke="#ddd"/>
+<text x="75" y="164.0" text-anchor="end" font-size="11">40.8</text>
+<line x1="85" y1="70.0" x2="1180" y2="70.0" stroke="#ddd"/>
+<text x="75" y="74.0" text-anchor="end" font-size="11">43.0</text>
+<polyline points="1112.0,86.3 888.0,150.0 697.5,220.1 348.0,387.9 280.3,418.7 210.4,462.8 166.2,498.6 131.2,538.9 112.0,573.1" fill="none" stroke="#222" stroke-width="2.2"/>
+<circle cx="1112.0" cy="86.3" r="5" fill="#222"/>
+<text x="1118.0" y="79.3" font-size="10">R01</text>
+<circle cx="888.0" cy="150.0" r="5" fill="#222"/>
+<text x="894.0" y="143.0" font-size="10">R02</text>
+<circle cx="697.5" cy="220.1" r="5" fill="#222"/>
+<text x="703.5" y="213.1" font-size="10">R03</text>
+<circle cx="348.0" cy="387.9" r="5" fill="#222"/>
+<text x="354.0" y="380.9" font-size="10">R04</text>
+<circle cx="280.3" cy="418.7" r="5" fill="#222"/>
+<text x="286.3" y="411.7" font-size="10">R05</text>
+<circle cx="210.4" cy="462.8" r="5" fill="#222"/>
+<text x="216.4" y="455.8" font-size="10">R06</text>
+<circle cx="166.2" cy="498.6" r="5" fill="#222"/>
+<text x="172.2" y="491.6" font-size="10">R07</text>
+<circle cx="131.2" cy="538.9" r="5" fill="#222"/>
+<text x="137.2" y="531.9" font-size="10">R08</text>
+<circle cx="112.0" cy="573.1" r="5" fill="#222"/>
+<text x="118.0" y="566.1" font-size="10">R09</text>
+<line x1="581.1" y1="282.8" x2="1111.6" y2="86.3" stroke="#d62728" stroke-width="1.4" opacity="0.7"/>
+<polygon points="581.1,275.8 588.1,282.8 581.1,289.8 574.1,282.8" fill="#d62728" stroke="white"/>
+<circle cx="1111.6" cy="86.3" r="7" fill="#d62728" stroke="white"/>
+<text x="589.1" y="270.8" fill="#d62728" font-size="11">R01 s4 Base</text>
+<line x1="467.5" y1="338.0" x2="1110.8" y2="86.3" stroke="#d62728" stroke-width="1.4" opacity="0.7"/>
+<rect x="461.0" y="331.5" width="13" height="13" fill="#d62728" stroke="white"/>
+<circle cx="1110.8" cy="86.3" r="7" fill="#d62728" stroke="white"/>
+<text x="475.5" y="355.0" fill="#d62728" font-size="11">R01 s8 Base</text>
+<line x1="441.4" y1="336.6" x2="887.7" y2="150.0" stroke="#2ca02c" stroke-width="1.4" opacity="0.7"/>
+<polygon points="441.4,329.6 448.4,336.6 441.4,343.6 434.4,336.6" fill="#2ca02c" stroke="white"/>
+<circle cx="887.7" cy="150.0" r="7" fill="#2ca02c" stroke="white"/>
+<text x="449.4" y="324.6" fill="#2ca02c" font-size="11">R02 s4 Base</text>
+<line x1="365.5" y1="377.2" x2="887.4" y2="150.0" stroke="#2ca02c" stroke-width="1.4" opacity="0.7"/>
+<rect x="359.0" y="370.7" width="13" height="13" fill="#2ca02c" stroke="white"/>
+<circle cx="887.4" cy="150.0" r="7" fill="#2ca02c" stroke="white"/>
+<text x="373.5" y="394.2" fill="#2ca02c" font-size="11">R02 s8 Base</text>
+<line x1="224.3" y1="477.0" x2="347.2" y2="387.9" stroke="#1f77b4" stroke-width="1.4" opacity="0.7"/>
+<polygon points="224.3,470.0 231.3,477.0 224.3,484.0 217.3,477.0" fill="#1f77b4" stroke="white"/>
+<circle cx="347.2" cy="387.9" r="7" fill="#1f77b4" stroke="white"/>
+<text x="232.3" y="465.0" fill="#1f77b4" font-size="11">R04 s4 Base</text>
+<line x1="193.8" y1="500.9" x2="347.5" y2="387.9" stroke="#1f77b4" stroke-width="1.4" opacity="0.7"/>
+<rect x="187.3" y="494.4" width="13" height="13" fill="#1f77b4" stroke="white"/>
+<circle cx="347.5" cy="387.9" r="7" fill="#1f77b4" stroke="white"/>
+<text x="201.8" y="517.9" fill="#1f77b4" font-size="11">R04 s8 Base</text>
+<text x="632.5" y="666" text-anchor="middle" font-size="13">Physical bitrate (bpp)</text>
+<text x="20" y="340.0" transform="rotate(-90 20 340.0)" text-anchor="middle" font-size="13">pc_error YUV-PSNR 6:1:1 (dB)</text>
+<text x="900" y="655" font-size="11" fill="#d62728">R01-derived</text>
+<text x="990" y="655" font-size="11" fill="#2ca02c">R02-derived</text>
+<text x="1080" y="655" font-size="11" fill="#1f77b4">R04-derived</text>
+</svg>

@@ -22,6 +22,7 @@ PYTHON = "$WORK/software/private/conda/envs/unicorn-me-py38/bin/python"
 DATA_ROOT = "$WORK/scalable_attribute_thesis/datasets/RWTT/processed/train_h5/h5/100000"
 GPCC_BINARY = "$HOME/Scalable-Attribute-Thesis/third_party/tmc3_v21"
 DEFAULT_SPEC = "scripts/hpc/sweep_spec.py"
+DEFAULT_REFERENCE_SPEC = "scripts/hpc/reference_sweep_spec.py"
 
 
 def local_repo():
@@ -41,7 +42,7 @@ def ssh(command, capture=False, check=True):
 def remote_prefix():
     return (
         'REPO="{}"; ROOT="{}"; PY="{}"; '
-        'cd "$REPO"; '
+        'cd "$REPO"; export PYTHONPATH="$REPO"; '
     ).format(REMOTE_REPO, WORKSPACE, PYTHON)
 
 
@@ -149,6 +150,25 @@ def submit_eval(args):
     command.extend(["--gpcc-binary", '"{}"'.format(GPCC_BINARY)])
     if getattr(args, "afterok", None):
         command.extend(["--afterok", shlex.quote(args.afterok)])
+    result = subprocess.run(
+        ["ssh", SSH_ALIAS, remote_prefix() + " ".join(command)],
+        text=True, capture_output=True)
+    print(result.stdout, end="")
+    print(result.stderr, end="", file=sys.stderr)
+    result.check_returncode()
+
+
+def submit_reference(args):
+    if not args.no_sync:
+        sync_source()
+    command = common_submit_command(
+        "scripts/hpc/submit_reference_sweep.py", args)
+    command.extend(["--gpcc-binary", '"{}"'.format(GPCC_BINARY)])
+    commit = run(["git", "rev-parse", "HEAD"], capture=True).strip()
+    dirty = bool(run(["git", "status", "--porcelain"], capture=True).strip())
+    command.extend(["--git-commit", shlex.quote(commit)])
+    if dirty:
+        command.append("--dirty-worktree")
     result = subprocess.run(
         ["ssh", SSH_ALIAS, remote_prefix() + " ".join(command)],
         text=True, capture_output=True)
@@ -330,6 +350,9 @@ def parse_args():
     evaluation = sub.add_parser("submit-eval")
     add_submit_common(evaluation, DEFAULT_RESOURCE_PROFILES["eval"])
     evaluation.add_argument("--afterok")
+    reference = sub.add_parser("submit-reference")
+    add_submit_common(reference, DEFAULT_RESOURCE_PROFILES["eval"])
+    reference.set_defaults(spec=DEFAULT_REFERENCE_SPEC)
     sub.add_parser("sync")
     sub.add_parser("queue")
     for name in ("status", "result"):
@@ -378,6 +401,8 @@ def main():
         submit_train(args)
     elif args.command == "submit-eval":
         submit_eval(args)
+    elif args.command == "submit-reference":
+        submit_reference(args)
     elif args.command == "queue":
         ssh("squeue.tinygpu -u \"$USER\" -o '%.18i %.24j %.10T %.10M %.9P %R'")
     elif args.command in ("status", "result"):

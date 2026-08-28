@@ -53,17 +53,35 @@ class BaseAdapter(torch.nn.Module):
         if not torch.equal(A.C, B.C) or not torch.equal(A.C, F_U.C):
             raise RuntimeError("A, B and F_U coordinates are not aligned")
 
+    def _check_state(self, A, B, F_U, D_U):
+        self._check(A, B, F_U)
+        if D_U.F.shape[1] != self.feature_channels:
+            raise RuntimeError("Unexpected D_U channel count")
+        if not torch.equal(A.C, D_U.C):
+            raise RuntimeError("A, B, F_U and D_U coordinates are not aligned")
+
     @torch.no_grad()
     def forward(self, A, base_lambda):
+        B, F_U, _ = self.forward_state(A, base_lambda)
+        return B, F_U
+
+    @torch.no_grad()
+    def forward_state(self, A, base_lambda):
         self.base.eval()
         output = self.base(A, training=False, lmb=base_lambda, real_coding=False)
         B = output["out_list"][0]
         F_U = output["curr_f"]
-        self._check(A, B, F_U)
-        return B, F_U
+        D_U = output["curr_dec"]
+        self._check_state(A, B, F_U, D_U)
+        return B, F_U, D_U
 
     @torch.no_grad()
     def hard_reconstruct(self, A, base_lambda):
+        B, F_U, _, bits = self.hard_reconstruct_state(A, base_lambda)
+        return B, F_U, bits
+
+    @torch.no_grad()
+    def hard_reconstruct_state(self, A, base_lambda):
         self.base.eval()
         encoded, x_low, gpcc_bits = self.base(
             A, training=False, lmb=base_lambda, encode=True)
@@ -73,13 +91,17 @@ class BaseAdapter(torch.nn.Module):
             coordinate_manager=A.coordinate_manager,
             device=A.device,
         )
-        B, F_U = self.base.decode(
+        B, F_U, D_U = self.base.decode(
             x0=x0,
             x_low=x_low,
             enc_set_list=encoded,
             lmb=base_lambda,
-            return_feature=True,
+            return_state=True,
         )
-        self._check(A, B, F_U)
+        self._check_state(A, B, F_U, D_U)
         bits = int(gpcc_bits + sum(len(item["strings"]) * 8 for item in encoded))
-        return B, F_U, bits
+        return B, F_U, D_U, bits
+
+    @torch.no_grad()
+    def embedding(self, base_lambda, device):
+        return self.base.embedder(base_lambda, device=device)

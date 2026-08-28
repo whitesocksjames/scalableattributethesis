@@ -84,17 +84,25 @@ def experiment_cli(experiment, excluded=()):
 
 
 def resolve_base_checkpoint(experiment, namespace, checkpoints_root):
-    explicit = experiment.get("base_checkpoint")
-    if explicit:
-        return os.path.expanduser(os.path.expandvars(explicit))
     profiles = namespace.get("BASE_CHECKPOINT_PROFILES", {})
     profile_name = experiment.get(
         "base_profile", namespace.get("DEFAULT_BASE_PROFILE"))
+    explicit = experiment.get("base_checkpoint")
+    if not profile_name and explicit:
+        return os.path.expanduser(os.path.expandvars(explicit))
     if not profile_name or profile_name not in profiles:
         raise ValueError(
             "Set base_checkpoint or select a known base_profile; got {!r}".format(
                 profile_name))
     profile = profiles[profile_name]
+    if isinstance(profile, dict) and "validated_lambda" in profile:
+        actual_lambda = experiment.get("base_lambda")
+        if actual_lambda != profile["validated_lambda"]:
+            raise ValueError(
+                "Base profile {} requires base_lambda={}, got {}".format(
+                    profile_name, profile["validated_lambda"], actual_lambda))
+    if explicit:
+        return os.path.expanduser(os.path.expandvars(explicit))
     relative = profile["checkpoint"] if isinstance(profile, dict) else profile
     return os.path.join(checkpoints_root, relative)
 
@@ -139,7 +147,7 @@ def read_manifest(experiment_root):
     if not path.exists():
         return {"version": 1, "experiment": Path(experiment_root).name,
                 "output_dir": str(experiment_root), "train": {"attempts": []},
-                "evaluations": {}}
+                "evaluations": {}, "references": {}}
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
 
@@ -155,12 +163,18 @@ def submit_job(command, job_name, experiment_root, run_dir, repo, python,
     manifest = read_manifest(experiment_root)
     if kind == "train":
         attempts = manifest["train"].setdefault("attempts", [])
-    else:
+    elif kind == "eval":
         evaluation = manifest["evaluations"].setdefault(
             checkpoint_tag,
             {"checkpoint": command[command.index("--enhancement-checkpoint") + 1],
              "output_dir": str(run_dir), "attempts": []})
         attempts = evaluation["attempts"]
+    elif kind == "reference":
+        reference = manifest.setdefault("references", {}).setdefault(
+            checkpoint_tag, {"output_dir": str(run_dir), "attempts": []})
+        attempts = reference["attempts"]
+    else:
+        raise ValueError("Unknown job kind: " + kind)
     if any(item.get("job_id") for item in attempts) and not retry and not dry_run:
         raise RuntimeError(
             "{} already has a recorded submission; use explicit retry or a new "

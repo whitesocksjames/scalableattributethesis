@@ -11,6 +11,13 @@ class EnhancementConfig:
     kernel_size: int = 3
     block_layers: int = 2
     block_type: str = "resnet"
+    synthesis_condition: str = "b_fu"
+    zero_centered_synthesis: bool = False
+
+    def __post_init__(self):
+        if self.synthesis_condition not in ("b_fu", "b", "none"):
+            raise ValueError(
+                "synthesis_condition must be b_fu, b, or none")
 
     def to_dict(self):
         return asdict(self)
@@ -30,4 +37,10 @@ def add_architecture_arguments(parser):
     parser.add_argument("--kernel-size", type=int, default=defaults.kernel_size)
     parser.add_argument("--block-layers", type=int, default=defaults.block_layers)
     parser.add_argument("--block-type", default=defaults.block_type)
+    parser.add_argument(
+        "--synthesis-condition", choices=("b_fu", "b", "none"),
+        default=defaults.synthesis_condition)
+    parser.add_argument(
+        "--zero-centered-synthesis", action="store_true",
+        default=defaults.zero_centered_synthesis)
     return parser

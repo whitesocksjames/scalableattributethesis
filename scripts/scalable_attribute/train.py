@@ -7,6 +7,7 @@ import shlex
 import sys
 import time
 
+import numpy as np
 import torch
 import MinkowskiEngine as ME
 
@@ -127,6 +128,7 @@ def gradient_norm(parameters, step, batch_index, points):
 
 def main():
     args = parse_args()
+    np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     os.makedirs(args.output_dir, exist_ok=True)
     checkpoint_dir = os.path.join(args.output_dir, "checkpoints")
