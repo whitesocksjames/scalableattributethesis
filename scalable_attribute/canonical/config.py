@@ -25,8 +25,8 @@ class BaseSynthesisConfig:
         return cls(
             input_mode=args.base_input_mode,
             base_channels=args.base_channels,
-            block_layers=args.block_layers,
-            kernel_size=args.kernel_size,
+            block_layers=args.base_block_layers,
+            kernel_size=args.base_kernel_size,
             zero_init=args.zero_init,
         )
 
@@ -39,9 +39,9 @@ def add_base_architecture_arguments(parser):
     parser.add_argument(
         "--base-channels", type=int, default=defaults.base_channels)
     parser.add_argument(
-        "--block-layers", type=int, default=defaults.block_layers)
+        "--base-block-layers", type=int, default=defaults.block_layers)
     parser.add_argument(
-        "--kernel-size", type=int, default=defaults.kernel_size)
+        "--base-kernel-size", type=int, default=defaults.kernel_size)
     zero_init = parser.add_mutually_exclusive_group()
     zero_init.add_argument(
         "--zero-init", dest="zero_init", action="store_true")
