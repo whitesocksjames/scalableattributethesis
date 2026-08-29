@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument("--data-root", required=True)
     parser.add_argument("--train-file-list", required=True)
     parser.add_argument("--base-checkpoint", required=True)
+    parser.add_argument("--resume-checkpoint")
     parser.add_argument("--base-lambda", type=int, required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--lr", type=float, required=True)
@@ -104,6 +105,26 @@ def main():
     torch.cuda.manual_seed_all(args.seed)
 
     config = BaseSynthesisConfig.from_args(args)
+    resume = None
+    starting_step = 0
+    if args.resume_checkpoint:
+        resume = torch.load(args.resume_checkpoint, map_location="cpu")
+        if resume.get("architecture") != "canonical_base_predict_correct":
+            raise ValueError("Resume checkpoint architecture mismatch")
+        if resume.get("config") != config.to_dict():
+            raise ValueError("Resume checkpoint BaseSynthesis config mismatch")
+        if os.path.realpath(resume.get("base_checkpoint", "")) != os.path.realpath(
+                args.base_checkpoint):
+            raise ValueError("Resume checkpoint released Base mismatch")
+        if int(resume.get("base_lambda", -1)) != args.base_lambda:
+            raise ValueError("Resume checkpoint Base lambda mismatch")
+        if "base_synthesis" not in resume or "optimizer" not in resume:
+            raise ValueError("Resume checkpoint lacks model or optimizer state")
+        starting_step = int(resume.get("step", -1))
+        if starting_step < 0:
+            raise ValueError("Resume checkpoint has invalid global step")
+        if args.max_steps <= starting_step:
+            raise ValueError("max-steps must exceed resumed global step")
     files = h5_files(args.data_root, args.train_file_list)
     if args.max_samples is not None:
         files = files[:args.max_samples]
@@ -133,6 +154,8 @@ def main():
         "git_commit": git_commit(),
         "hostname": socket.gethostname(),
         "command": command,
+        "resumed_from": args.resume_checkpoint,
+        "starting_step": starting_step,
     })
     write_json(os.path.join(args.output_dir, "resolved_args.json"), metadata)
     write_json(os.path.join(args.output_dir, "base_config.json"), config.to_dict())
@@ -150,6 +173,14 @@ def main():
     trainable = list(model.base_synthesis.parameters())
     optimizer = torch.optim.Adam(
         trainable, lr=args.lr, betas=(0.9, 0.999), weight_decay=0.0)
+    if resume is not None:
+        model.base_synthesis.load_state_dict(
+            resume["base_synthesis"], strict=True)
+        optimizer.load_state_dict(resume["optimizer"])
+        group = optimizer.param_groups[0]
+        if (group["lr"] != args.lr or tuple(group["betas"]) != (0.9, 0.999)
+                or group["weight_decay"] != 0.0):
+            raise ValueError("Resume checkpoint optimizer config mismatch")
     if model.prefix.training or any(
             parameter.requires_grad for parameter in model.prefix.parameters()):
         raise RuntimeError("Unicorn prefix is not frozen in eval mode")
@@ -164,7 +195,7 @@ def main():
     torch.cuda.reset_peak_memory_stats()
     start = time.monotonic()
     losses = []
-    step = 0
+    step = starting_step
     validation_summaries = {}
 
     def save_checkpoint(current_step):
@@ -260,6 +291,8 @@ def main():
     summary = {
         "status": "PASS",
         "steps": step,
+        "starting_step": starting_step,
+        "resumed_from": args.resume_checkpoint,
         "initial_mse": losses[0],
         "final_mse": losses[-1],
         "best_mse": min(losses),
@@ -269,11 +302,9 @@ def main():
         "checkpoint_reload": True,
         "validation_steps": validation_summaries,
         "training_mse_at_updates": {
-            "step0_pre_first_update": losses[0],
-            **{
-                "step{}_pre_update".format(index): losses[index - 1]
-                for index in (250, 500) if index <= len(losses)
-            },
+            "step{}_pre_update".format(starting_step + index): value
+            for index, value in enumerate(losses, start=1)
+            if starting_step + index in (starting_step + 1, 1000, 2000)
         },
     }
     write_json(os.path.join(args.output_dir, "summary.json"), summary)
