@@ -105,3 +105,8 @@ class FrozenUnicornPrefix(torch.nn.Module):
         feature = self.model.VAE.fuseNet(f5p + compensation)
         correction = self.model.VAE.outNet(feature)
         return feature, correction
+
+    @torch.no_grad()
+    def lambda_embedding(self, lmb, device):
+        """Return the frozen released variable-rate embedding."""
+        return self.model.embedder(lmb, device=device)
