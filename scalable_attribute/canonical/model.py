@@ -32,6 +32,11 @@ class CanonicalBaseModel(torch.nn.Module):
             state = self.prefix(attribute, base_lambda)
             prefix_bits = None
 
+        result = self.reconstruct_from_state(state)
+        result["prefix_bits"] = prefix_bits
+        return result
+
+    def reconstruct_from_state(self, state):
         compensation = self.base_synthesis(state)
         _same_support(state.x5p, state.f5p, "x5p/f5p")
         _same_support(state.f5p, compensation, "f5p/c_B")
@@ -48,5 +53,17 @@ class CanonicalBaseModel(torch.nn.Module):
             "c_B": compensation,
             "d5p": state.d5p,
             "prefix_state": state,
-            "prefix_bits": prefix_bits,
         }
+
+    def native_baselines(self, state):
+        """Return the two no-additional-bit full-resolution baselines."""
+        zero = type(state.f5p)(
+            features=torch.zeros_like(state.f5p.F),
+            coordinate_map_key=state.f5p.coordinate_map_key,
+            coordinate_manager=state.f5p.coordinate_manager,
+        )
+        feature, correction = self.prefix.synthesize(
+            state.f5p, zero)
+        native = state.x5p + correction
+        _same_support(state.x5p, native, "x5p/B_native")
+        return {"B_unpool": state.x5p, "B_native": native}

@@ -19,6 +19,7 @@ from data_utils.dataloaders.attribute_dataloader import make_data_loader
 from scalable_attribute.canonical.base_synthesis import BaseSynthesis
 from scalable_attribute.canonical.config import (
     BaseSynthesisConfig, add_base_architecture_arguments)
+from scalable_attribute.canonical.evaluation import evaluate_base
 from scalable_attribute.canonical.model import CanonicalBaseModel
 from scalable_attribute.data import UncachedPCDataset, h5_files
 
@@ -34,6 +35,10 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--max-steps", type=int, required=True)
     parser.add_argument("--max-samples", type=int)
+    parser.add_argument("--validation-file-list")
+    parser.add_argument("--validate-every", type=int, default=0)
+    parser.add_argument("--validate-at-start", action="store_true")
+    parser.add_argument("--save-every", type=int, default=0)
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--base-scale", type=int, default=5)
@@ -81,8 +86,17 @@ def main():
         raise ValueError("max-samples must be positive when provided")
     if args.lr <= 0:
         raise ValueError("lr must be positive")
+    if args.validate_every < 0 or args.save_every < 0:
+        raise ValueError("validate-every and save-every cannot be negative")
+    if ((args.validate_every or args.validate_at_start)
+            and not args.validation_file_list):
+        raise ValueError("Validation schedule requires validation-file-list")
     if os.path.exists(args.output_dir):
-        raise FileExistsError("Output directory already exists: " + args.output_dir)
+        existing = set(os.listdir(args.output_dir))
+        if existing - {"slurm"}:
+            raise FileExistsError(
+                "Output directory already contains run artifacts: "
+                + args.output_dir)
     os.makedirs(os.path.join(args.output_dir, "checkpoints"))
 
     np.random.seed(args.seed)
@@ -97,6 +111,12 @@ def main():
     loader = make_data_loader(
         dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.num_workers)
+    validation_files = []
+    validation_entries = []
+    if args.validation_file_list:
+        validation_files = h5_files(args.data_root, args.validation_file_list)
+        with open(args.validation_file_list, encoding="utf-8") as handle:
+            validation_entries = [line.strip() for line in handle if line.strip()]
 
     command = shlex.join([sys.executable] + sys.argv)
     metadata = dict(vars(args))
@@ -109,6 +129,7 @@ def main():
         },
         "objective": "mean((A.F - Base.F) ** 2)",
         "selected_h5_count": len(files),
+        "validation_h5_count": len(validation_files),
         "git_commit": git_commit(),
         "hostname": socket.gethostname(),
         "command": command,
@@ -144,6 +165,41 @@ def main():
     start = time.monotonic()
     losses = []
     step = 0
+    validation_summaries = {}
+
+    def save_checkpoint(current_step):
+        path = os.path.join(
+            args.output_dir, "checkpoints",
+            "step_{}.pth".format(current_step))
+        torch.save({
+            "architecture": "canonical_base_predict_correct",
+            "base_synthesis": model.base_synthesis.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "config": config.to_dict(),
+            "step": current_step,
+            "base_checkpoint": args.base_checkpoint,
+            "base_lambda": args.base_lambda,
+            "resolved_args": metadata,
+        }, path)
+        return path
+
+    def validate(current_step):
+        name = "step{:03d}".format(current_step)
+        summary = evaluate_base(
+            model, validation_files, validation_entries, args.base_lambda,
+            os.path.join(args.output_dir, "validation_{}.csv".format(name)))
+        if current_step == 0 and summary["max_abs_learned_native"] > 1e-7:
+            raise RuntimeError(
+                "Zero-init learned/native regression failed: {}".format(
+                    summary["max_abs_learned_native"]))
+        validation_summaries[name] = summary
+        write_json(
+            os.path.join(args.output_dir, "validation_summary.json"),
+            validation_summaries)
+
+    if args.validate_at_start:
+        validate(0)
+
     with open(trajectory_path, "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
@@ -182,22 +238,18 @@ def main():
                 handle.flush()
                 if step == 1 or step % 25 == 0 or step == args.max_steps:
                     print(json.dumps(row), flush=True)
+                if args.save_every and step % args.save_every == 0:
+                    save_checkpoint(step)
+                if args.validate_every and step % args.validate_every == 0:
+                    validate(step)
                 if step >= args.max_steps:
                     break
 
     runtime = time.monotonic() - start
     checkpoint_path = os.path.join(
         args.output_dir, "checkpoints", "step_{}.pth".format(step))
-    torch.save({
-        "architecture": "canonical_base_predict_correct",
-        "base_synthesis": model.base_synthesis.state_dict(),
-        "optimizer": optimizer.state_dict(),
-        "config": config.to_dict(),
-        "step": step,
-        "base_checkpoint": args.base_checkpoint,
-        "base_lambda": args.base_lambda,
-        "resolved_args": metadata,
-    }, checkpoint_path)
+    if not os.path.exists(checkpoint_path):
+        checkpoint_path = save_checkpoint(step)
     reloaded = BaseSynthesis(config).cuda()
     saved = torch.load(checkpoint_path, map_location="cpu")
     reloaded.load_state_dict(saved["base_synthesis"], strict=True)
@@ -215,6 +267,14 @@ def main():
         "peak_gpu_memory_gib": torch.cuda.max_memory_allocated() / 1024 ** 3,
         "checkpoint": checkpoint_path,
         "checkpoint_reload": True,
+        "validation_steps": validation_summaries,
+        "training_mse_at_updates": {
+            "step0_pre_first_update": losses[0],
+            **{
+                "step{}_pre_update".format(index): losses[index - 1]
+                for index in (250, 500) if index <= len(losses)
+            },
+        },
     }
     write_json(os.path.join(args.output_dir, "summary.json"), summary)
     print("CANONICAL BASE TRAINING PASS")

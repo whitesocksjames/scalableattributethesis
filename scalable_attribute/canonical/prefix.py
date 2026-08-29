@@ -70,7 +70,7 @@ class FrozenUnicornPrefix(torch.nn.Module):
         return self._complete_state(state["x"], state["f"], state["dec"])
 
     @torch.no_grad()
-    def hard_forward(self, attribute, lmb):
+    def hard_forward(self, attribute, lmb, return_details=False):
         self.model.eval()
         encoded, x_low, gpcc_bits = self.model(
             attribute, training=False, lmb=lmb, encode=True,
@@ -84,9 +84,15 @@ class FrozenUnicornPrefix(torch.nn.Module):
         x4, f4, d4 = self.model.decode(
             x0=x0, x_low=x_low, enc_set_list=encoded, lmb=lmb,
             max_residual_stages=self.residual_stages, return_state=True)
-        bits = int(gpcc_bits + sum(
-            len(item["strings"]) * 8 for item in encoded))
-        return self._complete_state(x4, f4, d4), bits
+        stream_bits = [int(len(item["strings"]) * 8) for item in encoded]
+        details = {
+            "bits_xlow": int(gpcc_bits),
+            "residual_bits": stream_bits,
+            "num_residual_streams": len(encoded),
+            "base_bits": int(gpcc_bits + sum(stream_bits)),
+        }
+        state = self._complete_state(x4, f4, d4)
+        return (state, details) if return_details else (state, details["base_bits"])
 
     @torch.no_grad()
     def _complete_state(self, x4, f4, d4):
