@@ -33,6 +33,7 @@ class CanonicalBaseModel(torch.nn.Module):
             prefix_bits = None
 
         result = self.reconstruct_from_state(state)
+        _same_support(attribute, result["Base"], "A/Base")
         result["prefix_bits"] = prefix_bits
         return result
 
@@ -45,7 +46,6 @@ class CanonicalBaseModel(torch.nn.Module):
         _same_support(state.x5p, feature, "x5p/F_B")
         _same_support(state.x5p, correction, "x5p/delta_B")
         base = state.x5p + correction
-        _same_support(attribute, base, "A/Base")
         return {
             "Base": base,
             "B0": state.x5p,
