@@ -120,10 +120,24 @@ def native_estimated_r5(prefix, attribute, conditioning_lambda, training):
 
 @torch.no_grad()
 def native_hard(prefix, attribute, conditioning_lambda):
-    encoded, x_low, gpcc_bits = prefix.model(
-        attribute, training=False, lmb=conditioning_lambda, encode=True)
+    entropy = prefix.model.VAE.entropy_fn
+    original_compress = entropy.compress
+    captured = []
+
+    def capture(symbols, *args, **kwargs):
+        captured.append(symbols.detach().cpu())
+        return original_compress(symbols, *args, **kwargs)
+
+    entropy.compress = capture
+    try:
+        encoded, x_low, gpcc_bits = prefix.model(
+            attribute, training=False, lmb=conditioning_lambda, encode=True)
+    finally:
+        entropy.compress = original_compress
     if len(encoded) != 5:
         raise RuntimeError("Native hard path did not produce five streams")
+    if len(captured) != 5:
+        raise RuntimeError("Native hard path did not expose five symbol tensors")
     output_strides = [list(item["x_out"].tensor_stride) for item in encoded]
     expected = [[value, value, value] for value in (16, 8, 4, 2, 1)]
     if output_strides != expected:
@@ -147,6 +161,7 @@ def native_hard(prefix, attribute, conditioning_lambda):
         "total_bits": int(gpcc_bits + sum(residual_bits)),
         "full_psnr": value_psnr,
         "stream_strides": output_strides,
+        "r5_symbols": captured[4],
     }
 
 
@@ -236,6 +251,32 @@ def aggregate(rows):
     }
     summary["hard_symbol_statistics"]["active_channel_count"] = len(
         summary["hard_symbol_statistics"]["active_channels_union"])
+    for label, count_key, nonzero_key, active_key, per_channel_key in (
+            ("native_r5", "native_r5_symbol_count",
+             "native_r5_symbol_nonzero_count", "native_r5_active_channels",
+             "native_r5_per_channel_nonzero_fraction"),
+            ("enhancement", "enh_symbol_count", "enh_symbol_nonzero_count",
+             "enh_active_channels", "enh_per_channel_nonzero_fraction")):
+        channel_lists = [json.loads(row[per_channel_key]) for row in rows]
+        channels = len(channel_lists[0])
+        if any(len(values) != channels for values in channel_lists):
+            raise RuntimeError(label + " channel count changed across samples")
+        sites = [row[count_key] // channels for row in rows]
+        total_sites = sum(sites)
+        summary[label + "_channel_statistics"] = {
+            "active_channels_union": sorted({
+                channel for row in rows
+                for channel in json.loads(row[active_key])}),
+            "nonzero_fraction": (
+                sum(row[nonzero_key] for row in rows)
+                / sum(row[count_key] for row in rows)),
+            "per_channel_nonzero_fraction": [
+                sum(values[channel] * sites[index]
+                    for index, values in enumerate(channel_lists)) / total_sites
+                for channel in range(channels)],
+        }
+        summary[label + "_channel_statistics"]["active_channel_count"] = len(
+            summary[label + "_channel_statistics"]["active_channels_union"])
     return summary
 
 
@@ -347,6 +388,10 @@ def main():
             raise RuntimeError("Native noise/symbol stage mappings differ")
         native = native_hard(
             model.base.prefix, attribute, args.conditioning_lambda)
+        native_symbols = native.pop("r5_symbols")
+        native_nonzero = native_symbols.ne(0)
+        native_active_channels = torch.nonzero(
+            native_nonzero.any(dim=0), as_tuple=False).flatten().tolist()
 
         np.random.seed(args.seed + index)
         model.train()
@@ -404,6 +449,16 @@ def main():
             "enh_symbol_max": float(hard_symbols.max().item()),
             "enh_active_channel_count": len(active_channels),
             "enh_active_channels": json.dumps(active_channels),
+            "enh_per_channel_nonzero_fraction": json.dumps(
+                nonzero.float().mean(dim=0).tolist()),
+            "native_r5_symbol_count": native_symbols.numel(),
+            "native_r5_symbol_nonzero_count": int(native_nonzero.sum().item()),
+            "native_r5_symbol_nonzero_fraction": float(
+                native_nonzero.float().mean().item()),
+            "native_r5_active_channel_count": len(native_active_channels),
+            "native_r5_active_channels": json.dumps(native_active_channels),
+            "native_r5_per_channel_nonzero_fraction": json.dumps(
+                native_nonzero.float().mean(dim=0).tolist()),
         }
         bits = {
             "native_r5_noise": native_noise_bits,
