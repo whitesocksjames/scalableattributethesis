@@ -7,6 +7,10 @@ import torch
 from scalable_attribute.canonical.enhancement import EnhancementVAE
 
 
+FINE_TUNE_ARCHITECTURE = "canonical_scalable_mvub_finetune_v1"
+TRAINABLE_SCOPES = ("enhancement_only", "full")
+
+
 def _same_support(left, right, label):
     if list(left.tensor_stride) != list(right.tensor_stride):
         raise RuntimeError(label + " tensor strides differ")
@@ -43,12 +47,28 @@ class CanonicalScalableModel(torch.nn.Module):
         self.base = frozen_base
         self.conditioning_lambda = conditioning_lambda
         self.enhancement = EnhancementVAE(self.base.prefix.model.VAE)
-        self.base.eval()
+        self._trainable_scope = None
+        self.set_trainable_scope("enhancement_only")
 
     def train(self, mode=True):
         super().train(mode)
-        self.base.eval()
+        self.base.train(mode if self._trainable_scope == "full" else False)
         self.enhancement.train(mode)
+        return self
+
+    @property
+    def trainable_scope(self):
+        return self._trainable_scope
+
+    def set_trainable_scope(self, scope):
+        if scope not in TRAINABLE_SCOPES:
+            raise ValueError("Unknown trainable scope: " + str(scope))
+        self.requires_grad_(False)
+        full = scope == "full"
+        self.base.set_trainable(full)
+        self.enhancement.requires_grad_(True)
+        self._trainable_scope = scope
+        self.train(self.training)
         return self
 
     @torch.no_grad()
@@ -69,12 +89,42 @@ class CanonicalScalableModel(torch.nn.Module):
         return self.base.prefix.lambda_embedding(
             self.conditioning_lambda, device)
 
+    def _training_embedding(self, device):
+        if self._trainable_scope == "full":
+            return self.base.prefix.lambda_embedding_trainable(
+                self.conditioning_lambda, device)
+        return self._embedding(device)
+
     def forward(self, attribute):
         base = self.base_forward(attribute)
         output = self.enhancement(
             base["Base"], attribute, base["F_B"], base["d5p"],
             self._embedding(attribute.device))
         return self._result(base, output)
+
+    def forward_base_train(self, attribute):
+        """Base-only differentiable path; never invokes EnhancementVAE."""
+        if self._trainable_scope != "full":
+            raise RuntimeError("Base endpoint training requires full scope")
+        base = self.base.forward_trainable(
+            attribute, self.conditioning_lambda)
+        _same_support(attribute, base["Base"], "GT/Base")
+        return base
+
+    def forward_full_train(self, attribute):
+        """Explicit training path for frozen-Base or full-unfreeze runs."""
+        if self._trainable_scope == "full":
+            base = self.base.forward_trainable(
+                attribute, self.conditioning_lambda)
+        else:
+            base = self.base_forward(attribute)
+            base["prefix_likelihoods"] = None
+        output = self.enhancement(
+            base["Base"], attribute, base["F_B"], base["d5p"],
+            self._training_embedding(attribute.device))
+        result = self._result(base, output)
+        result["prefix_likelihoods"] = base["prefix_likelihoods"]
+        return result
 
     @torch.no_grad()
     def deterministic_forward(self, attribute):
@@ -127,3 +177,19 @@ class CanonicalScalableModel(torch.nn.Module):
             "Qlatent_E": enhancement.get("Qlatent"),
             "prefix_state": base["prefix_state"],
         }
+
+
+def load_finetuned_scalable(model, checkpoint, conditioning_lambda=None):
+    """Load one complete fine-tuned Prefix+Base+Enhancement checkpoint."""
+    state = (torch.load(checkpoint, map_location="cpu")
+             if isinstance(checkpoint, (str, os.PathLike)) else checkpoint)
+    if state.get("architecture") != FINE_TUNE_ARCHITECTURE:
+        raise ValueError("Fine-tuned scalable checkpoint architecture mismatch")
+    expected_lambda = (model.conditioning_lambda if conditioning_lambda is None
+                       else conditioning_lambda)
+    if int(state.get("conditioning_lambda", -1)) != int(expected_lambda):
+        raise ValueError("Fine-tuned scalable checkpoint lambda mismatch")
+    if "scalable_model" not in state:
+        raise ValueError("Fine-tuned scalable checkpoint lacks complete model state")
+    model.load_state_dict(state["scalable_model"], strict=True)
+    return state

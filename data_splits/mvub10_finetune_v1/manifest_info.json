@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "dataset_root_at_generation": "/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/MVUB/processed/MVUB10_H5",
+  "paths": "relative_to_dataset_root",
+  "train_subjects": [
+    "David10",
+    "Phil10",
+    "Ricardo10",
+    "Sarah10"
+  ],
+  "train_h5_by_subject": {
+    "David10": 4784,
+    "Phil10": 4336,
+    "Ricardo10": 3456,
+    "Sarah10": 3312
+  },
+  "train_h5": 15888,
+  "validation_subject": "Andrew10",
+  "validation_selection": "8 uniformly spaced fixed frames",
+  "validation_frames": [
+    "frame0000",
+    "frame0045",
+    "frame0091",
+    "frame0136",
+    "frame0181",
+    "frame0226",
+    "frame0272",
+    "frame0317"
+  ],
+  "validation_h5": 128,
+  "overlap": 0
+}

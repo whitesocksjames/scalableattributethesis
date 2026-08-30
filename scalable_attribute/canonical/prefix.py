@@ -51,13 +51,22 @@ class FrozenUnicornPrefix(torch.nn.Module):
                 "Released checkpoint mismatch: missing={} unexpected={}".format(
                     missing, unexpected))
         self.model.load_state_dict(state)
+        self._trainable = False
         self.model.requires_grad_(False)
         self.model.eval()
         self.eval()
 
     def train(self, mode=True):
-        super().train(False)
-        self.model.eval()
+        effective_mode = bool(mode and self._trainable)
+        super().train(effective_mode)
+        self.model.train(effective_mode)
+        return self
+
+    def set_trainable(self, enabled):
+        """Select full-prefix training without changing the frozen default."""
+        self._trainable = bool(enabled)
+        self.model.requires_grad_(self._trainable)
+        self.train(self.training if self._trainable else False)
         return self
 
     @torch.no_grad()
@@ -68,6 +77,24 @@ class FrozenUnicornPrefix(torch.nn.Module):
             max_residual_stages=self.residual_stages, return_state=True)
         state = output["state"]
         return self._complete_state(state["x"], state["f"], state["dec"])
+
+    def training_forward(self, attribute, lmb):
+        """Differentiable r1-r4 traversal for explicit full-unfreeze runs."""
+        if not self._trainable:
+            raise RuntimeError("Prefix training_forward requires full trainable scope")
+        output = self.model(
+            attribute, training=True, lmb=lmb, real_coding=False,
+            max_residual_stages=self.residual_stages, return_state=True)
+        state = output["state"]
+        completed = int(state["completed_residual_stages"])
+        if completed != self.residual_stages:
+            raise RuntimeError("Differentiable Prefix did not stop after r4")
+        result = self._complete_state_trainable(
+            state["x"], state["f"], state["dec"])
+        likelihoods = list(output["likelihood_list"])
+        if len(likelihoods) != self.residual_stages:
+            raise RuntimeError("Differentiable Prefix likelihoods are not r1-r4")
+        return result, likelihoods
 
     @torch.no_grad()
     def hard_forward(self, attribute, lmb, return_details=False):
@@ -101,6 +128,12 @@ class FrozenUnicornPrefix(torch.nn.Module):
         return PrefixState(x4=x4, f4=f4, d4=d4,
                            x5p=x5p, f5p=f5p, d5p=d5p)
 
+    def _complete_state_trainable(self, x4, f4, d4):
+        x5p, f5p, d5p = self.model.prepare_next_scale(
+            x4, f4, d4, self.residual_stages)
+        return PrefixState(x4=x4, f4=f4, d4=d4,
+                           x5p=x5p, f5p=f5p, d5p=d5p)
+
     def synthesize(self, f5p, compensation):
         feature = self.model.VAE.fuseNet(f5p + compensation)
         correction = self.model.VAE.outNet(feature)
@@ -109,4 +142,9 @@ class FrozenUnicornPrefix(torch.nn.Module):
     @torch.no_grad()
     def lambda_embedding(self, lmb, device):
         """Return the frozen released variable-rate embedding."""
+        return self.model.embedder(lmb, device=device)
+
+    def lambda_embedding_trainable(self, lmb, device):
+        if not self._trainable:
+            raise RuntimeError("Trainable embedding requires full trainable scope")
         return self.model.embedder(lmb, device=device)

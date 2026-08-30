@@ -18,7 +18,7 @@ from data_utils.attribute.inout import read_h5, write_ply_ascii
 from scalable_attribute.canonical.config import BaseSynthesisConfig
 from scalable_attribute.canonical.model import CanonicalBaseModel
 from scalable_attribute.canonical.scalable_model import (
-    CanonicalScalableModel, load_frozen_base)
+    CanonicalScalableModel, load_finetuned_scalable, load_frozen_base)
 from scalable_attribute.data import h5_files
 from scalable_attribute.evaluation import (
     aggregate_models, average_models, sample_identity)
@@ -32,7 +32,9 @@ def parse_args():
     parser.add_argument("--released-checkpoint", required=True)
     parser.add_argument("--gpcc-binary", required=True)
     parser.add_argument("--base-synthesis-checkpoint", required=True)
-    parser.add_argument("--enhancement-checkpoint", required=True)
+    checkpoint = parser.add_mutually_exclusive_group(required=True)
+    checkpoint.add_argument("--enhancement-checkpoint")
+    checkpoint.add_argument("--scalable-checkpoint")
     parser.add_argument("--conditioning-lambda", type=int, required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--max-samples", type=int, default=0)
@@ -113,9 +115,12 @@ def main():
     args = parse_args()
     for name in (
             "data_root", "file_list", "released_checkpoint", "gpcc_binary",
-            "base_synthesis_checkpoint", "enhancement_checkpoint",
-            "output_dir"):
+            "base_synthesis_checkpoint", "output_dir"):
         setattr(args, name, os.path.abspath(os.path.expandvars(getattr(args, name))))
+    for name in ("enhancement_checkpoint", "scalable_checkpoint"):
+        value = getattr(args, name)
+        if value:
+            setattr(args, name, os.path.abspath(os.path.expandvars(value)))
     protected = ("per_h5.csv", "per_model.csv", "endpoint_summary.csv")
     existing = [name for name in protected
                 if os.path.exists(os.path.join(args.output_dir, name))]
@@ -140,13 +145,20 @@ def main():
         base, args.base_synthesis_checkpoint, args.released_checkpoint,
         args.conditioning_lambda)
     model = CanonicalScalableModel(base, args.conditioning_lambda).cuda().eval()
-    enhancement_state = torch.load(args.enhancement_checkpoint, map_location="cpu")
-    if enhancement_state.get("architecture") != "canonical_independent_enhancement":
-        raise ValueError("Enhancement checkpoint architecture mismatch")
-    if int(enhancement_state.get("conditioning_lambda", -1)) != args.conditioning_lambda:
-        raise ValueError("Enhancement checkpoint lambda mismatch")
-    model.enhancement.vae.load_state_dict(
-        enhancement_state["enhancement_vae"], strict=True)
+    if args.scalable_checkpoint:
+        load_finetuned_scalable(
+            model, args.scalable_checkpoint, args.conditioning_lambda)
+    else:
+        enhancement_state = torch.load(
+            args.enhancement_checkpoint, map_location="cpu")
+        if enhancement_state.get(
+                "architecture") != "canonical_independent_enhancement":
+            raise ValueError("Enhancement checkpoint architecture mismatch")
+        if int(enhancement_state.get(
+                "conditioning_lambda", -1)) != args.conditioning_lambda:
+            raise ValueError("Enhancement checkpoint lambda mismatch")
+        model.enhancement.vae.load_state_dict(
+            enhancement_state["enhancement_vae"], strict=True)
     model.requires_grad_(False)
 
     with open(args.file_list, encoding="utf-8") as handle:

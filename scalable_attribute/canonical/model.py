@@ -18,10 +18,20 @@ class CanonicalBaseModel(torch.nn.Module):
         self.prefix = FrozenUnicornPrefix(
             checkpoint, scale=scale, stage=stage, vmode=vmode)
         self.base_synthesis = BaseSynthesis(config)
+        self._full_trainable = False
 
     def train(self, mode=True):
         super().train(mode)
-        self.prefix.eval()
+        self.prefix.train(mode if self._full_trainable else False)
+        return self
+
+    def set_trainable(self, enabled):
+        """Enable the complete Base graph only for explicit full-unfreeze."""
+        self._full_trainable = bool(enabled)
+        self.requires_grad_(self._full_trainable)
+        self.prefix.set_trainable(self._full_trainable)
+        if not self._full_trainable:
+            self.eval()
         return self
 
     def forward(self, attribute, base_lambda, hard_prefix=False):
@@ -35,6 +45,16 @@ class CanonicalBaseModel(torch.nn.Module):
         result = self.reconstruct_from_state(state)
         _same_support(attribute, result["Base"], "A/Base")
         result["prefix_bits"] = prefix_bits
+        return result
+
+    def forward_trainable(self, attribute, base_lambda):
+        if not self._full_trainable:
+            raise RuntimeError("Base forward_trainable requires full trainable scope")
+        state, likelihoods = self.prefix.training_forward(
+            attribute, base_lambda)
+        result = self.reconstruct_from_state(state)
+        _same_support(attribute, result["Base"], "A/Base")
+        result["prefix_likelihoods"] = likelihoods
         return result
 
     def reconstruct_from_state(self, state):
