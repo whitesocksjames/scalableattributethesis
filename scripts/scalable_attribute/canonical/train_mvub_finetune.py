@@ -94,6 +94,16 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+def append_csv_row(path, row):
+    """Append one metrics row without rewriting the complete trajectory."""
+    exists = os.path.exists(path)
+    with open(path, "a", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(row))
+        if not exists:
+            writer.writeheader()
+        writer.writerow(row)
+
+
 def git_commit():
     try:
         return subprocess.check_output(
@@ -140,6 +150,29 @@ def assert_group_gradient(module, label, required):
         raise RuntimeError(label + " unexpectedly received a gradient")
     if any(not torch.isfinite(gradient).all() for gradient in present):
         raise RuntimeError(label + " received a non-finite gradient")
+
+
+def gradient_statistics(module):
+    parameters = [parameter for parameter in module.parameters()
+                  if parameter.requires_grad]
+    gradients = [parameter.grad for parameter in parameters
+                 if parameter.grad is not None]
+    if gradients:
+        squared_norm = torch.stack([
+            gradient.detach().float().pow(2).sum()
+            for gradient in gradients]).sum()
+        norm = float(squared_norm.sqrt().item())
+        elements = sum(gradient.numel() for gradient in gradients)
+    else:
+        norm = 0.0
+        elements = 0
+    return {
+        "present": bool(gradients),
+        "parameter_tensors": len(parameters),
+        "gradient_tensors": len(gradients),
+        "gradient_elements": elements,
+        "norm": norm,
+    }
 
 
 def total_gradient_norm(parameters):
@@ -208,6 +241,7 @@ def complete_checkpoint(model, optimizer, args, base_config, metadata, step):
 
 def main():
     args = parse_args()
+    source_git_commit = git_commit()
     for name in (
             "data_root", "train_file_list", "validation_file_list",
             "released_checkpoint", "base_synthesis_checkpoint",
@@ -327,7 +361,7 @@ def main():
         "num_validation_h5": len(validation_files),
         "shuffle": True,
         "drop_last": False,
-        "git_commit": git_commit(),
+        "git_commit": source_git_commit,
         "hostname": socket.gethostname(),
         "command": command,
         "step0_legacy_d611_exact": True,
@@ -342,7 +376,7 @@ def main():
         validation_summaries.append(validate(
             model, validation_loader, weights, 0, args.output_dir))
 
-    metrics = []
+    metrics_path = os.path.join(args.output_dir, "training_metrics.csv")
     endpoint_counts = {"Base": 0, "Full": 0}
     saved = {}
     torch.cuda.reset_peak_memory_stats()
@@ -354,6 +388,7 @@ def main():
         enhancement_calls["count"] += 1
 
     hook = model.enhancement.register_forward_hook(count_enhancement)
+    last_gradient_groups = None
     try:
         while step < args.max_steps:
             for coords, feats in train_loader:
@@ -400,11 +435,27 @@ def main():
                 loss.backward()
 
                 full_scope = model.trainable_scope == "full"
-                assert_group_gradient(model.base.prefix, "Prefix", full_scope)
-                assert_group_gradient(
-                    model.base.base_synthesis, "BaseSynthesis", full_scope)
-                assert_group_gradient(
-                    model.enhancement, "EnhancementVAE", endpoint == "Full")
+                gradient_modules = {
+                    "linear_in": model.base.prefix.model.linear_in,
+                    "upscaler": model.base.prefix.model.upscaler,
+                    "prefix_vae": model.base.prefix.model.VAE,
+                    "embedder": model.base.prefix.model.embedder,
+                    "base_synthesis": model.base.base_synthesis,
+                    "enhancement_vae": model.enhancement,
+                }
+                gradient_required = {
+                    "linear_in": full_scope,
+                    "upscaler": full_scope,
+                    "prefix_vae": full_scope,
+                    "embedder": full_scope,
+                    "base_synthesis": full_scope,
+                    "enhancement_vae": endpoint == "Full",
+                }
+                gradient_groups = {}
+                for name, module in gradient_modules.items():
+                    assert_group_gradient(
+                        module, name, gradient_required[name])
+                    gradient_groups[name] = gradient_statistics(module)
                 if args.arm == "enhancement_only":
                     assert_group_gradient(model.base, "Frozen Base", False)
                 norm = total_gradient_norm(trainable)
@@ -428,9 +479,11 @@ def main():
                     "peak_gpu_memory_gib": (
                         torch.cuda.max_memory_allocated() / 1024 ** 3),
                 }
-                metrics.append(row)
-                write_csv(os.path.join(args.output_dir, "training_metrics.csv"),
-                          metrics)
+                for name, statistics in gradient_groups.items():
+                    for field, value in statistics.items():
+                        row["grad_{}_{}".format(name, field)] = value
+                append_csv_row(metrics_path, row)
+                last_gradient_groups = gradient_groups
                 if step in args.save_steps or step == args.max_steps:
                     path = os.path.join(
                         checkpoint_dir, "step_{}.pth".format(step))
@@ -496,6 +549,7 @@ def main():
         "full_bits_identity": True,
         "hard_bits": {"base": post_bits[0], "enhancement": post_bits[1],
                       "full": post_bits[2]},
+        "last_gradient_groups": last_gradient_groups,
         "checkpoints": saved,
         "validation": validation_summaries,
     }
