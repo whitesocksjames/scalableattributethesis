@@ -99,6 +99,10 @@ def average_models(rows):
         "mean_model_bpp": sum(float(row["bpp"]) for row in rows) / len(rows),
         "mean_model_y_psnr": (
             sum(float(row["y_psnr"]) for row in rows) / len(rows)),
+        "mean_model_u_psnr": (
+            sum(float(row["u_psnr"]) for row in rows) / len(rows)),
+        "mean_model_v_psnr": (
+            sum(float(row["v_psnr"]) for row in rows) / len(rows)),
         "mean_model_yuv_psnr_611": (
             sum(float(row["yuv_psnr_611"]) for row in rows) / len(rows)),
     }

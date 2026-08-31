@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "canonical_base": {
+    "architecture": {
+      "input_mode": "x4_f4",
+      "base_channels": 128,
+      "block_layers": 2,
+      "kernel_size": 3,
+      "zero_init": true
+    },
+    "training": {
+      "lr": 0.0003,
+      "batch_size": 4,
+      "max_steps": 3525,
+      "save_steps": [500, 1000, 2000, 3000, 3525],
+      "seed": 0,
+      "objective": "D111",
+      "distortion_weights": "1,1,1",
+      "optimizer": "Adam",
+      "betas": [0.9, 0.999],
+      "weight_decay": 0.0,
+      "scheduler": null
+    }
+  },
+  "enhancement": {
+    "recipe_status": "pending_32k_manager_decision"
+  },
+  "points": {
+    "32k": {
+      "rate_id": "R01",
+      "conditioning_lambda": 32768,
+      "released_profile": "32k8k"
+    },
+    "16k": {
+      "rate_id": "R02",
+      "conditioning_lambda": 16384,
+      "released_profile": "32k8k"
+    },
+    "8k": {
+      "rate_id": "R03",
+      "conditioning_lambda": 8192,
+      "released_profile": "32k8k"
+    },
+    "4k": {
+      "rate_id": "R04",
+      "conditioning_lambda": 4096,
+      "released_profile": "8k256"
+    },
+    "2k": {
+      "rate_id": "R05",
+      "conditioning_lambda": 2048,
+      "released_profile": "8k256"
+    }
+  }
+}

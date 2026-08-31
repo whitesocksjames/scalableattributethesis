@@ -21,6 +21,8 @@ from scalable_attribute.canonical.config import (
     BaseSynthesisConfig, add_base_architecture_arguments)
 from scalable_attribute.canonical.evaluation import evaluate_base
 from scalable_attribute.canonical.model import CanonicalBaseModel
+from scalable_attribute.canonical.operating_points import (
+    DEFAULT_CONFIG, resolve_operating_point)
 from scalable_attribute.data import UncachedPCDataset, h5_files
 
 
@@ -28,24 +30,91 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", required=True)
     parser.add_argument("--train-file-list", required=True)
-    parser.add_argument("--base-checkpoint", required=True)
+    parser.add_argument("--point")
+    parser.add_argument("--operating-points-config", default=DEFAULT_CONFIG)
+    parser.add_argument("--released-root")
+    parser.add_argument("--base-checkpoint")
     parser.add_argument("--resume-checkpoint")
-    parser.add_argument("--base-lambda", type=int, required=True)
+    parser.add_argument("--base-lambda", type=int)
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--lr", type=float, required=True)
-    parser.add_argument("--batch-size", type=int, default=1)
-    parser.add_argument("--max-steps", type=int, required=True)
+    parser.add_argument("--lr", type=float)
+    parser.add_argument("--distortion-weights")
+    parser.add_argument("--batch-size", type=int)
+    parser.add_argument("--max-steps", type=int)
     parser.add_argument("--max-samples", type=int)
     parser.add_argument("--validation-file-list")
     parser.add_argument("--validate-every", type=int, default=0)
     parser.add_argument("--validate-at-start", action="store_true")
     parser.add_argument("--save-every", type=int, default=0)
+    parser.add_argument("--save-steps", type=int, nargs="*")
     parser.add_argument("--num-workers", type=int, default=0)
-    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--seed", type=int)
     parser.add_argument("--base-scale", type=int, default=5)
     parser.add_argument("--base-stage", type=int, default=1)
     parser.add_argument("--base-vmode", type=int, default=1)
     return add_base_architecture_arguments(parser).parse_args()
+
+
+def resolve_training_args(args):
+    """Apply point defaults once; explicit CLI values remain authoritative."""
+    point = None
+    if args.point:
+        point = resolve_operating_point(
+            args.point, args.released_root, args.operating_points_config)
+        if (args.base_lambda is not None and
+                args.base_lambda != point["conditioning_lambda"]):
+            raise ValueError("--base-lambda conflicts with official --point mapping")
+        if (args.base_checkpoint is not None and
+                os.path.realpath(os.path.expandvars(args.base_checkpoint)) !=
+                os.path.realpath(point["released_checkpoint"])):
+            raise ValueError(
+                "--base-checkpoint conflicts with official --point mapping")
+        training = point["base"]["training"]
+        defaults = {
+            "base_checkpoint": point["released_checkpoint"],
+            "base_lambda": point["conditioning_lambda"],
+            "lr": training["lr"],
+            "distortion_weights": training["distortion_weights"],
+            "batch_size": training["batch_size"],
+            "max_steps": training["max_steps"],
+            "save_steps": training["save_steps"],
+            "seed": training["seed"],
+        }
+        for name, value in defaults.items():
+            if getattr(args, name) is None:
+                setattr(args, name, value)
+    else:
+        required = ("base_checkpoint", "base_lambda", "lr", "max_steps")
+        missing = [name for name in required if getattr(args, name) is None]
+        if missing:
+            raise ValueError(
+                "Explicit mode requires --{}".format(
+                    ", --".join(name.replace("_", "-") for name in missing)))
+        if args.distortion_weights is None:
+            args.distortion_weights = "1,1,1"
+        if args.batch_size is None:
+            args.batch_size = 1
+        if args.save_steps is None:
+            args.save_steps = []
+        if args.seed is None:
+            args.seed = 0
+    return point
+
+
+def parse_distortion_weights(value):
+    try:
+        weights = tuple(float(item) for item in value.split(","))
+    except ValueError as exc:
+        raise ValueError("distortion-weights must be wY,wU,wV") from exc
+    if len(weights) != 3 or any(weight <= 0 for weight in weights):
+        raise ValueError("distortion-weights must contain three positive values")
+    return weights
+
+
+def weighted_distortion(reference, reconstruction, weights):
+    channel_mse = torch.mean((reference - reconstruction) ** 2, dim=0)
+    weight = channel_mse.new_tensor(weights)
+    return torch.sum(channel_mse * weight) / torch.sum(weight), channel_mse
 
 
 def gradient_norm(parameters):
@@ -81,6 +150,19 @@ def write_json(path, value):
 
 def main():
     args = parse_args()
+    operating_point = resolve_training_args(args)
+    for name in (
+            "data_root", "train_file_list", "base_checkpoint", "output_dir",
+            "operating_points_config"):
+        value = getattr(args, name)
+        setattr(args, name, os.path.abspath(os.path.expandvars(value)))
+    for name in ("resume_checkpoint", "validation_file_list", "released_root"):
+        value = getattr(args, name)
+        if value:
+            setattr(args, name, os.path.abspath(os.path.expandvars(value)))
+    if not os.path.isfile(args.base_checkpoint):
+        raise FileNotFoundError(
+            "Released Attribute checkpoint not found: " + args.base_checkpoint)
     if args.batch_size < 1 or args.max_steps < 1:
         raise ValueError("batch-size and max-steps must be positive")
     if args.max_samples is not None and args.max_samples < 1:
@@ -89,6 +171,10 @@ def main():
         raise ValueError("lr must be positive")
     if args.validate_every < 0 or args.save_every < 0:
         raise ValueError("validate-every and save-every cannot be negative")
+    if any(step < 1 or step > args.max_steps for step in args.save_steps):
+        raise ValueError("save-steps must be within [1, max-steps]")
+    save_steps = set(args.save_steps)
+    distortion_weights = parse_distortion_weights(args.distortion_weights)
     if ((args.validate_every or args.validate_at_start)
             and not args.validation_file_list):
         raise ValueError("Validation schedule requires validation-file-list")
@@ -105,6 +191,13 @@ def main():
     torch.cuda.manual_seed_all(args.seed)
 
     config = BaseSynthesisConfig.from_args(args)
+    if operating_point is not None:
+        expected_architecture = operating_point["base"]["architecture"]
+        if config.to_dict() != expected_architecture:
+            raise ValueError(
+                "Resolved Base architecture differs from operating-point "
+                "contract: {} != {}".format(
+                    config.to_dict(), expected_architecture))
     resume = None
     starting_step = 0
     if args.resume_checkpoint:
@@ -118,6 +211,10 @@ def main():
             raise ValueError("Resume checkpoint released Base mismatch")
         if int(resume.get("base_lambda", -1)) != args.base_lambda:
             raise ValueError("Resume checkpoint Base lambda mismatch")
+        resume_weights = tuple(resume.get(
+            "distortion_weights", [1.0, 1.0, 1.0]))
+        if resume_weights != distortion_weights:
+            raise ValueError("Resume checkpoint distortion weights mismatch")
         if "base_synthesis" not in resume or "optimizer" not in resume:
             raise ValueError("Resume checkpoint lacks model or optimizer state")
         starting_step = int(resume.get("step", -1))
@@ -148,7 +245,8 @@ def main():
             "betas": [0.9, 0.999], "weight_decay": 0.0,
             "scheduler": None,
         },
-        "objective": "mean((A.F - Base.F) ** 2)",
+        "objective": "sum(w_c*MSE_c)/sum(w_c)",
+        "distortion_weights": list(distortion_weights),
         "selected_h5_count": len(files),
         "validation_h5_count": len(validation_files),
         "git_commit": git_commit(),
@@ -159,6 +257,10 @@ def main():
     })
     write_json(os.path.join(args.output_dir, "resolved_args.json"), metadata)
     write_json(os.path.join(args.output_dir, "base_config.json"), config.to_dict())
+    if operating_point is not None:
+        write_json(
+            os.path.join(args.output_dir, "operating_point.json"),
+            operating_point)
     with open(os.path.join(args.output_dir, "selected_h5.txt"), "w",
               encoding="utf-8") as handle:
         handle.write("\n".join(files) + "\n")
@@ -189,8 +291,9 @@ def main():
 
     trajectory_path = os.path.join(args.output_dir, "training_metrics.csv")
     fields = [
-        "step", "mse", "gradient_norm", "points", "step_seconds",
-        "peak_gpu_memory_gib", "lr",
+        "step", "loss", "mse", "D_Y", "D_U", "D_V", "D611",
+        "gradient_norm", "points", "step_seconds", "peak_gpu_memory_gib",
+        "lr",
     ]
     torch.cuda.reset_peak_memory_stats()
     start = time.monotonic()
@@ -210,6 +313,7 @@ def main():
             "step": current_step,
             "base_checkpoint": args.base_checkpoint,
             "base_lambda": args.base_lambda,
+            "distortion_weights": list(distortion_weights),
             "resolved_args": metadata,
         }, path)
         return path
@@ -242,10 +346,25 @@ def main():
                     device="cuda")
                 optimizer.zero_grad(set_to_none=True)
                 output = model(attribute, args.base_lambda)
+                if step == 0 and starting_step == 0:
+                    native = model.native_baselines(
+                        output["prefix_state"])["B_native"]
+                    zero_init_difference = float(
+                        (output["Base"].F - native.F).abs().max().item())
+                    if zero_init_difference > 1e-7:
+                        raise RuntimeError(
+                            "Zero-init learned/native regression failed: {}".format(
+                                zero_init_difference))
+                loss, channel_mse = weighted_distortion(
+                    attribute.F, output["Base"].F, distortion_weights)
                 mse = torch.mean((attribute.F - output["Base"].F) ** 2)
-                if not torch.isfinite(mse):
-                    raise RuntimeError("Non-finite Base MSE at step {}".format(step + 1))
-                mse.backward()
+                d611 = (6.0 * channel_mse[0] + channel_mse[1]
+                        + channel_mse[2]) / 8.0
+                if not all(torch.isfinite(value).all().item() for value in (
+                        loss, mse, channel_mse, d611)):
+                    raise RuntimeError(
+                        "Non-finite Base distortion at step {}".format(step + 1))
+                loss.backward()
                 if any(parameter.grad is not None
                        for parameter in model.prefix.parameters()):
                     raise RuntimeError("Frozen Unicorn parameter received a gradient")
@@ -253,11 +372,16 @@ def main():
                 optimizer.step()
                 torch.cuda.synchronize()
                 step += 1
-                loss_value = float(mse.item())
+                loss_value = float(loss.item())
                 losses.append(loss_value)
                 row = {
                     "step": step,
-                    "mse": loss_value,
+                    "loss": loss_value,
+                    "mse": float(mse.item()),
+                    "D_Y": float(channel_mse[0].item()),
+                    "D_U": float(channel_mse[1].item()),
+                    "D_V": float(channel_mse[2].item()),
+                    "D611": float(d611.item()),
                     "gradient_norm": norm,
                     "points": len(attribute),
                     "step_seconds": time.monotonic() - step_start,
@@ -269,7 +393,8 @@ def main():
                 handle.flush()
                 if step == 1 or step % 25 == 0 or step == args.max_steps:
                     print(json.dumps(row), flush=True)
-                if args.save_every and step % args.save_every == 0:
+                if (step in save_steps or
+                        (args.save_every and step % args.save_every == 0)):
                     save_checkpoint(step)
                 if args.validate_every and step % args.validate_every == 0:
                     validate(step)
@@ -293,9 +418,9 @@ def main():
         "steps": step,
         "starting_step": starting_step,
         "resumed_from": args.resume_checkpoint,
-        "initial_mse": losses[0],
-        "final_mse": losses[-1],
-        "best_mse": min(losses),
+        "initial_loss": losses[0],
+        "final_loss": losses[-1],
+        "best_loss": min(losses),
         "runtime_seconds": runtime,
         "peak_gpu_memory_gib": torch.cuda.max_memory_allocated() / 1024 ** 3,
         "checkpoint": checkpoint_path,
@@ -307,7 +432,7 @@ def main():
             if starting_step + index in (starting_step + 1, 1000, 2000)
         },
     }
-    write_json(os.path.join(args.output_dir, "summary.json"), summary)
+    write_json(os.path.join(args.output_dir, "training_summary.json"), summary)
     print("CANONICAL BASE TRAINING PASS")
     print(json.dumps(summary, indent=2))
 

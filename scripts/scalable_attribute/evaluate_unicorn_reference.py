@@ -35,7 +35,7 @@ MODEL_FIELDS = (
 CURVE_FIELDS = (
     "rate_id", "checkpoint_profile", "base_lambda", "num_models", "num_h5",
     "total_points", "mean_model_bpp", "mean_model_y_psnr",
-    "mean_model_yuv_psnr_611",
+    "mean_model_u_psnr", "mean_model_v_psnr", "mean_model_yuv_psnr_611",
 )
 
 
