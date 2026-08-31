@@ -34,7 +34,8 @@ FIELDS = (
     "base_bits", "enhancement_bits", "x_low_bits", "r1_bits", "r2_bits",
     "r3_bits", "r4_bits", "num_base_residual_streams",
     "num_native_r5_streams", "y_mse", "u_mse", "v_mse", "y_psnr",
-    "u_psnr", "v_psnr", "yuv_psnr_611", "hard_max_abs_difference",
+    "u_psnr", "v_psnr", "yuv_psnr_611",
+    "soft_hard_max_abs_difference", "hard_roundtrip_max_abs_difference",
     "seconds",
 )
 
@@ -218,6 +219,9 @@ def main():
     residual_bits = prefix_rate["residual_bits"]
     if len(residual_bits) != 4:
         raise RuntimeError("Canonical prefix bit breakdown is not r1-r4")
+    expected_base_bits = int(prefix_rate["bits_xlow"] + sum(residual_bits))
+    if int(prefix_rate["base_bits"]) != expected_base_bits:
+        raise RuntimeError("Canonical Base physical bit identity failed")
     base_output = base.reconstruct_from_state(prefix_state)
     soft_base_output = base.reconstruct_from_state(soft_prefix_state)
     base_difference = sparse_max_difference(
@@ -240,7 +244,7 @@ def main():
     record("Canonical_Base", base_output["Base"], prefix_rate["base_bits"],
            "CURRENT_CANONICAL", started,
            checkpoint_step=int(base_state["step"]), enhancement_bits=0,
-           hard_max_abs_difference=base_difference, **common)
+           soft_hard_max_abs_difference=base_difference, **common)
 
     for label, path in base_candidates:
         started = time.perf_counter()
@@ -271,7 +275,7 @@ def main():
         record(label, candidate_output, prefix_rate["base_bits"],
                "CURRENT_CANONICAL_BASE_ABLATION", started,
                checkpoint_step=int(state["step"]), enhancement_bits=0,
-               hard_max_abs_difference=difference, **common)
+               soft_hard_max_abs_difference=difference, **common)
         del synthesis, candidate_output, candidate_soft
         torch.cuda.empty_cache()
 
@@ -308,7 +312,7 @@ def main():
                prefix_rate["base_bits"] + enhancement_bits,
                "CURRENT_CANONICAL", started, checkpoint_step=step,
                enhancement_bits=enhancement_bits,
-               hard_max_abs_difference=difference, **common)
+               hard_roundtrip_max_abs_difference=difference, **common)
         del enhancement, encoded, decoded
         torch.cuda.empty_cache()
 
@@ -350,7 +354,6 @@ def main():
             "r3_bits": residual_bits[2], "r4_bits": residual_bits[3],
             "num_base_residual_streams": 4,
             "num_native_r5_streams": 0,
-            "hard_max_abs_difference": difference,
         }
         record(label + "_Base", hard["Base"], hard["base_bits"],
                "CURRENT_MVUB_FINETUNED", started, enhancement_bits=0,
@@ -358,6 +361,7 @@ def main():
         record(label + "_Full", hard["Full"], hard["full_bits"],
                "CURRENT_MVUB_FINETUNED", started,
                enhancement_bits=hard["enhancement_bits"],
+               hard_roundtrip_max_abs_difference=difference,
                **candidate_common)
         del candidate, candidate_base, hard
         torch.cuda.empty_cache()
@@ -370,6 +374,8 @@ def main():
         "canonical_endpoints_share_prefix_state": True,
         "num_base_residual_streams": 4,
         "num_native_r5_streams": 0,
+        "base_soft_hard_difference_is_diagnostic_only": True,
+        "full_hard_roundtrip_required_exact": True,
         "rows": rows,
     }
     with open(os.path.join(args.output_dir, "physical_rd.json"), "w",

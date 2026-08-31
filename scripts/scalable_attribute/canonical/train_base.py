@@ -426,7 +426,7 @@ def main():
         "checkpoint": checkpoint_path,
         "checkpoint_reload": True,
         "validation_steps": validation_summaries,
-        "training_mse_at_updates": {
+        "training_loss_at_updates": {
             "step{}_pre_update".format(starting_step + index): value
             for index, value in enumerate(losses, start=1)
             if starting_step + index in (starting_step + 1, 1000, 2000)

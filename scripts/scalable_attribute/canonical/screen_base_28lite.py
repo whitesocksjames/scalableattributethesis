@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument("--endpoint-summary", required=True)
     parser.add_argument("--author-curve", required=True)
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--max-shortlist", type=int, default=2)
+    parser.add_argument("--max-shortlist", type=int, default=1)
     parser.add_argument("--plot", action="store_true")
     return parser.parse_args()
 
@@ -109,7 +109,8 @@ def main():
             "all_candidates_share_exact_physical_rate": True,
             "author_rate_bracket": bracket,
             "selection_rule": (
-                "rank by RWTT-28Lite YUV611; retain at most two for 8i tie-break"),
+                "rank by RWTT-28Lite YUV611; retain the configured top {} "
+                "candidate(s) for 8i tie-break".format(args.max_shortlist)),
             "shortlist": shortlist,
         }, handle, indent=2)
         handle.write("\n")

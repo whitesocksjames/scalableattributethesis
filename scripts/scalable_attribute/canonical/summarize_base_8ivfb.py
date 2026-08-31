@@ -56,9 +56,13 @@ def main():
         if any(int(float(row["num_native_r5_streams"])) != 0
                for row in selected):
             raise RuntimeError(label + " accessed native r5")
-        if any(float(row["hard_max_abs_difference"]) != 0.0
+        if any(int(float(row["enhancement_bits"])) != 0 for row in selected):
+            raise RuntimeError(label + " Base unexpectedly contains Enhancement bits")
+        if any(int(float(row["physical_bits"])) != int(float(row["base_bits"]))
                for row in selected):
-            raise RuntimeError(label + " hard exactness failed")
+            raise RuntimeError(label + " physical/Base bit identity failed")
+        soft_hard = [float(row["soft_hard_max_abs_difference"])
+                     for row in selected]
         per_sequence.extend(selected)
         candidates.append({
             "point": args.point,
@@ -71,7 +75,9 @@ def main():
             "mean_v_psnr": sum(float(row["v_psnr"]) for row in selected) / 4,
             "mean_yuv_psnr_611": sum(
                 float(row["yuv_psnr_611"]) for row in selected) / 4,
-            "hard_exact": True,
+            "max_soft_hard_abs_difference": max(soft_hard),
+            "hard_prefix_decode_used": True,
+            "bit_identity_pass": True,
         })
     candidates.sort(key=lambda row: -row["mean_yuv_psnr_611"])
     for rank, row in enumerate(candidates, start=1):
@@ -93,6 +99,7 @@ def main():
             "point": args.point,
             "role": "external generalization sanity/tie-break",
             "primary_selection_remains": "RWTT-28Lite",
+            "soft_hard_difference_is_diagnostic_only": True,
             "results": candidates,
         }, handle, indent=2)
         handle.write("\n")

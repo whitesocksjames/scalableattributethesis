@@ -63,7 +63,10 @@ def plot(official, selected, path):
 def main():
     args = parse_args()
     choices = [selection(value) for value in args.selection]
-    if {point for point, _, _ in choices} != set(EXPECTED_POINTS):
+    selected_points = [point for point, _, _ in choices]
+    if (len(choices) != len(EXPECTED_POINTS) or
+            set(selected_points) != set(EXPECTED_POINTS) or
+            any(selected_points.count(point) != 1 for point in EXPECTED_POINTS)):
         raise ValueError("Exactly one selection is required for each of "
                          + ", ".join(EXPECTED_POINTS))
     selected = []
