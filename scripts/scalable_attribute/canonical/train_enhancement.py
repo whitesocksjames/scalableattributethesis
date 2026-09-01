@@ -16,8 +16,10 @@ import numpy as np
 import torch
 
 from basic_models.loss import get_bits
-from data_utils.dataloaders.attribute_dataloader import make_data_loader
+from data_utils.dataloaders.attribute_dataloader import collate_pointcloud_fn
 from scalable_attribute.canonical.config import BaseSynthesisConfig
+from scalable_attribute.canonical.data_schedule import (
+    ContinuationBatchSampler, require_compatible_schedule)
 from scalable_attribute.canonical.model import CanonicalBaseModel
 from scalable_attribute.canonical.scalable_model import (
     CanonicalScalableModel, load_frozen_base)
@@ -132,6 +134,7 @@ def main():
     optimizer = torch.optim.Adam(
         trainable, lr=args.lr, betas=(0.9, 0.999), weight_decay=0.0)
     starting_step = 0
+    resume = None
     resumed_distortion_weights = None
     if args.resume_checkpoint:
         resume = torch.load(args.resume_checkpoint, map_location="cpu")
@@ -168,9 +171,29 @@ def main():
 
     files = h5_files(args.data_root, args.train_file_list)
     dataset = UncachedPCDataset(files, color_format="yuv", normalize=True)
-    loader = make_data_loader(
-        dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.num_workers)
+    manifest_path = os.path.realpath(os.path.expandvars(
+        os.path.expanduser(args.train_file_list)))
+    batch_sampler = ContinuationBatchSampler(
+        num_samples=len(dataset), batch_size=args.batch_size,
+        start_step=starting_step, stop_step=args.max_steps, seed=args.seed)
+    data_schedule = batch_sampler.metadata(manifest_path)
+    if resume is not None:
+        require_compatible_schedule(resume.get("data_schedule"), data_schedule)
+    start_epoch, start_batch_in_epoch = batch_sampler.position(starting_step)
+    stop_epoch, stop_batch_in_epoch = batch_sampler.position(args.max_steps)
+    data_schedule_run = {
+        **data_schedule,
+        "start_step": starting_step,
+        "stop_step_exclusive": args.max_steps,
+        "start_epoch": start_epoch,
+        "start_batch_in_epoch": start_batch_in_epoch,
+        "next_epoch_after_run": stop_epoch,
+        "next_batch_in_epoch_after_run": stop_batch_in_epoch,
+    }
+    loader = torch.utils.data.DataLoader(
+        dataset, batch_sampler=batch_sampler,
+        num_workers=args.num_workers, collate_fn=collate_pointcloud_fn,
+        pin_memory=True)
     command = shlex.join([sys.executable] + sys.argv)
     metadata = dict(vars(args))
     metadata.update({
@@ -186,6 +209,8 @@ def main():
         "num_train_h5": len(files),
         "drop_last": False,
         "shuffle": True,
+        "data_schedule": data_schedule_run,
+        "next_data_step": starting_step,
         "git_commit": git_commit(),
         "hostname": socket.gethostname(),
         "command": command,
@@ -201,6 +226,8 @@ def main():
         "conditioning_lambda": args.conditioning_lambda,
         "rd_lambda": args.rd_lambda,
     })
+    write_json(os.path.join(args.output_dir, "data_schedule.json"),
+               data_schedule_run)
     with open(os.path.join(args.output_dir, "command.txt"), "w",
               encoding="utf-8") as handle:
         handle.write(command + "\n")
@@ -218,12 +245,14 @@ def main():
             "released_checkpoint": args.released_checkpoint,
             "base_synthesis_checkpoint": args.base_synthesis_checkpoint,
             "base_config": base_config.to_dict(),
+            "data_schedule": data_schedule,
             "resolved_args": metadata,
         }, path)
         return path
 
     fields = [
-        "step", "R_noise", "D_F", "D_Y", "D_U", "D_V", "lambda_D", "loss", "gradient_norm",
+        "step", "data_epoch", "batch_in_epoch", "R_noise", "D_F",
+        "D_Y", "D_U", "D_V", "lambda_D", "loss", "gradient_norm",
         "lr", "points", "step_seconds", "peak_gpu_memory_gib", "finite",
     ]
     metrics_path = os.path.join(args.output_dir, "training_metrics.csv")
@@ -266,9 +295,12 @@ def main():
                 norm = gradient_norm(trainable)
                 optimizer.step()
                 torch.cuda.synchronize()
+                data_epoch, batch_in_epoch = batch_sampler.position(step)
                 step += 1
                 final_row = {
                     "step": step,
+                    "data_epoch": data_epoch,
+                    "batch_in_epoch": batch_in_epoch,
                     "R_noise": float(rate.item()),
                     "D_F": float(distortion.item()),
                     "D_Y": float(channel_mse[0].item()),
@@ -302,6 +334,8 @@ def main():
         "status": "PASS",
         "steps": step,
         "starting_step": starting_step,
+        "data_schedule": data_schedule,
+        "next_data_step": step,
         "runtime_seconds": time.monotonic() - started,
         "peak_gpu_memory_gib": torch.cuda.max_memory_allocated() / 1024 ** 3,
         "final_metrics": final_row,

@@ -1,0 +1,44 @@
+# Canonical cleanup inventory, 2026-09-01
+# Planning only: NO DELETE/MOVE AUTHORIZED.
+# Columns: class | action | path | measured_size | reason / prerequisite
+
+KEEP_ACTIVE | KEEP | scalable_attribute/canonical/ | repo-tracked | canonical model runtime
+KEEP_ACTIVE | KEEP | scripts/scalable_attribute/canonical/ | repo-tracked | canonical train/eval/probe entrypoints
+KEEP_ACTIVE | KEEP | scripts/data/ | repo-tracked | preprocessing and immutable author-source provenance
+KEEP_ACTIVE | KEEP | scripts/hpc/ | repo-tracked | FAU reference/evaluation tooling
+KEEP_ACTIVE | KEEP | docs/CANONICAL_TRAINING_PROTOCOL.md | repo-tracked | canonical protocol
+KEEP_ACTIVE | KEEP | HPC.md | repo-tracked | cluster policy
+KEEP_ACTIVE | KEEP | HPC_GUIDE.md | repo-tracked | FAU usage guide
+KEEP_ACTIVE | KEEP | N30_GUIDE.md | repo-tracked | N30 usage/safety guide
+KEEP_ACTIVE | KEEP | figures/rd/ | repo-tracked | compact figures plus source tables/scripts
+
+KEEP_EVIDENCE | KEEP | drafts/architecture_survey_20260820/ | repo-tracked | source capability/design-space evidence
+KEEP_EVIDENCE | KEEP | drafts/architecture_screening_20260820/ | repo-tracked | rejected/frozen candidate evidence
+KEEP_EVIDENCE | KEEP | drafts/finetune_strategy_decision_20260831/ | repo-tracked | 32K fine-tuning decision evidence
+KEEP_EVIDENCE | KEEP | drafts/canonical_mvub_finetune/ | repo-tracked | MVUB experiment lineage
+KEEP_EVIDENCE | KEEP | drafts/canonical_yaware_owlii_audit/ | repo-tracked | external evaluation evidence
+KEEP_EVIDENCE | KEEP | drafts/canonical_yaware_equilibrium_human_data_audit/ | repo-tracked | D411/D611 evidence
+
+KEEP_DATA | KEEP | /data/run01/scz0ade/Tanzeyu/data/ | NOT_MEASURED_GLOBAL_SCAN_ABORTED | datasets; never delete in cleanup phase
+KEEP_DATA | KEEP | /data/run01/scz0ade/Tanzeyu/checkpoints/ | NOT_MEASURED_GLOBAL_SCAN_ABORTED | released/selected checkpoints
+KEEP_DATA | KEEP | /data/run01/scz0ade/Tanzeyu/experiments/ | 32G_TOTAL_2026-09-01 | experiment namespace; review exact children only
+
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_base_r01/ | SIZE_PENDING_BOUNDED_AUDIT | preserve selected Base step5525 and E0/E1/E2 provenance
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_base_d611_r01/ | SIZE_PENDING_BOUNDED_AUDIT | Base D611 ablation evidence
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_enhancement_r01/ | SIZE_PENDING_BOUNDED_AUDIT | canonical Enhancement lineage/checkpoints
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/ | SIZE_PENDING_BOUNDED_AUDIT | lower-rate Base checkpoints/formal data
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_mvub_finetune_v1/ | SIZE_PENDING_BOUNDED_AUDIT | A/B/C and mixing ablation evidence
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_scalable_formal_r01/ | SIZE_PENDING_BOUNDED_AUDIT | formal Base/Full evaluation artifacts
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/ | SIZE_PENDING_BOUNDED_AUDIT | D111/D411/D611 lineage
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_lr5e5_r01/ | SIZE_PENDING_BOUNDED_AUDIT | LR follow-up evidence
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_equilibrium_r01/ | SIZE_PENDING_BOUNDED_AUDIT | equilibrium evidence
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/direct_d611_mixing_v1/ | SIZE_PENDING_BOUNDED_AUDIT | M0/M10/M25 evidence
+REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/direct_d611_matched_budget_v1/ | SIZE_PENDING_BOUNDED_AUDIT | matched-budget decision evidence
+
+CANDIDATE | REVIEW_EXACT_FILES_ONLY | finished experiment GPCC/torchac temporary working files | UNKNOWN | delete only exact disposable paths after manager approval
+CANDIDATE | REVIEW_EXACT_FILES_ONLY | superseded non-selected intermediate checkpoints | UNKNOWN | keep selected/resume/trajectory checkpoints; verify references first
+CANDIDATE | REVIEW_EXACT_FILES_ONLY | duplicate rendered PNG/SVG copies outside figures/rd/ | UNKNOWN | retain source CSV and one canonical render
+CANDIDATE | REVIEW_EXACT_FILES_ONLY | obsolete legacy scalable runtime files | repo-tracked/history | verify no active imports; recovery tag exists
+
+PROTECTED | NEVER_TOUCH | /data/run01/scz0ade/ outside Tanzeyu | N/A | shared-account ownership boundary
+PROTECTED | NEVER_TOUCH | other users' directories | N/A | do not enter, inspect, modify, move or clean
