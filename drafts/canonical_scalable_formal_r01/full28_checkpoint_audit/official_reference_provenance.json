@@ -1,0 +1,9 @@
+{
+  "source_reference_full": "/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/experiments/rwtt_unicorn_reference_v1/reference_full",
+  "source_reference_dev": "/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/experiments/rwtt_unicorn_reference_v1/reference_dev",
+  "source_scalable_eval": "/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/experiments/parallel_validation_20260820/c2_r08_smoke/eval",
+  "dev_manifest": "/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/RWTT/splits/model_95_5_seed0/dev_val_models14_uniform_v1_h5.txt",
+  "aggregation": "point-weighted per-channel MSE within original model; PSNR peak=1; 6:1:1; equal average across models",
+  "retained_per_h5_reused": true,
+  "source_artifacts_overwritten": false
+}

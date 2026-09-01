@@ -1,0 +1,63 @@
+{
+  "contract": "physical hard rate; pc_error normalized YUV PSNR 6:1:1; point-weighted per-model MSE then model-equal average",
+  "aggregate": {
+    "Official R01": {
+      "bpp": 1.5775420862824652,
+      "y_psnr": 41.04317686156853,
+      "u_psnr": 46.704810775214774,
+      "v_psnr": 47.85016770717602,
+      "yuv_psnr_611": 42.60175495647525
+    },
+    "Full step1763": {
+      "bpp": 1.6561769714106724,
+      "y_psnr": 41.55458178757488,
+      "u_psnr": 46.641685544830345,
+      "v_psnr": 47.63297148886796,
+      "yuv_psnr_611": 42.950268469893444
+    },
+    "Full step3525": {
+      "bpp": 1.586110761515086,
+      "y_psnr": 40.95658889698795,
+      "u_psnr": 46.75887704592875,
+      "v_psnr": 47.77915049909791,
+      "yuv_psnr_611": 42.53469511586929
+    },
+    "Base step1763 regression": {
+      "bpp": 0.5239158958326141,
+      "y_psnr": 32.38487793997443,
+      "u_psnr": 45.260789917661306,
+      "v_psnr": 46.68290354514123,
+      "yuv_psnr_611": 35.78162013783114
+    },
+    "Base step3525 formal": {
+      "bpp": 0.5239161393510068,
+      "y_psnr": 32.38487865947034,
+      "u_psnr": 45.260790735854016,
+      "v_psnr": 46.68290991299739,
+      "yuv_psnr_611": 35.781621575709174
+    }
+  },
+  "step3525_minus_step1763": {
+    "delta_bpp": -0.07006620989558643,
+    "delta_y_psnr": -0.5979928905869301,
+    "delta_u_psnr": 0.1171915010984037,
+    "delta_v_psnr": 0.14617901022995028,
+    "delta_yuv611": -0.4155733540241542
+  },
+  "per_model": {
+    "quality_improves": 0,
+    "quality_degrades": 28,
+    "rate_decreases": 27,
+    "rate_increases": 1,
+    "mean_delta_yuv611": -0.41557335402415624,
+    "median_delta_yuv611": -0.4091779151497441,
+    "quadrants": {
+      "better_quality_lower_rate": 0,
+      "better_quality_higher_rate": 0,
+      "worse_quality_lower_rate": 27,
+      "worse_quality_higher_rate": 1,
+      "ties": 0
+    }
+  },
+  "classification": "MIXED RD TRAJECTORY"
+}

@@ -32,14 +32,34 @@ def parse_args():
     parser.add_argument("--base-synthesis-checkpoint", required=True)
     parser.add_argument("--conditioning-lambda", type=int, required=True)
     parser.add_argument("--rd-lambda", type=float, required=True)
+    parser.add_argument("--distortion-weights", default="1,1,1")
     parser.add_argument("--lr", type=float, required=True)
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument("--max-steps", type=int, required=True)
     parser.add_argument("--save-steps", type=int, nargs="+", default=[100, 250])
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--resume-checkpoint")
+    parser.add_argument("--allow-resume-distortion-weight-change",
+                        action="store_true")
     parser.add_argument("--output-dir", required=True)
     return parser.parse_args()
+
+
+def parse_distortion_weights(value):
+    try:
+        weights = tuple(float(item) for item in value.split(","))
+    except ValueError as exc:
+        raise ValueError("distortion-weights must be wY,wU,wV") from exc
+    if len(weights) != 3 or any(weight <= 0 for weight in weights):
+        raise ValueError("distortion-weights must contain three positive values")
+    return weights
+
+
+def weighted_distortion(reference, reconstruction, weights):
+    channel_mse = torch.mean((reference - reconstruction) ** 2, dim=0)
+    weight = channel_mse.new_tensor(weights)
+    return torch.sum(channel_mse * weight) / torch.sum(weight), channel_mse
 
 
 def write_json(path, value):
@@ -75,6 +95,7 @@ def gradient_norm(parameters):
 
 def main():
     args = parse_args()
+    distortion_weights = parse_distortion_weights(args.distortion_weights)
     if args.batch_size < 1 or args.max_steps < 1:
         raise ValueError("batch-size and max-steps must be positive")
     if args.lr <= 0 or args.rd_lambda <= 0:
@@ -110,6 +131,40 @@ def main():
         raise RuntimeError("Canonical Base is not frozen")
     optimizer = torch.optim.Adam(
         trainable, lr=args.lr, betas=(0.9, 0.999), weight_decay=0.0)
+    starting_step = 0
+    resumed_distortion_weights = None
+    if args.resume_checkpoint:
+        resume = torch.load(args.resume_checkpoint, map_location="cpu")
+        if resume.get("architecture") != "canonical_independent_enhancement":
+            raise ValueError("Enhancement resume architecture mismatch")
+        if int(resume.get("conditioning_lambda", -1)) != args.conditioning_lambda:
+            raise ValueError("Enhancement resume conditioning lambda mismatch")
+        if float(resume.get("rd_lambda", -1)) != args.rd_lambda:
+            raise ValueError("Enhancement resume RD lambda mismatch")
+        resume_weights = tuple(float(value) for value in resume.get(
+            "distortion_weights", [1.0, 1.0, 1.0]))
+        resumed_distortion_weights = resume_weights
+        if (resume_weights != distortion_weights and
+                not args.allow_resume_distortion_weight_change):
+            raise ValueError("Enhancement resume distortion weights mismatch")
+        if os.path.realpath(resume.get("released_checkpoint", "")) != os.path.realpath(
+                args.released_checkpoint):
+            raise ValueError("Enhancement resume released checkpoint mismatch")
+        if os.path.realpath(resume.get("base_synthesis_checkpoint", "")) != os.path.realpath(
+                args.base_synthesis_checkpoint):
+            raise ValueError("Enhancement resume Base checkpoint mismatch")
+        if resume.get("base_config") != base_config.to_dict():
+            raise ValueError("Enhancement resume Base config mismatch")
+        if "enhancement_vae" not in resume or "optimizer" not in resume:
+            raise ValueError("Enhancement resume lacks model or optimizer state")
+        starting_step = int(resume.get("step", -1))
+        if starting_step < 0 or args.max_steps <= starting_step:
+            raise ValueError("max-steps must exceed resumed global step")
+        model.enhancement.vae.load_state_dict(
+            resume["enhancement_vae"], strict=True)
+        optimizer.load_state_dict(resume["optimizer"])
+        for group in optimizer.param_groups:
+            group["lr"] = args.lr
 
     files = h5_files(args.data_root, args.train_file_list)
     dataset = UncachedPCDataset(files, color_format="yuv", normalize=True)
@@ -124,7 +179,9 @@ def main():
         "optimizer": {"name": "Adam", "lr": args.lr,
                       "betas": [0.9, 0.999], "weight_decay": 0.0,
                       "scheduler": None},
-        "objective": "R_noise + rd_lambda * mean((GT.F - Full.F) ** 2)",
+        "objective": "R_noise + rd_lambda * sum_c(w_c*MSE_c)/sum_c(w_c)",
+        "distortion_weights": list(distortion_weights),
+        "distortion_definition": "sum_c(w_c*MSE_c)/sum_c(w_c)",
         "rate": "-sum(log2(likelihood_E)) / N_full",
         "num_train_h5": len(files),
         "drop_last": False,
@@ -132,6 +189,11 @@ def main():
         "git_commit": git_commit(),
         "hostname": socket.gethostname(),
         "command": command,
+        "resumed_from": args.resume_checkpoint,
+        "starting_step": starting_step,
+        "resumed_distortion_weights": (
+            list(resumed_distortion_weights)
+            if resumed_distortion_weights is not None else None),
     })
     write_json(os.path.join(args.output_dir, "resolved_args.json"), metadata)
     write_json(os.path.join(args.output_dir, "enhancement_config.json"), {
@@ -152,6 +214,7 @@ def main():
             "step": step,
             "conditioning_lambda": args.conditioning_lambda,
             "rd_lambda": args.rd_lambda,
+            "distortion_weights": list(distortion_weights),
             "released_checkpoint": args.released_checkpoint,
             "base_synthesis_checkpoint": args.base_synthesis_checkpoint,
             "base_config": base_config.to_dict(),
@@ -160,13 +223,13 @@ def main():
         return path
 
     fields = [
-        "step", "R_noise", "D_F", "lambda_D", "loss", "gradient_norm",
+        "step", "R_noise", "D_F", "D_Y", "D_U", "D_V", "lambda_D", "loss", "gradient_norm",
         "lr", "points", "step_seconds", "peak_gpu_memory_gib", "finite",
     ]
     metrics_path = os.path.join(args.output_dir, "training_metrics.csv")
     torch.cuda.reset_peak_memory_stats()
     started = time.monotonic()
-    step = 0
+    step = starting_step
     saved = {}
     final_row = None
     with open(metrics_path, "w", newline="", encoding="utf-8") as handle:
@@ -182,7 +245,12 @@ def main():
                 output = model(attribute)
                 likelihood = output["likelihood_E"]
                 rate = get_bits(likelihood) / len(attribute)
-                distortion = torch.mean((attribute.F - output["Full"].F) ** 2)
+                distortion, channel_mse = weighted_distortion(
+                    attribute.F, output["Full"].F, distortion_weights)
+                if step == starting_step and distortion_weights == (1.0, 1.0, 1.0):
+                    original = torch.mean((attribute.F - output["Full"].F) ** 2)
+                    if not torch.allclose(distortion, original, rtol=1e-6, atol=1e-10):
+                        raise RuntimeError("D111 weighted distortion equivalence failed")
                 lambda_distortion = args.rd_lambda * distortion
                 loss = rate + lambda_distortion
                 finite = all(torch.isfinite(value).all().item() for value in (
@@ -203,6 +271,9 @@ def main():
                     "step": step,
                     "R_noise": float(rate.item()),
                     "D_F": float(distortion.item()),
+                    "D_Y": float(channel_mse[0].item()),
+                    "D_U": float(channel_mse[1].item()),
+                    "D_V": float(channel_mse[2].item()),
                     "lambda_D": float(lambda_distortion.item()),
                     "loss": float(loss.item()),
                     "gradient_norm": norm,
@@ -230,6 +301,7 @@ def main():
     summary = {
         "status": "PASS",
         "steps": step,
+        "starting_step": starting_step,
         "runtime_seconds": time.monotonic() - started,
         "peak_gpu_memory_gib": torch.cuda.max_memory_allocated() / 1024 ** 3,
         "final_metrics": final_row,

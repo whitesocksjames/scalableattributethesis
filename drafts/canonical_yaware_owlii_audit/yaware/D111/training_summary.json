@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "steps": 2063,
+  "starting_step": 1763,
+  "runtime_seconds": 548.8273029625416,
+  "peak_gpu_memory_gib": 12.267346382141113,
+  "final_metrics": {
+    "step": 2063,
+    "R_noise": 1.03018057346344,
+    "D_F": 3.2260515581583604e-05,
+    "D_Y": 5.948614489170723e-05,
+    "D_U": 1.884844823507592e-05,
+    "D_V": 1.8446949979988858e-05,
+    "lambda_D": 1.0571125745773315,
+    "loss": 2.0872931480407715,
+    "gradient_norm": 31.38886070251465,
+    "lr": 1e-05,
+    "points": 284336,
+    "step_seconds": 1.6127241179347038,
+    "peak_gpu_memory_gib": 12.267346382141113,
+    "finite": true
+  },
+  "checkpoints": {
+    "1863": "/data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/D111/train/checkpoints/step_1863.pth",
+    "1963": "/data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/D111/train/checkpoints/step_1963.pth",
+    "2063": "/data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/D111/train/checkpoints/step_2063.pth"
+  },
+  "checkpoint_reload": true,
+  "base_frozen": true,
+  "only_enhancement_trainable": true
+}

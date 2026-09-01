@@ -1,0 +1,5 @@
+sequence,source_points,floor_points,round_points,author_target_points,floor_exact_match,round_exact_match
+basketball_player,2925514,796217,795503,796217,True,False
+dancer,2592758,702038,701782,702038,True,False
+exercise,2391718,645135,644112,645135,True,False
+model,2458429,657755,657424,657755,True,False

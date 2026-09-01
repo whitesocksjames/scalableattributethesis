@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "rate_accounting": "x_low+r1+r2+r3+r4; min_v/max_v excluded",
+  "native_r5_streams": 0,
+  "hard_full_max_abs_difference": 0.0,
+  "endpoints": [
+    {
+      "endpoint": "Base",
+      "num_models": 28,
+      "num_h5": 792,
+      "total_points": 57904570,
+      "mean_model_bpp": 0.5239161657205323,
+      "mean_model_y_psnr": 32.384877932304946,
+      "mean_model_yuv_psnr_611": 35.781622102118405
+    },
+    {
+      "endpoint": "Full",
+      "num_models": 28,
+      "num_h5": 792,
+      "total_points": 57904570,
+      "mean_model_bpp": 2.041407593259358,
+      "mean_model_y_psnr": 44.13122583919308,
+      "mean_model_yuv_psnr_611": 44.79052900940244
+    }
+  ]
+}

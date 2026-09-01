@@ -76,3 +76,4 @@ slurm-*.err
 *.temp
 .cache/
 /results.zip
+/scalable-geometry-roi-channel_split_lambda.zip

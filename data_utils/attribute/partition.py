@@ -1,10 +1,7 @@
 # Jianqiang Wang (wangjq@smail.nju.edu.cn)
 # Last update: 2023-01-07
 
-import open3d as o3d
-import os
 import numpy as np
-import h5py
 
 
 def kdtree_partition(points, max_num, n_parts=None):

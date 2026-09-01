@@ -1,0 +1,119 @@
+{
+  "status": "PASS",
+  "contract": "RWTT Full28; 28 models/792 H5; physical hard Base; pc_error YUV611; model-equal average",
+  "rule": "one frozen 28Lite winner per lower-rate point after 8i sanity; no fallback",
+  "statuses": [
+    {
+      "status": "PASS",
+      "point": "2k",
+      "candidate": "step3525"
+    },
+    {
+      "status": "PASS",
+      "point": "4k",
+      "candidate": "step2000"
+    },
+    {
+      "status": "PASS",
+      "point": "8k",
+      "candidate": "step3525"
+    },
+    {
+      "status": "PASS",
+      "point": "16k",
+      "candidate": "step3525"
+    }
+  ],
+  "selected": [
+    {
+      "point": "2k",
+      "candidate": "step3525",
+      "checkpoint_step": "3525",
+      "rate_id": "R05",
+      "checkpoint_profile": "8k256",
+      "base_lambda": "2048",
+      "num_models": "28",
+      "num_h5": "792",
+      "total_points": "57904570",
+      "mean_model_bpp": "0.15011433318920045",
+      "mean_model_y_psnr": "29.4191772977556",
+      "mean_model_u_psnr": "42.52318183259374",
+      "mean_model_v_psnr": "43.929367599184694",
+      "mean_model_yuv_psnr_611": "32.870951652289",
+      "soft_hard_max_abs_difference": "0.0",
+      "hard_prefix_decode_used": "True",
+      "bit_identity_pass": "True"
+    },
+    {
+      "point": "4k",
+      "candidate": "step2000",
+      "checkpoint_step": "2000",
+      "rate_id": "R04",
+      "checkpoint_profile": "8k256",
+      "base_lambda": "4096",
+      "num_models": "28",
+      "num_h5": "792",
+      "total_points": "57904570",
+      "mean_model_bpp": "0.17863994741023612",
+      "mean_model_y_psnr": "29.66133732448775",
+      "mean_model_u_psnr": "42.80716507206139",
+      "mean_model_v_psnr": "44.27000509528807",
+      "mean_model_yuv_psnr_611": "33.130649264284486",
+      "soft_hard_max_abs_difference": "0.0",
+      "hard_prefix_decode_used": "True",
+      "bit_identity_pass": "True"
+    },
+    {
+      "point": "8k",
+      "candidate": "step3525",
+      "checkpoint_step": "3525",
+      "rate_id": "R03",
+      "checkpoint_profile": "32k8k",
+      "base_lambda": "8192",
+      "num_models": "28",
+      "num_h5": "792",
+      "total_points": "57904570",
+      "mean_model_bpp": "0.32013849198331995",
+      "mean_model_y_psnr": "31.355551873820616",
+      "mean_model_u_psnr": "43.747813998197",
+      "mean_model_v_psnr": "45.295655210457426",
+      "mean_model_yuv_psnr_611": "34.647097556447264",
+      "soft_hard_max_abs_difference": "0.0",
+      "hard_prefix_decode_used": "True",
+      "bit_identity_pass": "True"
+    },
+    {
+      "point": "16k",
+      "candidate": "step3525",
+      "checkpoint_step": "3525",
+      "rate_id": "R02",
+      "checkpoint_profile": "32k8k",
+      "base_lambda": "16384",
+      "num_models": "28",
+      "num_h5": "792",
+      "total_points": "57904570",
+      "mean_model_bpp": "0.41357560311459707",
+      "mean_model_y_psnr": "31.941189709908606",
+      "mean_model_u_psnr": "44.605364314165726",
+      "mean_model_v_psnr": "46.092511380039",
+      "mean_model_yuv_psnr_611": "35.29312674420704",
+      "soft_hard_max_abs_difference": "0.0",
+      "hard_prefix_decode_used": "True",
+      "bit_identity_pass": "True"
+    },
+    {
+      "point": "32k",
+      "candidate": "existing_D111_step5525",
+      "checkpoint_step": "5525",
+      "checkpoint_profile": "32k8k",
+      "base_lambda": "32768",
+      "endpoint": "Base",
+      "num_models": "28",
+      "num_h5": "792",
+      "total_points": "57904570",
+      "mean_model_bpp": "0.5239161393510068",
+      "mean_model_y_psnr": "32.38487865947034",
+      "mean_model_yuv_psnr_611": "35.781621575709174"
+    }
+  ]
+}

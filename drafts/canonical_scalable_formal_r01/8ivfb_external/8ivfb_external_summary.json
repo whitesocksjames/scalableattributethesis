@@ -1,0 +1,198 @@
+{
+  "manager_table": [
+    {
+      "sequence": "longdress",
+      "official_r01_bpp": 1.898844476354541,
+      "official_r01_yuv611": 41.53530000000001,
+      "canonical_base_bpp": 0.7671073212691412,
+      "canonical_base_yuv611": 34.8154125,
+      "canonical_full3525_bpp": 1.9634810703454448,
+      "canonical_full3525_yuv611": 40.942637500000004
+    },
+    {
+      "sequence": "loot",
+      "official_r01_bpp": 0.45007668092662845,
+      "official_r01_yuv611": 45.6166625,
+      "canonical_base_bpp": 0.24322320669079892,
+      "canonical_base_yuv611": 43.0396875,
+      "canonical_full3525_bpp": 0.4952184630286172,
+      "canonical_full3525_yuv611": 45.463437500000005
+    },
+    {
+      "sequence": "redandblack",
+      "official_r01_bpp": 0.8738232340096425,
+      "official_r01_yuv611": 42.7703625,
+      "canonical_base_bpp": 0.4100880174107915,
+      "canonical_base_yuv611": 39.2361625,
+      "canonical_full3525_bpp": 0.9574457133580839,
+      "canonical_full3525_yuv611": 42.623712499999996
+    },
+    {
+      "sequence": "soldier",
+      "official_r01_bpp": 0.7289161328116751,
+      "official_r01_yuv611": 44.8988,
+      "canonical_base_bpp": 0.39337025097076367,
+      "canonical_base_yuv611": 41.76325,
+      "canonical_full3525_bpp": 0.7616847444336607,
+      "canonical_full3525_yuv611": 44.370725
+    }
+  ],
+  "endpoint_comparison": [
+    {
+      "sequence": "longdress",
+      "full_vs_r01_delta_bpp": 0.06463659399090393,
+      "full_vs_r01_delta_bpp_percent": 3.403996209052118,
+      "full_vs_r01_delta_yuv611": -0.592662500000003,
+      "base_gain_vs_native_yuv611": 1.7643750000000011
+    },
+    {
+      "sequence": "loot",
+      "full_vs_r01_delta_bpp": 0.04514178210198877,
+      "full_vs_r01_delta_bpp_percent": 10.029798035536919,
+      "full_vs_r01_delta_yuv611": -0.15322499999999195,
+      "base_gain_vs_native_yuv611": 0.7256250000000009
+    },
+    {
+      "sequence": "redandblack",
+      "full_vs_r01_delta_bpp": 0.08362247934844147,
+      "full_vs_r01_delta_bpp_percent": 9.569724870409967,
+      "full_vs_r01_delta_yuv611": -0.14665000000000106,
+      "base_gain_vs_native_yuv611": 0.7638999999999996
+    },
+    {
+      "sequence": "soldier",
+      "full_vs_r01_delta_bpp": 0.03276861162198563,
+      "full_vs_r01_delta_bpp_percent": 4.495525636891329,
+      "full_vs_r01_delta_yuv611": -0.5280750000000012,
+      "base_gain_vs_native_yuv611": 1.364325000000001
+    }
+  ],
+  "base_native": [
+    {
+      "sequence": "longdress",
+      "shared_base_bpp": 0.7671073212691412,
+      "delta_y": 2.258300000000002,
+      "delta_u": 0.1886999999999972,
+      "delta_v": 0.37650000000000006,
+      "delta_yuv611": 1.7643750000000011
+    },
+    {
+      "sequence": "loot",
+      "shared_base_bpp": 0.24322320669079892,
+      "delta_y": 0.9558999999999997,
+      "delta_u": 0.08660000000000423,
+      "delta_v": -0.017000000000003013,
+      "delta_yuv611": 0.7256250000000009
+    },
+    {
+      "sequence": "redandblack",
+      "shared_base_bpp": 0.4100880174107915,
+      "delta_y": 0.9936999999999969,
+      "delta_u": -0.003900000000001569,
+      "delta_v": 0.15289999999999537,
+      "delta_yuv611": 0.7638999999999996
+    },
+    {
+      "sequence": "soldier",
+      "shared_base_bpp": 0.39337025097076367,
+      "delta_y": 1.8079999999999998,
+      "delta_u": 0.07319999999999993,
+      "delta_v": -0.006599999999998829,
+      "delta_yuv611": 1.364325000000001
+    }
+  ],
+  "trajectory": [
+    {
+      "sequence": "longdress",
+      "step1763_bpp": 1.9834072678870724,
+      "step3525_bpp": 1.9634810703454448,
+      "delta_bpp_3525_minus_1763": -0.01992619754162761,
+      "delta_y_psnr_3525_minus_1763": -0.831399999999995,
+      "delta_u_psnr_3525_minus_1763": 0.0818000000000012,
+      "delta_v_psnr_3525_minus_1763": 0.25950000000000273,
+      "delta_yuv611_3525_minus_1763": -0.5808874999999958
+    },
+    {
+      "sequence": "loot",
+      "step1763_bpp": 0.4910062896986781,
+      "step3525_bpp": 0.4952184630286172,
+      "delta_bpp_3525_minus_1763": 0.004212173329939117,
+      "delta_y_psnr_3525_minus_1763": -0.39970000000000283,
+      "delta_u_psnr_3525_minus_1763": 0.08460000000000178,
+      "delta_v_psnr_3525_minus_1763": 0.06970000000000454,
+      "delta_yuv611_3525_minus_1763": -0.28048749999999245
+    },
+    {
+      "sequence": "redandblack",
+      "step1763_bpp": 0.9450712757575318,
+      "step3525_bpp": 0.9574457133580839,
+      "delta_bpp_3525_minus_1763": 0.012374437600552124,
+      "delta_y_psnr_3525_minus_1763": -0.5814999999999984,
+      "delta_u_psnr_3525_minus_1763": 0.2331000000000003,
+      "delta_v_psnr_3525_minus_1763": 0.23100000000000165,
+      "delta_yuv611_3525_minus_1763": -0.3781125000000074
+    },
+    {
+      "sequence": "soldier",
+      "step1763_bpp": 0.7532446783602105,
+      "step3525_bpp": 0.7616847444336607,
+      "delta_bpp_3525_minus_1763": 0.00844006607345027,
+      "delta_y_psnr_3525_minus_1763": -0.4928999999999988,
+      "delta_u_psnr_3525_minus_1763": 0.03160000000000451,
+      "delta_v_psnr_3525_minus_1763": 0.07089999999999463,
+      "delta_yuv611_3525_minus_1763": -0.3568624999999912
+    }
+  ],
+  "author_comparison": {
+    "longdress": {
+      "mean_abs_yuv611_difference": 0.002172222222224068,
+      "max_abs_yuv611_difference": 0.00921250000000029,
+      "matched_contract_mean_abs_yuv611_difference": 0.002172222222224068,
+      "matched_contract_max_abs_yuv611_difference": 0.00921250000000029
+    },
+    "loot": {
+      "mean_abs_yuv611_difference": 0.0510444444444447,
+      "max_abs_yuv611_difference": 0.4260124999999988,
+      "matched_contract_mean_abs_yuv611_difference": 0.004173437500000432,
+      "matched_contract_max_abs_yuv611_difference": 0.012374999999998693
+    },
+    "redandblack": {
+      "mean_abs_yuv611_difference": 0.005729166666664614,
+      "max_abs_yuv611_difference": 0.01156249999999659,
+      "matched_contract_mean_abs_yuv611_difference": 0.005729166666664614,
+      "matched_contract_max_abs_yuv611_difference": 0.01156249999999659
+    },
+    "soldier": {
+      "mean_abs_yuv611_difference": 0.05010277777777677,
+      "max_abs_yuv611_difference": 0.436262499999998,
+      "matched_contract_mean_abs_yuv611_difference": 0.0018328124999991147,
+      "matched_contract_max_abs_yuv611_difference": 0.003987500000000921
+    }
+  },
+  "channel_gaps": [
+    {
+      "sequence": "longdress",
+      "full_vs_r01_delta_y_psnr": -0.7691999999999979,
+      "full_vs_r01_delta_u_psnr": 0.39450000000000074,
+      "full_vs_r01_delta_v_psnr": -0.5206000000000017
+    },
+    {
+      "sequence": "loot",
+      "full_vs_r01_delta_y_psnr": -0.2073000000000036,
+      "full_vs_r01_delta_u_psnr": 0.008900000000004127,
+      "full_vs_r01_delta_v_psnr": 0.00910000000000366
+    },
+    {
+      "sequence": "redandblack",
+      "full_vs_r01_delta_y_psnr": -0.22630000000000194,
+      "full_vs_r01_delta_u_psnr": 0.21060000000000656,
+      "full_vs_r01_delta_v_psnr": -0.02599999999999625
+    },
+    {
+      "sequence": "soldier",
+      "full_vs_r01_delta_y_psnr": -0.7047000000000025,
+      "full_vs_r01_delta_u_psnr": 0.00730000000000075,
+      "full_vs_r01_delta_v_psnr": -0.003700000000002035
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+dataset,sequence,path,file_count,format,point_count,geometry_precision,has_rgb,has_normals,dynamic_static,status
+MVUB,Andrew,/home/liltan/projects/PCGC/PCGCv2/testdata/MVUB/andrew_vox9_frame0000.ply,1,ASCII PLY,279664,vox9,yes,yes,dynamic single retained frame,LOCAL
+MVUB,David,/home/liltan/projects/PCGC/PCGCv2/testdata/MVUB/david_vox9_frame0000.ply,1,ASCII PLY,330797,vox9,yes,yes,dynamic single retained frame,LOCAL
+MVUB,Phil,/home/liltan/projects/PCGC/PCGCv2/testdata/MVUB/phil_vox9_frame0139.ply,1,ASCII PLY,356258,vox9,yes,yes,dynamic single retained frame,LOCAL
+MVUB,Sarah,/home/liltan/projects/PCGC/PCGCv2/testdata/MVUB/sarah_vox9_frame0023.ply,1,ASCII PLY,299363,vox9,yes,yes,dynamic single retained frame,LOCAL
+MVUB,Ricardo,,0,,,unknown,unknown,dynamic,NOT FOUND
+Volucap,Thomas,,0,archive not found,,unknown,unknown,dynamic,NOT FOUND
+MPEG test,Queen,/home/liltan/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/queen_0200/queen_0200.ply,1,PLY,,unknown,unknown,test content,EXCLUDED
+MPEG test,Boxer,/home/liltan/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/boxer_viewdep_vox12/boxer_viewdep_vox12.ply,1,PLY,,vox12,unknown,view-dependent test content,EXCLUDED
+MPEG test,Thaidancer,GPCC configuration/results only,0,no source PLY found,,vox12,unknown,view-dependent test content,EXCLUDED
