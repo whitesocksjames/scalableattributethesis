@@ -31,6 +31,13 @@ from scripts.scalable_attribute.canonical.evaluate_scalable_formal import (
 ENDPOINTS = ("B_native", "Official_Full")
 
 
+def require_exact_hard_roundtrip(max_abs_difference, entry):
+    if max_abs_difference != 0.0:
+        raise RuntimeError(
+            "Official Full hard round-trip mismatch for {}: {}".format(
+                entry, max_abs_difference))
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     source = parser.add_mutually_exclusive_group(required=True)
@@ -171,6 +178,7 @@ def main():
                 lmb=args.conditioning_lambda)
             hard_roundtrip = sparse_max_difference(
                 encoded[-1]["x_out"], full, "Official Full hard round-trip")
+            require_exact_hard_roundtrip(hard_roundtrip, entry)
 
             gt_path = os.path.join(metric_dir, "gt.ply")
             rec_path = os.path.join(metric_dir, "rec.ply")

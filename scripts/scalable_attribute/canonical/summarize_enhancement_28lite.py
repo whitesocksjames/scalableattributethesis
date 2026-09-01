@@ -18,7 +18,6 @@ def parse_args():
         "--checkpoint", action="append", required=True, metavar="STEP=DIR",
         help="One evaluate_scalable_formal output directory; repeat four times")
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--quality-tie-tolerance-db", type=float, default=1e-6)
     return parser.parse_args()
 
 
@@ -177,7 +176,32 @@ def summarize_checkpoint(point, step, directory):
     }
 
 
-def flat_row(result, selected):
+def dominates(left, right):
+    """Return True when left is no worse in RD and strictly better in one."""
+    rate_no_worse = left["full_bpp"] <= right["full_bpp"]
+    quality_no_worse = (
+        left["full_yuv_psnr_611"] >= right["full_yuv_psnr_611"])
+    strictly_better = (
+        left["full_bpp"] < right["full_bpp"]
+        or left["full_yuv_psnr_611"] > right["full_yuv_psnr_611"])
+    return rate_no_worse and quality_no_worse and strictly_better
+
+
+def pareto_frontier(results):
+    frontier = [
+        candidate for candidate in results
+        if not any(
+            other is not candidate and dominates(other, candidate)
+            for other in results)
+    ]
+    return sorted(
+        frontier,
+        key=lambda result: (
+            result["full_bpp"], -result["full_yuv_psnr_611"],
+            result["checkpoint_step"]))
+
+
+def flat_row(result, pareto, unique):
     row = {
         key: value for key, value in result.items()
         if key != "hard_correctness"
@@ -193,12 +217,13 @@ def flat_row(result, selected):
         "base_bit_identity": result["hard_correctness"]["base_bit_identity"],
         "full_bit_identity": result["hard_correctness"]["full_bit_identity"],
         "hard_full_exact": result["hard_correctness"]["hard_full_exact"],
-        "selected_candidate": selected,
+        "pareto_candidate": pareto,
+        "unique_candidate": unique,
     })
     return row
 
 
-def write_outputs(output_dir, point, results, selected, tolerance):
+def write_outputs(output_dir, point, results, frontier):
     output_dir.mkdir(parents=True, exist_ok=True)
     paths = {suffix: output_dir / (OUTPUT_STEM + "." + suffix)
              for suffix in ("csv", "json", "md")}
@@ -206,25 +231,31 @@ def write_outputs(output_dir, point, results, selected, tolerance):
     if existing:
         raise FileExistsError("refusing to overwrite: " + ", ".join(existing))
 
-    rows = [flat_row(result, result is selected) for result in results]
+    frontier_steps = {result["checkpoint_step"] for result in frontier}
+    unique = frontier[0] if len(frontier) == 1 else None
+    rows = [flat_row(
+        result, result["checkpoint_step"] in frontier_steps,
+        unique is result) for result in results]
     with paths["csv"].open("x", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
 
     rule = {
-        "primary": "maximum model-equal Full YUV611",
-        "quality_tie": (
-            "within {:.9g} dB of the maximum Full YUV611".format(tolerance)),
-        "quality_tie_break_1": "minimum model-equal physical Full bpp",
-        "quality_tie_break_2": "earliest checkpoint step",
+        "axes": "model-equal physical Full bpp and Full YUV611",
+        "dominance": (
+            "A dominates B iff A.bpp <= B.bpp and A.YUV611 >= B.YUV611, "
+            "with at least one strict inequality"),
+        "automatic_winner": "only when the Pareto frontier has one checkpoint",
     }
     payload = {
         "status": "PASS",
         "benchmark": "RWTT-28Lite",
         "point": point,
         "selection_rule": rule,
-        "selected_candidate": selected,
+        "pareto_candidates": frontier,
+        "unique_candidate": unique,
+        "manager_review_required": len(frontier) != 1,
         "trajectory": results,
     }
     with paths["json"].open("x", encoding="utf-8") as handle:
@@ -234,28 +265,34 @@ def write_outputs(output_dir, point, results, selected, tolerance):
     with paths["md"].open("x", encoding="utf-8") as handle:
         handle.write("# Enhancement {} RWTT-28Lite trajectory\n\n".format(point))
         handle.write(
-            "Selection: maximum model-equal Full YUV611; candidates within "
-            "`{:.9g} dB` are quality ties, resolved by lower physical Full bpp "
-            "and then earlier step.\n\n".format(tolerance))
+            "Selection uses the `(physical Full bpp, Full YUV611)` Pareto "
+            "frontier. A unique candidate is declared only when one checkpoint "
+            "dominates every other checkpoint.\n\n")
         handle.write(
             "| Step | Base bpp | Enh. bpp | Full bpp | Full Y | Full U | "
-            "Full V | Full YUV611 | Hard | Selected |\n")
-        handle.write("|---:|---:|---:|---:|---:|---:|---:|---:|---|---|\n")
+            "Full V | Full YUV611 | Hard | Pareto | Unique |\n")
+        handle.write(
+            "|---:|---:|---:|---:|---:|---:|---:|---:|---|---|---|\n")
         for row in rows:
             handle.write(
                 "| {checkpoint_step} | {base_bpp:.9f} | {enhancement_bpp:.9f} | "
                 "{full_bpp:.9f} | {full_y_psnr:.6f} | {full_u_psnr:.6f} | "
                 "{full_v_psnr:.6f} | {full_yuv_psnr_611:.6f} | "
-                "{hard_status} | {selected_candidate} |\n".format(**row))
-        handle.write("\nSelected checkpoint: step `{}`.\n".format(
-            selected["checkpoint_step"]))
+                "{hard_status} | {pareto_candidate} | "
+                "{unique_candidate} |\n".format(**row))
+        handle.write("\nPareto checkpoints: {}.\n".format(
+            ", ".join("step{}".format(item["checkpoint_step"])
+                      for item in frontier)))
+        if unique is None:
+            handle.write("Manager review is required; no unique winner.\n")
+        else:
+            handle.write("Unique candidate: step `{}`.\n".format(
+                unique["checkpoint_step"]))
     return paths
 
 
 def main():
     args = parse_args()
-    if args.quality_tie_tolerance_db < 0:
-        raise ValueError("quality tie tolerance must be non-negative")
     checkpoints = parse_checkpoints(args.checkpoint)
     results = [summarize_checkpoint(args.point, step, directory)
                for step, directory in checkpoints]
@@ -266,21 +303,16 @@ def main():
     if any(current != samples[0] for current in samples[1:]):
         raise ValueError("checkpoint evaluations use different RWTT-28Lite samples/order")
 
-    best_quality = max(result["full_yuv_psnr_611"] for result in results)
-    quality_ties = [
-        result for result in results
-        if best_quality - result["full_yuv_psnr_611"]
-        <= args.quality_tie_tolerance_db
-    ]
-    selected = min(
-        quality_ties,
-        key=lambda result: (result["full_bpp"], result["checkpoint_step"]))
+    frontier = pareto_frontier(results)
     paths = write_outputs(
         Path(args.output_dir).expanduser().resolve(), args.point, results,
-        selected, args.quality_tie_tolerance_db)
+        frontier)
     print(json.dumps({
         "status": "PASS",
-        "selected_step": selected["checkpoint_step"],
+        "pareto_steps": [item["checkpoint_step"] for item in frontier],
+        "unique_candidate_step": (
+            frontier[0]["checkpoint_step"] if len(frontier) == 1 else None),
+        "manager_review_required": len(frontier) != 1,
         "outputs": {name: str(path) for name, path in paths.items()},
     }, indent=2))
 
