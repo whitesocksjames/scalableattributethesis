@@ -14,7 +14,10 @@ Base + independent EnhancementVAE bitstream                         -> Full
 
 Base is independently decodable. Base physical bits are exactly `x_low` plus
 the four native residual streams. BaseSynthesis transmits no bits. Full adds an
-independent Enhancement stream; native `r5` is not transmitted.
+separate entropy-coded Enhancement payload conditioned on decoded Base; native
+`r5` is not transmitted. The Enhancement payload is not independently
+decodable: its entropy decoding and reconstruction require the decoded Base
+state and the matching fixed operating-point model/configuration.
 
 ## Official operating-point mapping
 
@@ -35,6 +38,12 @@ lambda/checkpoint pairing.
 
 The current five-point canonical Base study uses R01-R05 (32K, 16K, 8K,
 4K, 2K). Every run must record the explicit checkpoint path and lambda.
+
+R06-R08 (1K/512/256) begin with `role=diagnostic` and no selected Base. Their
+five-checkpoint Base trajectories may produce a machine-readable `candidate`
+after RWTT-28Lite selection and 8i sanity. Candidate status permits a later
+review for Full28 or Enhancement Stage 1; it is not an automatic promotion to
+`canonical_selected` and does not add the point to the formal curve.
 
 Current evidence-snapshot selections are:
 
@@ -147,16 +156,33 @@ global step 1763, rather than generating a new Stage-2 shuffle. With 14098 H5
 and batch size 4, Stage 1 consumes 1763 of 3525 batches and Stage 2 consumes the
 remaining 1762 batches, completing exactly one scheduled pass.
 
-The checkpoint stores the schedule policy, seed, manifest path, sample count,
-batch size and steps per epoch. Resume fails if these fields differ or if the
-checkpoint predates this explicit schedule. This protects scientific
-continuation without adding sampler-state or RNG-state recovery machinery.
+The checkpoint stores the schedule policy, seed, manifest path, ordered
+manifest-content fingerprint, resolved data root, sample count, batch size and
+steps per epoch. Resume fails if these fields differ or if the checkpoint
+predates this explicit schedule. This protects scientific continuation without
+adding sampler-state or RNG-state recovery machinery.
 Uniform-noise quantization remains unchanged; this contract governs dataset
 order only.
 
 The matched-budget 32K result supports this default two-stage procedure, but
 does not prove that every lower-rate point needs or optimally uses all 1762
 Stage-2 updates.
+
+### Operating-point CLI
+
+Canonical Enhancement runs select the official mapping and selected Base via:
+
+```text
+--point {32k,16k,8k,4k,2k}
+--released-root <released-checkpoint-root>
+--canonical-experiment-root <canonical-experiments-root>
+```
+
+The machine-readable mapping and provisional stage defaults live only in
+`configs/scalable_attribute/canonical_operating_points.json`. Stage 1 is the
+default. Stage 2 requires both `--enhancement-stage 2` and an explicit
+`--resume-checkpoint`; no evaluation or training script launches it
+automatically.
 
 ## Checkpoint and correctness requirements
 

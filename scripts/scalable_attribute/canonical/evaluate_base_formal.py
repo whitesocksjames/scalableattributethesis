@@ -240,6 +240,7 @@ def main():
         summaries.append({
             "candidate": label, "point": args.point or point_id,
             "checkpoint_step": steps[label],
+            "checkpoint_path": dict(candidates)[label],
             **average,
             "soft_hard_max_abs_difference": max(
                 row["soft_hard_max_abs_difference"] for row in prepared),

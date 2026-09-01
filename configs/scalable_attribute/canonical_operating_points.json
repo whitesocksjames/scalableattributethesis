@@ -23,33 +23,94 @@
     }
   },
   "enhancement": {
-    "recipe_status": "pending_32k_manager_decision"
+    "recipe_status": "provisional_stage_gated",
+    "stage1": {
+      "manager_trigger_required": false,
+      "objective": "D111",
+      "distortion_weights": "1,1,1",
+      "lr": 0.00005,
+      "batch_size": 4,
+      "max_steps": 1763,
+      "save_steps": [500, 1000, 1500, 1763],
+      "seed": 0,
+      "optimizer": "Adam",
+      "betas": [0.9, 0.999],
+      "weight_decay": 0.0,
+      "scheduler": null
+    },
+    "stage2": {
+      "manager_trigger_required": true,
+      "resume_same_model_and_optimizer": true,
+      "objective": "D611",
+      "distortion_weights": "6,1,1",
+      "lr": 0.00005,
+      "batch_size": 4,
+      "max_steps": 3525,
+      "maximum_additional_steps": 1762,
+      "save_steps": [2250, 2750, 3000, 3250, 3525],
+      "seed": 0,
+      "optimizer": "Adam",
+      "betas": [0.9, 0.999],
+      "weight_decay": 0.0,
+      "scheduler": null
+    }
   },
   "points": {
     "32k": {
       "rate_id": "R01",
       "conditioning_lambda": 32768,
-      "released_profile": "32k8k"
+      "released_profile": "32k8k",
+      "role": "canonical_selected",
+      "selected_base_checkpoint": "canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth"
     },
     "16k": {
       "rate_id": "R02",
       "conditioning_lambda": 16384,
-      "released_profile": "32k8k"
+      "released_profile": "32k8k",
+      "role": "canonical_selected",
+      "selected_base_checkpoint": "canonical_multirate_base_v1/training/base_16k/checkpoints/step_3525.pth"
     },
     "8k": {
       "rate_id": "R03",
       "conditioning_lambda": 8192,
-      "released_profile": "32k8k"
+      "released_profile": "32k8k",
+      "role": "canonical_selected",
+      "selected_base_checkpoint": "canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth"
     },
     "4k": {
       "rate_id": "R04",
       "conditioning_lambda": 4096,
-      "released_profile": "8k256"
+      "released_profile": "8k256",
+      "role": "canonical_selected",
+      "selected_base_checkpoint": "canonical_multirate_base_v1/training/base_4k/checkpoints/step_2000.pth"
     },
     "2k": {
       "rate_id": "R05",
       "conditioning_lambda": 2048,
-      "released_profile": "8k256"
+      "released_profile": "8k256",
+      "role": "canonical_selected",
+      "selected_base_checkpoint": "canonical_multirate_base_v1/training/base_2k/checkpoints/step_3525.pth"
+    },
+    "1k": {
+      "rate_id": "R06",
+      "conditioning_lambda": 1024,
+      "released_profile": "2k128",
+      "role": "diagnostic",
+      "selected_base_checkpoint": null
+    },
+    "512": {
+      "rate_id": "R07",
+      "conditioning_lambda": 512,
+      "released_profile": "2k128",
+      "role": "diagnostic",
+      "selected_base_checkpoint": null
+    },
+    "256": {
+      "rate_id": "R08",
+      "conditioning_lambda": 256,
+      "released_profile": "2k128",
+      "role": "diagnostic",
+      "selected_base_checkpoint": null
     }
   }
 }

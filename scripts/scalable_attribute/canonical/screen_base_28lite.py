@@ -88,6 +88,15 @@ def main():
         row["author_rate_bracket"] = bracket
         row["shortlisted"] = rank <= args.max_shortlist
     shortlist = candidates[:args.max_shortlist]
+    promoted = []
+    for row in shortlist:
+        promoted.append({
+            **row,
+            "role": "candidate",
+            "candidate_base_checkpoint": row.get("checkpoint_path"),
+            "canonical_selected": False,
+            "requires_manager_review_for_full28_or_enhancement": True,
+        })
 
     os.makedirs(args.output_dir, exist_ok=True)
     prefix = "BASE_{}_28LITE".format(args.point.upper())
@@ -111,7 +120,10 @@ def main():
             "selection_rule": (
                 "rank by RWTT-28Lite YUV611; retain the configured top {} "
                 "candidate(s) for 8i tie-break".format(args.max_shortlist)),
-            "shortlist": shortlist,
+            "input_role": "diagnostic",
+            "result_role": "candidate",
+            "automatic_canonical_promotion": False,
+            "shortlist": promoted,
         }, handle, indent=2)
         handle.write("\n")
     with open(md_path, "x", encoding="utf-8") as handle:

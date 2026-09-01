@@ -21,6 +21,8 @@ from scalable_attribute.canonical.config import BaseSynthesisConfig
 from scalable_attribute.canonical.data_schedule import (
     ContinuationBatchSampler, require_compatible_schedule)
 from scalable_attribute.canonical.model import CanonicalBaseModel
+from scalable_attribute.canonical.operating_points import (
+    DEFAULT_CONFIG, OperatingPointConfig)
 from scalable_attribute.canonical.scalable_model import (
     CanonicalScalableModel, load_frozen_base)
 from scalable_attribute.data import UncachedPCDataset, h5_files
@@ -30,22 +32,98 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", required=True)
     parser.add_argument("--train-file-list", required=True)
-    parser.add_argument("--released-checkpoint", required=True)
-    parser.add_argument("--base-synthesis-checkpoint", required=True)
-    parser.add_argument("--conditioning-lambda", type=int, required=True)
-    parser.add_argument("--rd-lambda", type=float, required=True)
-    parser.add_argument("--distortion-weights", default="1,1,1")
-    parser.add_argument("--lr", type=float, required=True)
-    parser.add_argument("--batch-size", type=int, default=4)
-    parser.add_argument("--max-steps", type=int, required=True)
-    parser.add_argument("--save-steps", type=int, nargs="+", default=[100, 250])
+    parser.add_argument("--point")
+    parser.add_argument("--operating-points-config", default=DEFAULT_CONFIG)
+    parser.add_argument("--released-root")
+    parser.add_argument("--canonical-experiment-root")
+    parser.add_argument("--enhancement-stage", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--released-checkpoint")
+    parser.add_argument("--base-synthesis-checkpoint")
+    parser.add_argument("--conditioning-lambda", type=int)
+    parser.add_argument("--rd-lambda", type=float)
+    parser.add_argument("--distortion-weights")
+    parser.add_argument("--lr", type=float)
+    parser.add_argument("--batch-size", type=int)
+    parser.add_argument("--max-steps", type=int)
+    parser.add_argument("--save-steps", type=int, nargs="+")
     parser.add_argument("--num-workers", type=int, default=0)
-    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--seed", type=int)
     parser.add_argument("--resume-checkpoint")
     parser.add_argument("--allow-resume-distortion-weight-change",
                         action="store_true")
     parser.add_argument("--output-dir", required=True)
     return parser.parse_args()
+
+
+def resolve_training_args(args):
+    """Resolve one canonical point or retain the explicit legacy CLI."""
+    point = None
+    if args.point:
+        point = OperatingPointConfig.resolve(
+            args.point, args.released_root, args.canonical_experiment_root,
+            args.operating_points_config)
+        fixed = {
+            "released_checkpoint": point.released_checkpoint,
+            "base_synthesis_checkpoint": point.selected_base_checkpoint,
+            "conditioning_lambda": point.conditioning_lambda,
+            "rd_lambda": float(point.conditioning_lambda),
+        }
+        for name, expected in fixed.items():
+            actual = getattr(args, name)
+            if actual is not None:
+                if name.endswith("checkpoint"):
+                    matches = (
+                        os.path.realpath(os.path.expandvars(actual))
+                        == os.path.realpath(expected))
+                else:
+                    matches = float(actual) == float(expected)
+                if not matches:
+                    raise ValueError(
+                        "--{} conflicts with canonical --point mapping".format(
+                            name.replace("_", "-")))
+            setattr(args, name, expected)
+
+        stage = point.enhancement["stage{}".format(args.enhancement_stage)]
+        defaults = {
+            "distortion_weights": stage["distortion_weights"],
+            "lr": stage["lr"],
+            "batch_size": stage["batch_size"],
+            "max_steps": stage["max_steps"],
+            "save_steps": stage["save_steps"],
+            "seed": stage["seed"],
+        }
+        for name, value in defaults.items():
+            if getattr(args, name) is None:
+                setattr(args, name, value)
+        if args.enhancement_stage == 2:
+            if not stage.get("manager_trigger_required"):
+                raise ValueError(
+                    "Canonical Enhancement Stage 2 trigger contract is invalid")
+            if not args.resume_checkpoint:
+                raise ValueError(
+                    "Enhancement Stage 2 requires explicit --resume-checkpoint")
+            args.allow_resume_distortion_weight_change = True
+    else:
+        required = (
+            "released_checkpoint", "base_synthesis_checkpoint",
+            "conditioning_lambda", "rd_lambda", "lr", "max_steps")
+        missing = [name for name in required if getattr(args, name) is None]
+        if missing:
+            raise ValueError(
+                "Explicit mode requires --{}".format(
+                    ", --".join(name.replace("_", "-") for name in missing)))
+        if args.distortion_weights is None:
+            args.distortion_weights = "1,1,1"
+        if args.batch_size is None:
+            args.batch_size = 4
+        if args.save_steps is None:
+            args.save_steps = [100, 250]
+        if args.seed is None:
+            args.seed = 0
+        if args.enhancement_stage == 2 and not args.resume_checkpoint:
+            raise ValueError(
+                "Enhancement Stage 2 requires explicit --resume-checkpoint")
+    return point
 
 
 def parse_distortion_weights(value):
@@ -97,6 +175,19 @@ def gradient_norm(parameters):
 
 def main():
     args = parse_args()
+    operating_point = resolve_training_args(args)
+    for name in (
+            "data_root", "train_file_list", "released_checkpoint",
+            "base_synthesis_checkpoint", "output_dir",
+            "operating_points_config"):
+        value = getattr(args, name)
+        setattr(args, name, os.path.abspath(os.path.expandvars(value)))
+    for name in (
+            "resume_checkpoint", "released_root",
+            "canonical_experiment_root"):
+        value = getattr(args, name)
+        if value:
+            setattr(args, name, os.path.abspath(os.path.expandvars(value)))
     distortion_weights = parse_distortion_weights(args.distortion_weights)
     if args.batch_size < 1 or args.max_steps < 1:
         raise ValueError("batch-size and max-steps must be positive")
@@ -163,6 +254,12 @@ def main():
         starting_step = int(resume.get("step", -1))
         if starting_step < 0 or args.max_steps <= starting_step:
             raise ValueError("max-steps must exceed resumed global step")
+        if operating_point is not None and args.enhancement_stage == 2:
+            stage1_stop = int(
+                operating_point.enhancement["stage1"]["max_steps"])
+            if starting_step < stage1_stop:
+                raise ValueError(
+                    "Enhancement Stage 2 checkpoint predates the Stage-1 gate")
         model.enhancement.vae.load_state_dict(
             resume["enhancement_vae"], strict=True)
         optimizer.load_state_dict(resume["optimizer"])
@@ -176,7 +273,7 @@ def main():
     batch_sampler = ContinuationBatchSampler(
         num_samples=len(dataset), batch_size=args.batch_size,
         start_step=starting_step, stop_step=args.max_steps, seed=args.seed)
-    data_schedule = batch_sampler.metadata(manifest_path)
+    data_schedule = batch_sampler.metadata(manifest_path, args.data_root)
     if resume is not None:
         require_compatible_schedule(resume.get("data_schedule"), data_schedule)
     start_epoch, start_batch_in_epoch = batch_sampler.position(starting_step)
@@ -198,6 +295,9 @@ def main():
     metadata = dict(vars(args))
     metadata.update({
         "architecture": "canonical_independent_enhancement",
+        "operating_point": (
+            operating_point.to_dict() if operating_point is not None else None),
+        "enhancement_stage": args.enhancement_stage,
         "base_config": base_config.to_dict(),
         "optimizer": {"name": "Adam", "lr": args.lr,
                       "betas": [0.9, 0.999], "weight_decay": 0.0,
@@ -223,6 +323,9 @@ def main():
     write_json(os.path.join(args.output_dir, "resolved_args.json"), metadata)
     write_json(os.path.join(args.output_dir, "enhancement_config.json"), {
         "source": "released ResidualVAE exact initialization",
+        "operating_point": (
+            operating_point.to_dict() if operating_point is not None else None),
+        "enhancement_stage": args.enhancement_stage,
         "conditioning_lambda": args.conditioning_lambda,
         "rd_lambda": args.rd_lambda,
     })
@@ -236,6 +339,10 @@ def main():
         path = os.path.join(checkpoint_dir, "step_{}.pth".format(step))
         torch.save({
             "architecture": "canonical_independent_enhancement",
+            "operating_point": (
+                operating_point.to_dict()
+                if operating_point is not None else None),
+            "enhancement_stage": args.enhancement_stage,
             "enhancement_vae": model.enhancement.vae.state_dict(),
             "optimizer": optimizer.state_dict(),
             "step": step,
