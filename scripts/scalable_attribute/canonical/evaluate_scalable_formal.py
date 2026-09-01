@@ -36,6 +36,7 @@ def parse_args():
     checkpoint.add_argument("--enhancement-checkpoint")
     checkpoint.add_argument("--scalable-checkpoint")
     parser.add_argument("--conditioning-lambda", type=int, required=True)
+    parser.add_argument("--checkpoint-profile", default="32k8k")
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--max-samples", type=int, default=0)
     parser.add_argument("--require-exact", action="store_true")
@@ -85,12 +86,12 @@ def reconstruction_rgb(sparse):
     return np.clip(rgb.round().int().numpy(), 0, 255)
 
 
-def endpoint_models(rows, endpoint):
+def endpoint_models(rows, endpoint, checkpoint_profile):
     prepared = []
     for row in rows:
         item = dict(row)
         item["rate_id"] = "Canonical_" + endpoint
-        item["checkpoint_profile"] = "32k8k"
+        item["checkpoint_profile"] = checkpoint_profile
         item["base_lambda"] = int(row["conditioning_lambda"])
         prepared.append(item)
     return aggregate_models(
@@ -238,8 +239,8 @@ def main():
             index + 1, len(files), entry, row["base_bpp"], row["full_bpp"],
             full_difference), flush=True)
 
-    base_models = endpoint_models(rows, "Base")
-    full_models = endpoint_models(rows, "Full")
+    base_models = endpoint_models(rows, "Base", args.checkpoint_profile)
+    full_models = endpoint_models(rows, "Full", args.checkpoint_profile)
     combined_models = []
     for endpoint, models in (("Base", base_models), ("Full", full_models)):
         for row in models:
