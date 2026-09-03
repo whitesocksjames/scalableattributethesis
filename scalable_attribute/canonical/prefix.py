@@ -78,9 +78,14 @@ class FrozenUnicornPrefix(torch.nn.Module):
         state = output["state"]
         return self._complete_state(state["x"], state["f"], state["dec"])
 
-    def training_forward(self, attribute, lmb):
-        """Differentiable r1-r4 traversal for explicit full-unfreeze runs."""
-        if not self._trainable:
+    def training_forward(self, attribute, lmb, allow_frozen=False):
+        """Training-time r1-r4 traversal, optionally with frozen parameters.
+
+        ``allow_frozen`` exists for controlled ablations which must use the
+        same Uniform-noise quantization path as a trainable Prefix while
+        keeping every Prefix parameter frozen.
+        """
+        if not self._trainable and not allow_frozen:
             raise RuntimeError("Prefix training_forward requires full trainable scope")
         output = self.model(
             attribute, training=True, lmb=lmb, real_coding=False,

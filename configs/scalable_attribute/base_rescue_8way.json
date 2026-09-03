@@ -1,0 +1,26 @@
+{
+  "contract": "4k2k_distribution_aware_base_rescue_v1",
+  "common": {
+    "data_root": "/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/RWTT/processed/train_h5/h5/100000",
+    "train_file_list": "/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/RWTT/splits/model_95_5_seed0/train_h5.txt",
+    "content_statistics": "/data/run01/scz0ade/Tanzeyu/experiments/base_rescue_8way/input/rwtt_train_blocks.csv",
+    "released_root": "/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt",
+    "output_root": "/data/run01/scz0ade/Tanzeyu/experiments/base_rescue_8way",
+    "batch_size": 4,
+    "seed": 0,
+    "distortion": "D111",
+    "quantization_path": "training=True Uniform-noise",
+    "optimizer": "fresh Adam betas=(0.9,0.999) weight_decay=0",
+    "rwtt_28lite_manifest": "/data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/rwtt_28lite/rwtt_28lite_manifest.txt"
+  },
+  "arms": [
+    {"name":"4K-U-PATH","profile":"8k256","lambda":4096,"initial_base":"/data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/training/base_4k/checkpoints/step_2000.pth","sampling":"uniform","scope":"base_path","prefix_lr":1e-5,"base_synthesis_lr":5e-5,"max_steps":1500,"save_steps":[250,500,1000,1500]},
+    {"name":"4K-H-PATH","profile":"8k256","lambda":4096,"initial_base":"/data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/training/base_4k/checkpoints/step_2000.pth","sampling":"high_energy","scope":"base_path","prefix_lr":1e-5,"base_synthesis_lr":5e-5,"max_steps":1500,"save_steps":[250,500,1000,1500]},
+    {"name":"4K-H-BS","profile":"8k256","lambda":4096,"initial_base":"/data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/training/base_4k/checkpoints/step_2000.pth","sampling":"high_energy","scope":"base_synthesis_only","base_synthesis_lr":5e-5,"max_steps":1500,"save_steps":[250,500,1000,1500]},
+    {"name":"2K-U-PATH","profile":"8k256","lambda":2048,"initial_base":"/data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/training/base_2k/checkpoints/step_3525.pth","sampling":"uniform","scope":"base_path","prefix_lr":1e-5,"base_synthesis_lr":5e-5,"max_steps":1500,"save_steps":[250,500,1000,1500]},
+    {"name":"2K-H-PATH","profile":"8k256","lambda":2048,"initial_base":"/data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/training/base_2k/checkpoints/step_3525.pth","sampling":"high_energy","scope":"base_path","prefix_lr":1e-5,"base_synthesis_lr":5e-5,"max_steps":1500,"save_steps":[250,500,1000,1500]},
+    {"name":"2K-H-BS","profile":"8k256","lambda":2048,"initial_base":"/data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/training/base_2k/checkpoints/step_3525.pth","sampling":"high_energy","scope":"base_synthesis_only","base_synthesis_lr":5e-5,"max_steps":1500,"save_steps":[250,500,1000,1500]},
+    {"name":"2K-ALT-U","profile":"2k128","lambda":2048,"initial_base":null,"sampling":"uniform","scope":"base_synthesis_only","base_synthesis_lr":3e-4,"max_steps":3525,"save_steps":[500,1000,2000,3525]},
+    {"name":"2K-ALT-H","profile":"2k128","lambda":2048,"initial_base":null,"sampling":"high_energy","scope":"base_synthesis_only","base_synthesis_lr":3e-4,"max_steps":3525,"save_steps":[500,1000,2000,3525]}
+  ]
+}

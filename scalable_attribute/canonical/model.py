@@ -19,6 +19,7 @@ class CanonicalBaseModel(torch.nn.Module):
             checkpoint, scale=scale, stage=stage, vmode=vmode)
         self.base_synthesis = BaseSynthesis(config)
         self._full_trainable = False
+        self._trainable_scope = "base_synthesis_only"
 
     def train(self, mode=True):
         super().train(mode)
@@ -27,11 +28,23 @@ class CanonicalBaseModel(torch.nn.Module):
 
     def set_trainable(self, enabled):
         """Enable the complete Base graph only for explicit full-unfreeze."""
-        self._full_trainable = bool(enabled)
-        self.requires_grad_(self._full_trainable)
+        return self.set_trainable_scope(
+            "base_path" if enabled else "base_synthesis_only")
+
+    @property
+    def trainable_scope(self):
+        return self._trainable_scope
+
+    def set_trainable_scope(self, scope):
+        """Select the two Base-only optimization scopes explicitly."""
+        if scope not in ("base_synthesis_only", "base_path"):
+            raise ValueError("Unknown Base trainable scope: " + str(scope))
+        self.requires_grad_(False)
+        self._full_trainable = scope == "base_path"
         self.prefix.set_trainable(self._full_trainable)
-        if not self._full_trainable:
-            self.eval()
+        self.base_synthesis.requires_grad_(True)
+        self._trainable_scope = scope
+        self.train(self.training)
         return self
 
     def forward(self, attribute, base_lambda, hard_prefix=False):
@@ -55,6 +68,22 @@ class CanonicalBaseModel(torch.nn.Module):
         result = self.reconstruct_from_state(state)
         _same_support(attribute, result["Base"], "A/Base")
         result["prefix_likelihoods"] = likelihoods
+        return result
+
+    def forward_base_training(self, attribute, base_lambda):
+        """Uniform-noise r1-r4 Base path for rescue-screen arms.
+
+        Both scopes deliberately use the same training-time quantization.
+        In ``base_synthesis_only`` the Prefix remains in eval mode with all
+        parameters frozen; its likelihoods are still returned for R_B_est.
+        """
+        state, likelihoods = self.prefix.training_forward(
+            attribute, base_lambda,
+            allow_frozen=self._trainable_scope == "base_synthesis_only")
+        result = self.reconstruct_from_state(state)
+        _same_support(attribute, result["Base"], "A/Base")
+        result["prefix_likelihoods"] = likelihoods
+        result["completed_residual_stages"] = self.prefix.residual_stages
         return result
 
     def reconstruct_from_state(self, state):
