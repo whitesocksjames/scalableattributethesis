@@ -83,7 +83,10 @@ class CanonicalScalableModel(torch.nn.Module):
             raise ValueError("Unknown trainable scope: " + str(scope))
         self.requires_grad_(False)
         full = scope == "full"
-        self.base.set_trainable(full)
+        if full:
+            self.base.set_trainable(True)
+        else:
+            self.base.freeze()
         self.enhancement.requires_grad_(True)
         self._trainable_scope = scope
         self.train(self.training)

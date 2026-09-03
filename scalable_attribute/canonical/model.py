@@ -31,6 +31,13 @@ class CanonicalBaseModel(torch.nn.Module):
         return self.set_trainable_scope(
             "base_path" if enabled else "base_synthesis_only")
 
+    def freeze(self):
+        """Freeze the complete Base for Enhancement-only optimization."""
+        self.requires_grad_(False)
+        self._full_trainable = False
+        self.eval()
+        return self
+
     @property
     def trainable_scope(self):
         return self._trainable_scope
