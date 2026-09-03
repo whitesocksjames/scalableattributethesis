@@ -233,15 +233,16 @@ def main():
         raise ValueError("save-steps must be unique")
     if not args.smoke_only and any(x < 1 or x > args.max_steps for x in args.save_steps):
         raise ValueError("save-steps outside training range")
+    # Complete data/difficulty validation must precede any output creation.
+    files = h5_files(args.data_root, args.train_file_list)
+    scores = load_difficulty_scores(args.content_statistics)
+    labels, thresholds = classify_difficulty(files, scores)
     if os.path.exists(args.output_dir) and set(os.listdir(args.output_dir)) - {"slurm"}:
         raise FileExistsError("Output directory already contains run artifacts")
     os.makedirs(os.path.join(args.output_dir, "checkpoints"), exist_ok=True)
 
     random_seed = args.seed
     np.random.seed(random_seed); torch.manual_seed(random_seed); torch.cuda.manual_seed_all(random_seed)
-    files = h5_files(args.data_root, args.train_file_list)
-    scores = load_difficulty_scores(args.content_statistics)
-    labels, thresholds = classify_difficulty(files, scores)
     high_weight = 3.0 if args.sampling == "high_energy" else 1.0
     steps = 2 if args.smoke_only else args.max_steps
     sampler = DeterministicWeightedBatchSampler(
