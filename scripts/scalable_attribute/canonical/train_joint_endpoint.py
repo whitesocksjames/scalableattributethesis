@@ -415,13 +415,19 @@ def main():
         handle.write(command + "\n")
 
     if args.smoke_only:
+        # Physical coding is defined per H5. Never pass a collated multi-sample
+        # tensor to the author G-PCC helper because it drops the batch column.
+        hard_index = next(iter(ContinuationBatchSampler(
+            len(dataset), 1, 0, 1, args.seed)))[0]
+        hard_coords, hard_feats = collate_pointcloud_fn([dataset[hard_index]])
+        hard_attribute = make_attribute(hard_coords, hard_feats)
         coords, feats = next(iter(loader))
         attribute = make_attribute(coords, feats)
         hard = {
             "source": hard_contract(
-                model, attribute, args.source_conditioning_lambda),
+                model, hard_attribute, args.source_conditioning_lambda),
             "target": hard_contract(
-                model, attribute, args.conditioning_lambda),
+                model, hard_attribute, args.conditioning_lambda),
         }
         if (args.source_conditioning_lambda != args.conditioning_lambda and
                 args.source_hard_reference_json is None):
@@ -496,6 +502,8 @@ def main():
         write_json(os.path.join(args.output_dir, "smoke_summary.json"), {
             "status": "PASS", "endpoints": smoke,
             "hard_contract": hard,
+            "hard_reference_h5": files[hard_index],
+            "optimizer_smoke_physical_batch_size": args.batch_size,
             "historical_source_reproduction": source_reproduction,
             "smoke_steps": args.smoke_steps,
             "endpoint_counts": endpoint_counts,
