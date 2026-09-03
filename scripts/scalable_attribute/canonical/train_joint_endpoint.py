@@ -40,6 +40,7 @@ def parse_args():
     parser.add_argument("--checkpoint-profile")
     parser.add_argument("--base-checkpoint", required=True)
     parser.add_argument("--initial-enhancement-checkpoint")
+    parser.add_argument("--source-hard-reference-json")
     parser.add_argument("--source-conditioning-lambda", type=int)
     parser.add_argument("--conditioning-lambda", type=int, required=True)
     parser.add_argument("--lambda-base", type=float, required=True)
@@ -70,6 +71,16 @@ def sha256(path):
     with open(path, "rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
+    return digest.hexdigest()
+
+
+def sparse_tensor_sha256(value):
+    digest = hashlib.sha256()
+    for tensor in (value.C, value.F):
+        array = tensor.detach().cpu().contiguous().numpy()
+        digest.update(str(array.dtype).encode("ascii"))
+        digest.update(str(tuple(array.shape)).encode("ascii"))
+        digest.update(array.tobytes())
     return digest.hexdigest()
 
 
@@ -174,7 +185,27 @@ def hard_contract(model, attribute, conditioning_lambda):
         "num_base_residual_streams": 4,
         "native_r5_used": False,
         "hard_roundtrip_max_abs_difference": difference,
+        "base_reconstruction_sha256": sparse_tensor_sha256(hard["Base"]),
+        "full_reconstruction_sha256": sparse_tensor_sha256(hard["Full"]),
     }
+
+
+def verify_source_hard_reference(observed, path):
+    with open(path, encoding="utf-8") as handle:
+        expected = json.load(handle)
+    fields = ("conditioning_lambda", "base_bits", "enhancement_bits",
+              "full_bits", "base_reconstruction_sha256",
+              "full_reconstruction_sha256")
+    missing = [name for name in fields if name not in expected]
+    if missing:
+        raise ValueError("Source hard reference lacks: " + ", ".join(missing))
+    mismatches = {name: {"expected": expected[name], "observed": observed[name]}
+                  for name in fields if expected[name] != observed[name]}
+    if mismatches:
+        raise RuntimeError("Historical 8K hard reproduction failed: " +
+                           json.dumps(mismatches, sort_keys=True))
+    return {"status": "PASS", "reference": path,
+            "matched_fields": list(fields)}
 
 
 def checkpoint(model, optimizer, args, base_config, metadata, step,
@@ -232,6 +263,10 @@ def main():
         args.initial_enhancement_checkpoint = os.path.abspath(
             os.path.expandvars(os.path.expanduser(
                 args.initial_enhancement_checkpoint)))
+    if args.source_hard_reference_json:
+        args.source_hard_reference_json = os.path.abspath(
+            os.path.expandvars(os.path.expanduser(
+                args.source_hard_reference_json)))
     if args.source_conditioning_lambda is None:
         args.source_conditioning_lambda = args.conditioning_lambda
     if args.checkpoint_profile is None:
@@ -244,7 +279,9 @@ def main():
                         ("released checkpoint", args.released_checkpoint),
                         ("Base checkpoint", args.base_checkpoint),
                         ("initial Enhancement checkpoint",
-                         args.initial_enhancement_checkpoint)):
+                         args.initial_enhancement_checkpoint),
+                        ("source hard reference",
+                         args.source_hard_reference_json)):
         if path is not None and not os.path.isfile(path):
             raise FileNotFoundError("{} not found: {}".format(label, path))
     if args.conditioning_lambda <= 0 or args.lr <= 0:
@@ -301,6 +338,12 @@ def main():
         if int(enhancement_state.get("conditioning_lambda", -1)) != int(
                 args.source_conditioning_lambda):
             raise ValueError("Initial Enhancement source lambda mismatch")
+        if float(enhancement_state.get("rd_lambda", -1)) != float(
+                args.source_conditioning_lambda):
+            raise ValueError("Initial Enhancement RD lambda mismatch")
+        if tuple(float(value) for value in enhancement_state.get(
+                "distortion_weights", ())) != (1.0, 1.0, 1.0):
+            raise ValueError("Initial Enhancement is not D111")
         if os.path.realpath(enhancement_state.get(
                 "base_synthesis_checkpoint", "")) != os.path.realpath(
                     args.base_checkpoint):
@@ -380,6 +423,14 @@ def main():
             "target": hard_contract(
                 model, attribute, args.conditioning_lambda),
         }
+        if (args.source_conditioning_lambda != args.conditioning_lambda and
+                args.source_hard_reference_json is None):
+            raise ValueError(
+                "Cross-lambda smoke requires --source-hard-reference-json")
+        source_reproduction = (
+            verify_source_hard_reference(
+                hard["source"], args.source_hard_reference_json)
+            if args.source_hard_reference_json else {"status": "NOT_REQUESTED"})
         smoke = {}
         call_count = {"value": 0}
         hook = model.enhancement.register_forward_hook(
@@ -445,6 +496,7 @@ def main():
         write_json(os.path.join(args.output_dir, "smoke_summary.json"), {
             "status": "PASS", "endpoints": smoke,
             "hard_contract": hard,
+            "historical_source_reproduction": source_reproduction,
             "smoke_steps": args.smoke_steps,
             "endpoint_counts": endpoint_counts,
             "last_step": last,

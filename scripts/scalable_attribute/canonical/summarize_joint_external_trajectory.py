@@ -15,6 +15,7 @@ def parse_args():
         metavar="DATASET:SEQUENCE=CSV")
     parser.add_argument("--official-8i", required=True)
     parser.add_argument("--official-owlii", required=True)
+    parser.add_argument("--neighbor-reference-csv", required=True)
     parser.add_argument("--output-dir", required=True)
     return parser.parse_args()
 
@@ -87,6 +88,14 @@ official = {
     "8ivfb": read_csv(args.official_8i),
     "owlii": read_csv(args.official_owlii),
 }
+neighbor_rows = read_csv(args.neighbor_reference_csv)
+neighbor = {}
+for row in neighbor_rows:
+    key = (row["point"].upper(), row["dataset"], row["sequence"].lower(),
+           row["endpoint"])
+    if key in neighbor:
+        raise ValueError("Duplicate neighbor reference: " + repr(key))
+    neighbor[key] = (float(row["physical_bpp"]), float(row["YUV611"]))
 rows = []
 for dataset, sequence, path in map(parse_evaluation, args.evaluation):
     evaluation = read_csv(path)
@@ -95,6 +104,11 @@ for dataset, sequence, path in map(parse_evaluation, args.evaluation):
     if len(curves) != 9:
         raise ValueError("Official curve must have nine points: " + sequence)
     for step, endpoint, row in endpoint_rows(evaluation):
+        neighbor_key_2k = ("2K", dataset, sequence, endpoint)
+        neighbor_key_8k = ("8K", dataset, sequence, endpoint)
+        if neighbor_key_2k not in neighbor or neighbor_key_8k not in neighbor:
+            raise ValueError("Missing frozen 2K/8K neighbor reference for " +
+                             repr((dataset, sequence, endpoint)))
         if (int(row["num_base_residual_streams"]) != 4 or
                 int(row["num_native_r5_streams"]) != 0):
             raise ValueError("Hard Base syntax contract failed")
@@ -111,6 +125,10 @@ for dataset, sequence, path in map(parse_evaluation, args.evaluation):
         rate = float(row["physical_bpp"])
         quality = float(row["yuv_psnr_611"])
         target, bracket = interpolate(curves, rate)
+        rate_2k, quality_2k = neighbor[neighbor_key_2k]
+        rate_8k, quality_8k = neighbor[neighbor_key_8k]
+        dominated_2k = dominates((rate_2k, quality_2k), (rate, quality))
+        dominated_8k = dominates((rate_8k, quality_8k), (rate, quality))
         rows.append({
             "dataset": dataset, "sequence": sequence, "step": step,
             "endpoint": endpoint, "physical_bpp": rate,
@@ -123,6 +141,14 @@ for dataset, sequence, path in map(parse_evaluation, args.evaluation):
             "delta_to_official_curve": (
                 quality - target if target is not None else "N/A"),
             "interpolation": bracket,
+            "neighbor_2k_bpp": rate_2k,
+            "neighbor_2k_YUV611": quality_2k,
+            "neighbor_8k_bpp": rate_8k,
+            "neighbor_8k_YUV611": quality_8k,
+            "ladder_rate_region_pass": rate_2k <= rate <= rate_8k,
+            "dominated_by_2k_neighbor": dominated_2k,
+            "dominated_by_8k_neighbor": dominated_8k,
+            "neighbor_pareto_dominated": dominated_2k or dominated_8k,
             "hard_status": "PASS",
         })
 
@@ -180,4 +206,10 @@ with open(output / "joint_external_summary.json", "x", encoding="utf-8") as hand
     json.dump({"status": "PASS", "steps": expected_steps,
                "num_endpoint_rows": len(rows), "group_means": means,
                "pareto_violations": violations,
+               "neighbor_reference_csv": str(
+                   Path(args.neighbor_reference_csv).expanduser().resolve()),
+               "neighbor_pareto_dominated_rows": sum(
+                   bool(row["neighbor_pareto_dominated"]) for row in rows),
+               "ladder_rate_region_failure_rows": sum(
+                   not bool(row["ladder_rate_region_pass"]) for row in rows),
                "selection_performed": False}, handle, indent=2)
