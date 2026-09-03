@@ -2,6 +2,7 @@
 """E0-B correctness probe for the canonical independent EnhancementVAE."""
 
 import argparse
+import hashlib
 import json
 import os
 import shlex
@@ -27,6 +28,15 @@ def parse_args():
     parser.add_argument("--file-list", required=True)
     parser.add_argument("--released-checkpoint", required=True)
     parser.add_argument("--base-synthesis-checkpoint", required=True)
+    parser.add_argument(
+        "--require-base-architecture",
+        choices=("canonical_base_predict_correct", "canonical_base_rescue_v1"))
+    parser.add_argument("--require-base-rescue-step", type=int)
+    parser.add_argument(
+        "--require-base-rescue-sampling", choices=("uniform", "high_energy"))
+    parser.add_argument(
+        "--require-base-rescue-trainable-scope",
+        choices=("base_path", "base_synthesis_only"))
     parser.add_argument("--conditioning-lambda", type=int, required=True)
     parser.add_argument("--tmc3-path", required=True)
     parser.add_argument("--output-dir", required=True)
@@ -97,15 +107,17 @@ def native_full_anchor(prefix, attribute, conditioning_lambda):
     }
 
 
-def parameter_independence(released, enhancement):
-    released_state = released.state_dict()
+def parameter_independence(released, enhancement, expected_state=None):
+    released_state = (released.state_dict()
+                      if expected_state is None else expected_state)
     enhancement_state = enhancement.state_dict()
     if set(released_state) != set(enhancement_state):
         raise RuntimeError("Enhancement/released state_dict keys differ")
     max_difference = 0.0
     for name in released_state:
         difference = float((
-            released_state[name] - enhancement_state[name]
+            released_state[name].detach().cpu() -
+            enhancement_state[name].detach().cpu()
         ).abs().max().item())
         max_difference = max(max_difference, difference)
     released_parameters = dict(released.named_parameters())
@@ -123,6 +135,50 @@ def parameter_independence(released, enhancement):
         "parameter_count": sum(
             parameter.numel() for parameter in enhancement.parameters()),
     }
+
+
+def clone_state_dict_cpu(module):
+    return {
+        name: value.detach().cpu().clone()
+        for name, value in module.state_dict().items()
+    }
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def require_base_checkpoint_contract(state, args):
+    architecture = state.get("architecture")
+    if (args.require_base_architecture is not None and
+            architecture != args.require_base_architecture):
+        raise ValueError("Required Base checkpoint architecture mismatch")
+    rescue_requirements = (
+        args.require_base_rescue_step,
+        args.require_base_rescue_sampling,
+        args.require_base_rescue_trainable_scope,
+    )
+    if not any(value is not None for value in rescue_requirements):
+        return
+    if architecture != "canonical_base_rescue_v1":
+        raise ValueError("Base-rescue requirements need a rescue checkpoint")
+    if (args.require_base_rescue_step is not None and
+            int(state.get("step", -1)) != args.require_base_rescue_step):
+        raise ValueError("Required Base rescue step mismatch")
+    if (args.require_base_rescue_trainable_scope is not None and
+            state.get("trainable_scope") !=
+            args.require_base_rescue_trainable_scope):
+        raise ValueError("Required Base rescue trainable scope mismatch")
+    if args.require_base_rescue_sampling is not None:
+        sampling = state.get("sampling") or {}
+        high_weight = float(sampling.get("high_weight", float("nan")))
+        actual = "uniform" if high_weight == 1.0 else "high_energy"
+        if actual != args.require_base_rescue_sampling:
+            raise ValueError("Required Base rescue sampling mismatch")
 
 
 def main():
@@ -155,8 +211,11 @@ def main():
 
     base_checkpoint = torch.load(
         args.base_synthesis_checkpoint, map_location="cpu")
+    require_base_checkpoint_contract(base_checkpoint, args)
     config = BaseSynthesisConfig(**base_checkpoint["config"])
     base = CanonicalBaseModel(args.released_checkpoint, config).cuda()
+    released_enhancement_initialization = clone_state_dict_cpu(
+        base.prefix.model.VAE)
     load_frozen_base(
         base, args.base_synthesis_checkpoint, args.released_checkpoint,
         args.conditioning_lambda)
@@ -170,7 +229,9 @@ def main():
     base_before = base(first_attribute, args.conditioning_lambda)["Base"]
 
     model = CanonicalScalableModel(
-        base, conditioning_lambda=args.conditioning_lambda).cuda()
+        base, conditioning_lambda=args.conditioning_lambda,
+        enhancement_initialization_state=
+        released_enhancement_initialization).cuda()
     model.train()
     base_after = model.base_forward(first_attribute)["Base"]
     base_invariance = sparse_difference(
@@ -179,7 +240,8 @@ def main():
         raise RuntimeError("Adding Enhancement changed Base")
 
     independence = parameter_independence(
-        model.base.prefix.model.VAE, model.enhancement.vae)
+        model.base.prefix.model.VAE, model.enhancement.vae,
+        expected_state=released_enhancement_initialization)
     if independence["state_max_abs_difference"] != 0.0:
         raise RuntimeError("Enhancement initialization differs from released VAE")
 
@@ -342,6 +404,16 @@ def main():
         "status": "PASS",
         "metric": "normalized YUV 1:1:1 tensor MSE; PSNR peak=1",
         "conditioning_lambda": args.conditioning_lambda,
+        "base_checkpoint": {
+            "architecture": base_checkpoint["architecture"],
+            "step": int(base_checkpoint.get("step", -1)),
+            "sha256": sha256(args.base_synthesis_checkpoint),
+        },
+        "enhancement_initialization": {
+            "source": "released_vae_exact_independent_clone",
+            "released_checkpoint": args.released_checkpoint,
+            "released_checkpoint_sha256": sha256(args.released_checkpoint),
+        },
         "selected_h5": entries,
         "parameter_independence": independence,
         "freeze_contract": frozen_contract,

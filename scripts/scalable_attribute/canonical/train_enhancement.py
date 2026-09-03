@@ -2,6 +2,7 @@
 """Train the canonical independent EnhancementVAE for a fixed short run."""
 
 import argparse
+import hashlib
 import csv
 import json
 import os
@@ -39,6 +40,15 @@ def parse_args():
     parser.add_argument("--enhancement-stage", type=int, choices=(1, 2), default=1)
     parser.add_argument("--released-checkpoint")
     parser.add_argument("--base-synthesis-checkpoint")
+    parser.add_argument(
+        "--require-base-architecture",
+        choices=("canonical_base_predict_correct", "canonical_base_rescue_v1"))
+    parser.add_argument("--require-base-rescue-step", type=int)
+    parser.add_argument(
+        "--require-base-rescue-sampling", choices=("uniform", "high_energy"))
+    parser.add_argument(
+        "--require-base-rescue-trainable-scope",
+        choices=("base_path", "base_synthesis_only"))
     parser.add_argument("--conditioning-lambda", type=int)
     parser.add_argument("--rd-lambda", type=float)
     parser.add_argument("--distortion-weights")
@@ -147,6 +157,49 @@ def write_json(path, value):
         json.dump(value, handle, indent=2)
 
 
+def sha256(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def clone_state_dict_cpu(module):
+    return {
+        name: value.detach().cpu().clone()
+        for name, value in module.state_dict().items()
+    }
+
+
+def require_base_checkpoint_contract(state, args):
+    architecture = state.get("architecture")
+    if (args.require_base_architecture is not None and
+            architecture != args.require_base_architecture):
+        raise ValueError("Required Base checkpoint architecture mismatch")
+    rescue_requirements = (
+        args.require_base_rescue_step,
+        args.require_base_rescue_sampling,
+        args.require_base_rescue_trainable_scope,
+    )
+    if any(value is not None for value in rescue_requirements):
+        if architecture != "canonical_base_rescue_v1":
+            raise ValueError("Base-rescue requirements need a rescue checkpoint")
+        if (args.require_base_rescue_step is not None and
+                int(state.get("step", -1)) != args.require_base_rescue_step):
+            raise ValueError("Required Base rescue step mismatch")
+        if (args.require_base_rescue_trainable_scope is not None and
+                state.get("trainable_scope") !=
+                args.require_base_rescue_trainable_scope):
+            raise ValueError("Required Base rescue trainable scope mismatch")
+        if args.require_base_rescue_sampling is not None:
+            sampling = state.get("sampling") or {}
+            high_weight = float(sampling.get("high_weight", float("nan")))
+            actual = "uniform" if high_weight == 1.0 else "high_energy"
+            if actual != args.require_base_rescue_sampling:
+                raise ValueError("Required Base rescue sampling mismatch")
+
+
 def git_commit():
     try:
         return subprocess.check_output(
@@ -209,13 +262,28 @@ def main():
     torch.cuda.manual_seed_all(args.seed)
 
     base_state = torch.load(args.base_synthesis_checkpoint, map_location="cpu")
+    require_base_checkpoint_contract(base_state, args)
     base_config = BaseSynthesisConfig(**base_state["config"])
     base = CanonicalBaseModel(args.released_checkpoint, base_config).cuda()
+    # Capture the released VAE before loading a rescue checkpoint. A rescue
+    # checkpoint may replace the shared Prefix VAE, but Enhancement Stage-1
+    # must remain an exact independent clone of the released ResidualVAE.
+    released_enhancement_initialization = clone_state_dict_cpu(
+        base.prefix.model.VAE)
     load_frozen_base(
         base, args.base_synthesis_checkpoint, args.released_checkpoint,
         args.conditioning_lambda)
     model = CanonicalScalableModel(
-        base, conditioning_lambda=args.conditioning_lambda).cuda()
+        base, conditioning_lambda=args.conditioning_lambda,
+        enhancement_initialization_state=
+        released_enhancement_initialization).cuda()
+    initialized = model.enhancement.vae.state_dict()
+    if initialized.keys() != released_enhancement_initialization.keys():
+        raise RuntimeError("Enhancement released-initialization keys mismatch")
+    for name, expected in released_enhancement_initialization.items():
+        if not torch.equal(initialized[name].detach().cpu(), expected):
+            raise RuntimeError(
+                "Enhancement is not an exact released clone: " + name)
     model.train()
     trainable = list(model.enhancement.parameters())
     if not trainable or any(not parameter.requires_grad for parameter in trainable):
@@ -298,6 +366,14 @@ def main():
         "operating_point": (
             operating_point.to_dict() if operating_point is not None else None),
         "enhancement_stage": args.enhancement_stage,
+        "base_checkpoint_architecture": base_state["architecture"],
+        "base_checkpoint_step": int(base_state.get("step", -1)),
+        "base_checkpoint_sha256": sha256(args.base_synthesis_checkpoint),
+        "enhancement_initialization": "released_vae_exact_independent_clone",
+        "enhancement_initialization_released_checkpoint":
+            args.released_checkpoint,
+        "enhancement_initialization_released_checkpoint_sha256":
+            sha256(args.released_checkpoint),
         "base_config": base_config.to_dict(),
         "optimizer": {"name": "Adam", "lr": args.lr,
                       "betas": [0.9, 0.999], "weight_decay": 0.0,

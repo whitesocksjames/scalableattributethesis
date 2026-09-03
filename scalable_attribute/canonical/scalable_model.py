@@ -19,19 +19,34 @@ def _same_support(left, right, label):
 
 
 def load_frozen_base(base_model, checkpoint, released_checkpoint, base_lambda):
-    """Load the canonical BaseSynthesis checkpoint and freeze the whole Base."""
+    """Load either canonical Base checkpoint format and freeze the whole Base.
+
+    ``canonical_base_rescue_v1`` owns a fine-tuned Prefix as well as
+    BaseSynthesis, so its complete ``base_model`` state must be restored.
+    """
     state = torch.load(checkpoint, map_location="cpu")
-    if state.get("architecture") != "canonical_base_predict_correct":
+    architecture = state.get("architecture")
+    if architecture not in (
+            "canonical_base_predict_correct", "canonical_base_rescue_v1"):
         raise ValueError("Canonical Base checkpoint architecture mismatch")
     if state.get("config") != base_model.config.to_dict():
         raise ValueError("Canonical Base checkpoint config mismatch")
-    if int(state.get("base_lambda", -1)) != int(base_lambda):
+    checkpoint_lambda = state.get(
+        "base_lambda", state.get("conditioning_lambda", -1))
+    if int(checkpoint_lambda) != int(base_lambda):
         raise ValueError("Canonical Base checkpoint lambda mismatch")
-    if os.path.realpath(state.get("base_checkpoint", "")) != os.path.realpath(
+    checkpoint_released = state.get(
+        "base_checkpoint", state.get("released_checkpoint", ""))
+    if os.path.realpath(checkpoint_released) != os.path.realpath(
             released_checkpoint):
         raise ValueError("Canonical Base released checkpoint mismatch")
-    base_model.base_synthesis.load_state_dict(
-        state["base_synthesis"], strict=True)
+    if architecture == "canonical_base_predict_correct":
+        base_model.base_synthesis.load_state_dict(
+            state["base_synthesis"], strict=True)
+    else:
+        if "base_model" not in state:
+            raise ValueError("Base rescue checkpoint lacks complete model state")
+        base_model.load_state_dict(state["base_model"], strict=True)
     base_model.requires_grad_(False)
     base_model.eval()
     return base_model
@@ -40,13 +55,16 @@ def load_frozen_base(base_model, checkpoint, released_checkpoint, base_lambda):
 class CanonicalScalableModel(torch.nn.Module):
     """Own a frozen canonical Base and a trainable independent EnhancementVAE."""
 
-    def __init__(self, frozen_base, conditioning_lambda):
+    def __init__(self, frozen_base, conditioning_lambda,
+                 enhancement_initialization_state=None):
         super().__init__()
         if any(parameter.requires_grad for parameter in frozen_base.parameters()):
             raise ValueError("Canonical Base must be frozen before scalable assembly")
         self.base = frozen_base
         self.conditioning_lambda = conditioning_lambda
-        self.enhancement = EnhancementVAE(self.base.prefix.model.VAE)
+        self.enhancement = EnhancementVAE(
+            self.base.prefix.model.VAE,
+            initialization_state=enhancement_initialization_state)
         self._trainable_scope = None
         self.set_trainable_scope("enhancement_only")
 

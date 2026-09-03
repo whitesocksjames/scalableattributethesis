@@ -6,12 +6,14 @@ import torch
 class EnhancementVAE(torch.nn.Module):
     """A trainable ResidualVAE initialized from, but not shared with, Unicorn."""
 
-    def __init__(self, released_vae):
+    def __init__(self, released_vae, initialization_state=None):
         super().__init__()
         # ResidualVAE reads the released Attribute configuration at module import.
         # Reuse that already-configured class without re-importing the author module.
         self.vae = type(released_vae)(stride=[2, 2, 2])
-        self.vae.load_state_dict(released_vae.state_dict(), strict=True)
+        state = (released_vae.state_dict()
+                 if initialization_state is None else initialization_state)
+        self.vae.load_state_dict(state, strict=True)
 
     def forward(self, base, ground_truth, base_feature, prior_dec, embedding):
         return self.vae(
