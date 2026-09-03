@@ -50,6 +50,7 @@ def parse_args():
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--num-workers", type=int, default=0)
     p.add_argument("--output-dir", required=True)
+    p.add_argument("--expected-source-commit", required=True)
     p.add_argument("--smoke-only", action="store_true")
     return add_base_architecture_arguments(p).parse_args()
 
@@ -69,6 +70,36 @@ def git_commit():
             stderr=subprocess.DEVNULL).strip()
     except (OSError, subprocess.CalledProcessError):
         return None
+
+
+def assert_source_state(expected):
+    head = git_commit()
+    if head != expected:
+        raise RuntimeError(
+            "Runtime source HEAD mismatch: expected {}, got {}".format(expected, head))
+    try:
+        dirty = subprocess.check_output(
+            ["git", "status", "--porcelain"], text=True).strip()
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise RuntimeError("Cannot verify runtime source cleanliness") from error
+    if dirty:
+        raise RuntimeError("Runtime source worktree is dirty:\n" + dirty)
+    return head
+
+
+def assert_inputs_exist(args):
+    required_files = {
+        "train_file_list": args.train_file_list,
+        "content_statistics": args.content_statistics,
+        "released_checkpoint": args.released_checkpoint,
+    }
+    if args.initial_base_checkpoint:
+        required_files["initial_base_checkpoint"] = args.initial_base_checkpoint
+    if not os.path.isdir(args.data_root):
+        raise FileNotFoundError("data_root does not exist: " + args.data_root)
+    for name, path in required_files.items():
+        if not os.path.isfile(path):
+            raise FileNotFoundError("{} does not exist: {}".format(name, path))
 
 
 def write_json(path, value):
@@ -186,13 +217,14 @@ def verify_saved_checkpoint(path, model, optimizer, expected_step):
 
 def main():
     args = parse_args()
-    source_commit = git_commit()
     for name in ("data_root", "train_file_list", "content_statistics",
                  "released_checkpoint", "output_dir"):
         setattr(args, name, os.path.abspath(os.path.expandvars(os.path.expanduser(getattr(args, name)))))
     if args.initial_base_checkpoint:
         args.initial_base_checkpoint = os.path.abspath(os.path.expandvars(
             os.path.expanduser(args.initial_base_checkpoint)))
+    source_commit = assert_source_state(args.expected_source_commit)
+    assert_inputs_exist(args)
     if args.batch_size < 1 or args.max_steps < 1:
         raise ValueError("batch-size/max-steps must be positive")
     if args.conditioning_lambda <= 0 or args.prefix_lr <= 0 or args.base_synthesis_lr <= 0:
@@ -291,7 +323,9 @@ def main():
             writer.writerow(row); h.flush()
             if step == 1 or step % 25 == 0 or step == steps:
                 print(json.dumps({**row,"gradient_groups":gradients}),flush=True)
-            if not args.smoke_only and (step in args.save_steps or step == args.max_steps):
+            should_save = (args.smoke_only and step == steps) or (
+                not args.smoke_only and (step in args.save_steps or step == args.max_steps))
+            if should_save:
                 path=os.path.join(args.output_dir,"checkpoints","step_{}.pth".format(step))
                 torch.save({"architecture":ARCHITECTURE,"base_model":model.state_dict(),
                             "optimizer":optimizer.state_dict(),"step":step,
@@ -303,11 +337,10 @@ def main():
                             "initialization":initialization,"trainable_scope":args.trainable_scope,
                             "sampling":metadata["sampling"],"resolved_args":metadata},path)
                 saved[str(step)]=path
-    reload_pass = True
-    if not args.smoke_only:
-        final_path = saved[str(args.max_steps)]
-        reload_pass = verify_saved_checkpoint(
-            final_path, model, optimizer, args.max_steps)
+    final_step = steps if args.smoke_only else args.max_steps
+    final_path = saved[str(final_step)]
+    reload_pass = verify_saved_checkpoint(
+        final_path, model, optimizer, final_step)
     runtime_seconds = time.monotonic()-started
     write_json(os.path.join(args.output_dir,"training_summary.json"),{
         "status":"PASS","steps":steps,"runtime_seconds":time.monotonic()-started,

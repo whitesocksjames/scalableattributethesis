@@ -3,6 +3,7 @@
 import csv
 import hashlib
 import math
+import os
 from pathlib import Path
 
 import torch
@@ -27,7 +28,10 @@ def load_difficulty_scores(path, score_column="r2_E_D111"):
             key = sample_key(row["source"])
             if key in scores:
                 raise ValueError("Duplicate difficulty key: " + key)
-            scores[key] = float(row[score_column])
+            value = float(row[score_column])
+            if not math.isfinite(value):
+                raise ValueError("Non-finite difficulty score for " + key)
+            scores[key] = value
     if not scores:
         raise ValueError("Difficulty table is empty")
     return scores
@@ -36,8 +40,14 @@ def load_difficulty_scores(path, score_column="r2_E_D111"):
 def classify_difficulty(files, scores):
     """Return exact bottom/middle/top quartile labels with stable tie breaks."""
     ranked = []
+    seen = set()
     for index, path in enumerate(files):
         key = sample_key(path)
+        if key in seen:
+            raise ValueError("Duplicate train H5 key: " + key)
+        seen.add(key)
+        if not os.path.isfile(path):
+            raise FileNotFoundError("Train H5 does not exist: " + path)
         if key not in scores:
             raise KeyError("No difficulty score for " + key)
         ranked.append((scores[key], key, index))
