@@ -37,8 +37,13 @@ def main():
         if arm["initial_base"]: cmd.extend(["--initial-base-checkpoint",arm["initial_base"]])
         if smoke: cmd.append("--smoke-only")
         path=a.command_dir/(arm["name"]+".sh")
-        path.write_text("#!/bin/bash\nset -euo pipefail\ncd {}\nexec {}\n".format(
-            shlex.quote(str(a.source_root)),shlex.join(cmd)))
+        path.write_text(
+            "#!/bin/bash\nset -euo pipefail\n"
+            "export PYTHONDONTWRITEBYTECODE=1\n"
+            "export PYTHONPATH={}\n"
+            "cd {}\nexec {}\n".format(
+                shlex.quote(str(a.source_root)),
+                shlex.quote(str(a.source_root)), shlex.join(cmd)))
         path.chmod(0o700)
     print(json.dumps({"status":"PASS","arms":[x["name"] for x in cfg["arms"]]},indent=2))
 
