@@ -65,6 +65,8 @@ def parse_args():
         help="Complete fine-tuned scalable checkpoint; may be repeated")
     parser.add_argument("--gpcc-binary", required=True)
     parser.add_argument("--conditioning-lambda", type=int)
+    parser.add_argument("--checkpoint-profile")
+    parser.add_argument("--base-checkpoint-lambda", type=int)
     parser.add_argument("--run-official", action="store_true")
     parser.add_argument("--official-rate-ids", nargs="+")
     parser.add_argument("--output-dir", required=True)
@@ -117,6 +119,10 @@ def main():
         _, configured = point_for_lambda(
             args.conditioning_lambda, config_path=args.operating_points_config)
         canonical_profile = configured["released_profile"]
+    if args.checkpoint_profile is not None:
+        canonical_profile = args.checkpoint_profile
+    if args.base_checkpoint_lambda is None:
+        args.base_checkpoint_lambda = args.conditioning_lambda
     for name in ("enhancement_step1763", "enhancement_step3525"):
         value = getattr(args, name)
         if value:
@@ -207,7 +213,7 @@ def main():
         released_checkpoint, BaseSynthesisConfig(**base_state["config"])).cuda()
     load_frozen_base(
         base, args.base_synthesis_checkpoint, released_checkpoint,
-        args.conditioning_lambda)
+        args.base_checkpoint_lambda)
 
     # One deterministic prefix supports soft/hard equivalence; the one hard
     # invocation supplies the shared physical Base stream for every candidate.
@@ -327,7 +333,7 @@ def main():
         load_frozen_base(
             candidate_base, args.base_synthesis_checkpoint,
             released_checkpoint,
-            args.conditioning_lambda)
+            args.base_checkpoint_lambda)
         candidate = CanonicalScalableModel(
             candidate_base, args.conditioning_lambda).cuda().eval()
         state = load_finetuned_scalable(
