@@ -52,6 +52,7 @@ def parse_args():
     p.add_argument("--output-dir", required=True)
     p.add_argument("--expected-source-commit", required=True)
     p.add_argument("--smoke-only", action="store_true")
+    p.add_argument("--empty-cache-every", type=int, default=0)
     return add_base_architecture_arguments(p).parse_args()
 
 
@@ -292,7 +293,9 @@ def main():
 
     fields = ["step","loss","R_B_est","D111","D_Y","D_U","D_V",
               "gradient_norm","prefix_lr","base_synthesis_lr","points",
-              "step_seconds","peak_gpu_memory_gib"]
+              "step_seconds","memory_allocated_gib","memory_reserved_gib",
+              "max_memory_allocated_gib","max_memory_reserved_gib",
+              "memory_free_gib","memory_total_gib"]
     metrics = os.path.join(args.output_dir, "training_metrics.csv")
     torch.cuda.reset_peak_memory_stats(); started = time.monotonic(); saved = {}
     with open(metrics, "w", newline="", encoding="utf-8") as h:
@@ -313,6 +316,7 @@ def main():
             norm=float(torch.stack([p.grad.detach().float().pow(2).sum()
                        for p in trainable if p.grad is not None]).sum().sqrt().item())
             optimizer.step(); torch.cuda.synchronize()
+            memory_free, memory_total = torch.cuda.mem_get_info()
             lrs={g["name"]:g["lr"] for g in optimizer.param_groups}
             row={"step":step,"loss":float(loss.item()),"R_B_est":float(rate.item()),
                  "D111":float(distortion.item()),"D_Y":float(channel[0].item()),
@@ -320,7 +324,12 @@ def main():
                  "gradient_norm":norm,"prefix_lr":lrs.get("native_prefix"),
                  "base_synthesis_lr":lrs["base_synthesis"],"points":len(attribute),
                  "step_seconds":time.monotonic()-tick,
-                 "peak_gpu_memory_gib":torch.cuda.max_memory_allocated()/1024**3}
+                 "memory_allocated_gib":torch.cuda.memory_allocated()/1024**3,
+                 "memory_reserved_gib":torch.cuda.memory_reserved()/1024**3,
+                 "max_memory_allocated_gib":torch.cuda.max_memory_allocated()/1024**3,
+                 "max_memory_reserved_gib":torch.cuda.max_memory_reserved()/1024**3,
+                 "memory_free_gib":memory_free/1024**3,
+                 "memory_total_gib":memory_total/1024**3}
             writer.writerow(row); h.flush()
             if step == 1 or step % 25 == 0 or step == steps:
                 print(json.dumps({**row,"gradient_groups":gradients}),flush=True)
@@ -338,6 +347,9 @@ def main():
                             "initialization":initialization,"trainable_scope":args.trainable_scope,
                             "sampling":metadata["sampling"],"resolved_args":metadata},path)
                 saved[str(step)]=path
+            del output, loss, rate, distortion, channel, attribute, coords, feats
+            if args.empty_cache_every and step % args.empty_cache_every == 0:
+                torch.cuda.empty_cache()
     final_step = steps if args.smoke_only else args.max_steps
     final_path = saved[str(final_step)]
     reload_pass = verify_saved_checkpoint(
