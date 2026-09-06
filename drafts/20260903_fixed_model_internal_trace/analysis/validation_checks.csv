@@ -1,0 +1,5 @@
+run,configs,blocks_per_config,status
+core,5,88,PASS
+family,4,88,PASS
+rwtt,5,88,PASS
+official overlap R04/R05,2,88,EXACT

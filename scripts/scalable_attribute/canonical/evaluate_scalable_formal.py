@@ -36,6 +36,7 @@ def parse_args():
     checkpoint.add_argument("--enhancement-checkpoint")
     checkpoint.add_argument("--scalable-checkpoint")
     parser.add_argument("--conditioning-lambda", type=int, required=True)
+    parser.add_argument("--base-checkpoint-lambda", type=int)
     parser.add_argument("--checkpoint-profile", default="32k8k")
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--max-samples", type=int, default=0)
@@ -142,9 +143,12 @@ def main():
     base_state = torch.load(args.base_synthesis_checkpoint, map_location="cpu")
     base_config = BaseSynthesisConfig(**base_state["config"])
     base = CanonicalBaseModel(args.released_checkpoint, base_config).cuda()
+    base_checkpoint_lambda = (
+        args.conditioning_lambda if args.base_checkpoint_lambda is None
+        else args.base_checkpoint_lambda)
     load_frozen_base(
         base, args.base_synthesis_checkpoint, args.released_checkpoint,
-        args.conditioning_lambda)
+        base_checkpoint_lambda)
     model = CanonicalScalableModel(base, args.conditioning_lambda).cuda().eval()
     if args.scalable_checkpoint:
         load_finetuned_scalable(

@@ -32,7 +32,7 @@ export OMP_NUM_THREADS=6
 
 nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
 export PYTHONPATH="${RESCUE_SOURCE_ROOT}"
-IFS=, read -r -a RESCUE_STEPS <<< "${RESCUE_STEPS_CSV}"
+IFS=: read -r -a RESCUE_STEPS <<< "${RESCUE_STEPS_CSV}"
 cd "${RESCUE_SOURCE_ROOT}"
 exec python scripts/scalable_attribute/canonical/evaluate_base_rescue_arm.py \
   --train-dir "${RESCUE_TRAIN_DIR}" \
