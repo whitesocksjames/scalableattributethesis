@@ -4,7 +4,7 @@ import os
 
 import torch
 
-from scalable_attribute.canonical.enhancement import EnhancementVAE
+from scalable_attribute.models.enhancement import EnhancementVAE
 
 
 FINE_TUNE_ARCHITECTURE = "canonical_scalable_mvub_finetune_v1"

@@ -24,7 +24,7 @@ def names(node):
 
 class SourceContractTests(unittest.TestCase):
  def test_prefix_is_explicitly_four_stages(self):
-    tree = parsed("scalable_attribute/canonical/prefix.py")
+    tree = parsed("scalable_attribute/models/prefix.py")
     owner = next(node for node in tree.body
                  if isinstance(node, ast.ClassDef)
                  and node.name == "FrozenUnicornPrefix")
@@ -38,7 +38,7 @@ class SourceContractTests(unittest.TestCase):
 
 
  def test_base_synthesis_inputs_are_prefix_state_only(self):
-    tree = parsed("scalable_attribute/canonical/base_synthesis.py")
+    tree = parsed("scalable_attribute/models/base_synthesis.py")
     forward = function_node(tree, "BaseSynthesis", "forward")
     self.assertEqual([argument.arg for argument in forward.args.args], ["self", "state"])
     attributes = {(item.value.id, item.attr) for item in ast.walk(forward)
@@ -51,7 +51,7 @@ class SourceContractTests(unittest.TestCase):
 
 
  def test_base_reconstruction_has_no_gt_or_enhancement_dependency(self):
-    tree = parsed("scalable_attribute/canonical/model.py")
+    tree = parsed("scalable_attribute/models/base.py")
     reconstruct = function_node(tree, "CanonicalBaseModel", "reconstruct_from_state")
     self.assertEqual([argument.arg for argument in reconstruct.args.args], ["self", "state"])
     used = names(reconstruct)
@@ -61,7 +61,7 @@ class SourceContractTests(unittest.TestCase):
 
 
  def test_enhancement_decode_signature_has_no_ground_truth(self):
-    tree = parsed("scalable_attribute/canonical/enhancement.py")
+    tree = parsed("scalable_attribute/models/enhancement.py")
     decode = function_node(tree, "EnhancementVAE", "decode")
     arguments = [argument.arg for argument in decode.args.args]
     self.assertEqual(arguments, ["self", "payload", "base", "base_feature",

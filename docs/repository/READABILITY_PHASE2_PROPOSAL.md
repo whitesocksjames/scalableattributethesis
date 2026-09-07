@@ -72,18 +72,28 @@ than moving internal modules behind re-export shims.
 
 | Current file | Proposed implementation file | Responsibility |
 | --- | --- | --- |
-| `canonical/config.py` | `models/config.py` | Immutable BaseSynthesis architecture configuration and CLI argument definitions. |
+| `canonical/config.py` | `models/config.py` | Immutable BaseSynthesis architecture configuration. The compatibility CLI helper remains temporarily and moves to `runtime/cli.py` in a later reviewed batch. |
 | `canonical/prefix.py` | `models/prefix.py` | `PrefixState`, released Unicorn r1-r4 traversal, decoded native transition to x5p/f5p/d5p, synthesis access and lambda embedding. |
 | `canonical/base_synthesis.py` | `models/base_synthesis.py` | x4/f4 to feature compensation c_B. No rate, training loop or metrics. |
 | `canonical/model.py` | `models/base.py` | `CanonicalBaseModel`, Base reconstruction and native Base baselines. |
 | `canonical/enhancement.py` | `models/enhancement.py` | Independent ResidualVAE wrapper and deterministic/encode/decode interfaces. |
-| Architecture part of `canonical/scalable_model.py` | `models/scalable.py` | `CanonicalScalableModel`, trainable scopes and Base/Full forward composition. |
+| Architecture part of `canonical/scalable_model.py` | `models/scalable.py` | `CanonicalScalableModel` and Base/Full forward composition. Existing trainable-scope methods remain attached during Batch 1/2 for move-only equivalence. |
 
 The model directory should read in dataflow order:
 
 ```text
 Prefix -> BaseSynthesis -> Base -> Enhancement -> Scalable Base/Full model
 ```
+
+Two known boundaries are intentionally deferred rather than mixed into the
+move-only batches:
+
+- `add_base_architecture_arguments()` is CLI/runtime support. Its final home is
+  `runtime/cli.py`; `models/config.py` ultimately contains architecture config
+  only.
+- `CanonicalScalableModel.set_trainable_scope()` and related freeze/unfreeze
+  behavior are training policy. Batch 1/2 retain their methods and public API;
+  a later review may extract their implementation to `training/scopes.py`.
 
 ### Checkpoint and runtime support
 
@@ -210,6 +220,11 @@ from scalable_attribute.canonical.scalable_model import (
 Old modules should initially be silent re-export shims, not emit deprecation
 warnings into training logs. Removal is outside this phase.
 
+`scalable_attribute/canonical/README.md` and its package documentation make the
+compatibility-only role explicit. The preferred reading path is
+`models/ -> training/evaluation/runtime`; no new implementation belongs in the
+compatibility package.
+
 Recorded CLI paths remain executable. If scripts are relocated in the final
 batch, the old files become thin `main()` forwarding wrappers. Argument names,
 defaults, output layouts and exit behavior remain unchanged. No scheduler
@@ -322,4 +337,3 @@ performance benchmarking is not a refactor acceptance criterion.
 
 Stop a batch if state-dict keys, strict-loader results, support/stride/channels,
 Base/Full reconstruction or rate identities differ from the accepted baseline.
-
