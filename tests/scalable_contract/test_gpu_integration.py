@@ -23,14 +23,36 @@ FIXTURES = {
 
 
 def sparse_equal(left, right):
+    import numpy as np
+
     if list(left.tensor_stride) != list(right.tensor_stride):
         return False
     if left.C.shape != right.C.shape:
         return False
-    left_order = sorted(range(len(left.C)), key=lambda i: tuple(left.C[i].tolist()))
-    right_order = sorted(range(len(right.C)), key=lambda i: tuple(right.C[i].tolist()))
-    return (torch.equal(left.C[left_order], right.C[right_order]) and
-            torch.equal(left.F[left_order], right.F[right_order]))
+    if left.F.shape != right.F.shape:
+        return False
+
+    # Copy each sparse tensor component to CPU exactly once. The previous
+    # per-row ``.tolist()`` sort forced thousands of tiny GPU synchronizations.
+    left_coordinates = left.C.detach().cpu().numpy()
+    right_coordinates = right.C.detach().cpu().numpy()
+    left_features = left.F.detach().cpu().numpy()
+    right_features = right.F.detach().cpu().numpy()
+
+    if np.array_equal(left_coordinates, right_coordinates):
+        return np.array_equal(left_features, right_features)
+
+    def coordinate_order(coordinates):
+        keys = tuple(coordinates[:, column] for column in
+                     range(coordinates.shape[1] - 1, -1, -1))
+        return np.lexsort(keys)
+
+    left_order = coordinate_order(left_coordinates)
+    right_order = coordinate_order(right_coordinates)
+    return (np.array_equal(left_coordinates[left_order],
+                           right_coordinates[right_order]) and
+            np.array_equal(left_features[left_order],
+                           right_features[right_order]))
 
 
 def load_attribute(path):
