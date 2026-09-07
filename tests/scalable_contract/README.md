@@ -40,6 +40,12 @@ lambda4096 and step3000. All state loads are strict: missing or unexpected keys
 fail. Optional externally recorded SHA256 values are provenance aids, not fixture
 availability gates.
 
+The fast loader suite also exercises the standard 8K
+`canonical_base_predict_correct` branch at lambda8192. It verifies that this
+format restores only BaseSynthesis, leaves the released Prefix unchanged,
+freezes the complete Base, and rejects missing or unexpected BaseSynthesis
+keys. This is synthetic and performs no physical coding.
+
 Each GPU test uses a new codec working directory. Cross-GPU floating-point or
 bitstream byte equality is not required; encode/decode equality is checked
 within each run after coordinate alignment.

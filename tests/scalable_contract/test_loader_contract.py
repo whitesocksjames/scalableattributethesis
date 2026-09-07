@@ -44,7 +44,63 @@ def rescue_checkpoint(model, released):
     }
 
 
+def standard_8k_checkpoint(model, released):
+    return {
+        "architecture": "canonical_base_predict_correct",
+        "config": model.config.to_dict(),
+        "base_lambda": 8192,
+        "base_checkpoint": str(released),
+        "base_synthesis": {
+            name: torch.full_like(value, 13)
+            for name, value in model.base_synthesis.state_dict().items()
+        },
+    }
+
+
 class LoaderContractTests(unittest.TestCase):
+ def test_8k_standard_restores_only_base_synthesis_and_freezes_base(self):
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        released = tmp_path / "released.pth"
+        released.touch()
+        model = DummyBase()
+        prefix_before = {
+            name: value.clone() for name, value in model.prefix.state_dict().items()
+        }
+        checkpoint = tmp_path / "standard_8k.pth"
+        torch.save(standard_8k_checkpoint(model, released), checkpoint)
+
+        load_frozen_base(model, checkpoint, released, 8192)
+
+        self.assertTrue(all(
+            torch.equal(value, prefix_before[name])
+            for name, value in model.prefix.state_dict().items()))
+        self.assertTrue(all(
+            torch.equal(value, torch.full_like(value, 13))
+            for value in model.base_synthesis.state_dict().values()))
+        self.assertFalse(any(
+            parameter.requires_grad for parameter in model.parameters()))
+
+
+ def test_8k_standard_rejects_missing_and_unexpected_base_synthesis_keys(self):
+  for mutation in ("missing", "unexpected"):
+   with self.subTest(mutation=mutation):
+    with tempfile.TemporaryDirectory() as directory:
+     tmp_path = Path(directory)
+     released = tmp_path / "released.pth"
+     released.touch()
+     model = DummyBase()
+     state = standard_8k_checkpoint(model, released)
+     if mutation == "missing":
+         state["base_synthesis"].pop(next(iter(state["base_synthesis"])))
+     else:
+         state["base_synthesis"]["unexpected_key"] = torch.zeros(1)
+     checkpoint = tmp_path / (mutation + ".pth")
+     torch.save(state, checkpoint)
+     with self.assertRaises(RuntimeError):
+         load_frozen_base(model, checkpoint, released, 8192)
+
+
  def test_2k_rescue_restores_prefix_and_base_synthesis_strictly(self):
     tmp_path = Path(tempfile.mkdtemp())
     released = tmp_path / "released.pth"
