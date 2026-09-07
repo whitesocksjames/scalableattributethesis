@@ -4,6 +4,11 @@ Status: staged organization, not final publication freeze. No experiments author
 
 ## Phase 1 completion
 
+Subsequent approved physical cleanup: six out-of-scope upstream mode directories
+and two root packages were relocated unchanged. The earlier "no move" entries
+below describe the completed navigation phase, not the later cleanup authorization.
+See [relocation and recovery](../../archive/README.md).
+
 Completed on 2026-09-07 following manager approval. The root README now provides
 five current navigation routes. Inventory and candidate provenance are published;
 stale runtime selection and broken historical HPC submission instructions are

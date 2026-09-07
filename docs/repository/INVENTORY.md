@@ -1,5 +1,11 @@
 # Repository inventory — Phase 1
 
+Physical cleanup update (2026-09-07): six non-current upstream mode directories
+now live under `archive/upstream_out_of_scope/`; two root ZIPs are retained under
+`archive/packages/`. See [exact relocation/recovery table](../../archive/README.md).
+The CSV remains the accepted pre-cleanup inventory, not a post-move path listing.
+Current model and result paths have not moved.
+
 Inventory date: 2026-09-07. This is a read-only navigation inventory for the
 Phase 1 rationalization. It does not authorize deletion, moving, renaming,
 rewriting, or retraining. The machine-readable companion is
@@ -36,7 +42,7 @@ the exact role of individual contents.
 | [`drafts/`](../../drafts/) | `LEGACY_EXPERIMENT;LEGACY_DIAGNOSTIC;HISTORICAL_EVIDENCE;GENERATED_ARTIFACT` | Dated reports, raw evidence, tables, plots, and reproduction inputs. Preserve paths; several directories/files are untracked. |
 | [`results/`](../../results/) | `ACTIVE_RESULT;HISTORICAL_EVIDENCE;GENERATED_ARTIFACT` | Current candidate tables/plots and older PCAC/PCGC/reference outputs. See [`CURRENT_RESULT_INDEX.md`](CURRENT_RESULT_INDEX.md). |
 | [`basic_models/`](../../basic_models/), [`lossy_attribute/`](../../lossy_attribute/), [`data_utils/`](../../data_utils/), [`cfg/`](../../cfg/), [`third_party/`](../../third_party/) | `UPSTREAM_UNICORN_DEPENDENCY` | Current canonical code imports native backbones, released lossy Attribute modules, data readers, CLI configuration, metrics, and G-PCC/PCError tools. |
-| [`lossless_attribute/`](../../lossless_attribute/), [`dynamic_attribute/`](../../dynamic_attribute/), [`lossless_geometry/`](../../lossless_geometry/), [`lossy_geometry/`](../../lossy_geometry/), [`dynamic_geometry/`](../../dynamic_geometry/), [`dynamic_geometry_lidar/`](../../dynamic_geometry_lidar/), [`pipelines/`](../../pipelines/) | `UPSTREAM_UNICORN_DEPENDENCY;HISTORICAL_EVIDENCE` | Original Unicorn source families retained for compatibility/recovery. Geometry and non-scalable modes are out of current thesis scope. |
+| [`lossless_attribute/`](../../archive/upstream_out_of_scope/lossless_attribute/), [`dynamic_attribute/`](../../archive/upstream_out_of_scope/dynamic_attribute/), [`lossless_geometry/`](../../archive/upstream_out_of_scope/lossless_geometry/), [`lossy_geometry/`](../../archive/upstream_out_of_scope/lossy_geometry/), [`dynamic_geometry/`](../../archive/upstream_out_of_scope/dynamic_geometry/), [`dynamic_geometry_lidar/`](../../archive/upstream_out_of_scope/dynamic_geometry_lidar/), [`pipelines/`](../../pipelines/) | `UPSTREAM_UNICORN_DEPENDENCY;HISTORICAL_EVIDENCE` | Original Unicorn source families retained for compatibility/recovery. Geometry and non-scalable modes are out of current thesis scope. |
 | [`figures/`](../../figures/) | `ACTIVE_RESULT;GENERATED_ARTIFACT;HISTORICAL_EVIDENCE` | Curated figures with source CSV/provenance; not a runtime entrypoint. |
 | [`references/`](../../references/) | `ACTIVE_CONFIG;HISTORICAL_EVIDENCE` | Read-only thesis task and Unicorn Part II references. |
 

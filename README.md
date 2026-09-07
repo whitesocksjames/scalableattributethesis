@@ -20,6 +20,10 @@ point 提供 full-resolution **Base** 与 **Full**。当前是阶段性开发整
 当前 4K：8K→4K joint step3000 Base/Full；Base bitrate 不要求低于 8K。
 256 保留 evaluation。所有点仍是 working candidates，不因历史报告写有 FREEZE 而自动封版。
 
+非当前的 dynamic/lossless/geometry 源码已收起到
+[archive/upstream_out_of_scope](archive/upstream_out_of_scope/)。
+原路径、依赖检查和恢复方法见 [archive](archive/README.md)。
+
 旧 `canonical_operating_points.json` 是兼容历史 CLI 的 official-mapping recipe，
 不能直接作为 current candidate registry。尤其不要用旧 `--point 2k/4k` 选择新权重。
 Coding/rate/metric convention 与 Original Unicorn 对齐；模型权重、数据和大型运行输出
