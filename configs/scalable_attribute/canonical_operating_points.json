@@ -1,5 +1,8 @@
 {
   "schema_version": 1,
+  "navigation_status": "legacy_official_mapping_recipe_not_current_candidate_registry",
+  "current_candidate_registry": "configs/scalable_attribute/current_candidates.json",
+  "selection_notice": "Historical selected_base_checkpoint entries are retained for existing CLI compatibility. Current 2K rescue, 4K joint and 1K/512/256 candidates are described in current_candidates.json. Do not use this file to select current comparison weights.",
   "canonical_base": {
     "architecture": {
       "input_mode": "x4_f4",

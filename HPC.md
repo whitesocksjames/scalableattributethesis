@@ -1,5 +1,13 @@
 # HPC Workspace
 
+> Phase 1 navigation (2026-09-07): current canonical commands are indexed in
+> [training](docs/repository/CURRENT_TRAINING_ENTRYPOINTS.md) and
+> [evaluation](docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md).
+> The local-first sweep submit/retry workflow documented below is **historical
+> and broken for current training/evaluation**: its generic train.py/evaluate.py
+> targets and sweep_spec.py no longer exist. Do not launch it as a canonical run.
+> Resource/account documentation is retained; scheduler state still requires live checks.
+
 本文件记录 project-level compute policy。N30操作见 [N30_GUIDE.md](N30_GUIDE.md)，FAU TinyGPU操作见 [HPC_GUIDE.md](HPC_GUIDE.md)。
 
 ## Dual-cluster compute policy
@@ -71,7 +79,7 @@ existing V100 protocol is required. New project-default training belongs on N30.
 Submitted jobs are never migrated silently; changing a pending request requires
 explicit cancel and resubmit.
 
-## FAU TinyGPU local-first workflow
+## Historical FAU TinyGPU local-first workflow — inactive submission paths
 
 Edit `scripts/hpc/sweep_spec.py` locally, then use the thin entry point:
 

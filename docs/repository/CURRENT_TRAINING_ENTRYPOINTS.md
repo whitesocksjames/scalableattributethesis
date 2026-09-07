@@ -1,0 +1,29 @@
+# Current training entry points
+
+This page locates code; it does not authorize a new run or change a recipe.
+Use [current candidates](CURRENT_OPERATING_POINTS.md) for initialization evidence.
+
+| Purpose | Entry point | Role |
+| --- | --- | --- |
+| Canonical BaseSynthesis training | [train_base.py](../../scripts/scalable_attribute/canonical/train_base.py) | Active |
+| Frozen Base + independent Enhancement | [train_enhancement.py](../../scripts/scalable_attribute/canonical/train_enhancement.py) | Active, including rescued Base compatibility |
+| Joint random Base/Full endpoint | [train_joint_endpoint.py](../../scripts/scalable_attribute/canonical/train_joint_endpoint.py) | Active for joint lineage; inspect exact initialization contract |
+| Base rescue scopes/samplers | [train_base_rescue.py](../../scripts/scalable_attribute/canonical/train_base_rescue.py) | Historical experiment entry, still needed for reproduction |
+| MVUB-only/mixed adaptation | [train_mvub_finetune.py](../../scripts/scalable_attribute/canonical/train_mvub_finetune.py), [train_enhancement_mixed.py](../../scripts/scalable_attribute/canonical/train_enhancement_mixed.py) | Historical experiments; reusable code is not deletion authority |
+
+`--point` reads the old official-mapping config. It does not resolve the current
+rescued/joint candidate set. For these candidates use the existing explicit
+checkpoint/profile/lambda options recorded in retained commands. In particular,
+4K joint target lambda=4096 with source family=32k8k is not official R04 (8k256).
+Do not replace a full-state checkpoint by its initial Base checkpoint.
+
+Source definitions: [data schedule](../../scalable_attribute/canonical/data_schedule.py),
+[joint objective](../../scalable_attribute/canonical/joint_endpoint.py),
+[rescue support](../../scalable_attribute/canonical/base_rescue.py).
+Architecture, optimizer recipe and sampler history remain separate concerns.
+Stage-2 D611 continues to require an explicit manager decision.
+
+Cluster wrappers: [N30 guide](../../N30_GUIDE.md), [HPC guide](../../HPC_GUIDE.md).
+`scripts/hpc/submit_train_sweep.py` and `submit_eval_sweep.py` target deleted legacy
+train/evaluate scripts. Their submission and retry workflows are not current
+canonical launchers. No automatic replacement CLI is claimed by this phase.

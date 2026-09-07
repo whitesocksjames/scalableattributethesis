@@ -1,5 +1,14 @@
 # Canonical Training Protocol
 
+> Navigation update, 2026-09-07: this document records the earlier working
+> training protocol, not the complete current checkpoint selection. See
+> [current architecture](repository/CURRENT_ARCHITECTURE.md),
+> [current candidates](repository/CURRENT_OPERATING_POINTS.md), and
+> [training entry points](repository/CURRENT_TRAINING_ENTRYPOINTS.md).
+> Selected 2K rescue and 4K joint have updated native weights. 256 remains
+> evaluable and 4K Base rate ordering is not a correctness gate. Existing
+> recipe text below is retained for historical reproducibility.
+
 Status: thesis working protocol, 2026-09-01. This document separates settings
 supported by current evidence from provisional stage-gated choices.
 

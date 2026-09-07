@@ -1,3 +1,33 @@
+# Scalable Attribute Thesis
+
+基于 Unicorn Part II 的两层质量可伸缩 RGB Attribute compression：每个 operating
+point 提供 full-resolution **Base** 与 **Full**。当前是阶段性开发整理，不是 final freeze。
+
+## 30 秒导航
+
+| 我要找什么？ | 直接打开 |
+| --- | --- |
+| 当前模型 / 新增 Base module | [CURRENT_ARCHITECTURE](docs/repository/CURRENT_ARCHITECTURE.md) |
+| 当前 checkpoints / 2K rescue / 4K joint | [CURRENT_OPERATING_POINTS](docs/repository/CURRENT_OPERATING_POINTS.md) · [machine-readable registry](configs/scalable_attribute/current_candidates.json) |
+| 当前训练入口 | [CURRENT_TRAINING_ENTRYPOINTS](docs/repository/CURRENT_TRAINING_ENTRYPOINTS.md) |
+| 当前 hard / external evaluation | [CURRENT_EVALUATION_ENTRYPOINTS](docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md) |
+| 当前汇总数据和 RD 图 | [CURRENT_RESULT_INDEX](docs/repository/CURRENT_RESULT_INDEX.md) |
+| 哪些 active / historical / broken？ | [Repository inventory](docs/repository/INVENTORY.md) |
+| 本次整理范围 | [Phase 1 plan](docs/repository/PHASE1_PLAN.md) |
+| N30 / HPC 使用规则 | [N30](N30_GUIDE.md) · [HPC](HPC_GUIDE.md) |
+
+当前 2K：U-PATH Base step500 + D111 Enhancement step1500。
+当前 4K：8K→4K joint step3000 Base/Full；Base bitrate 不要求低于 8K。
+256 保留 evaluation。所有点仍是 working candidates，不因历史报告写有 FREEZE 而自动封版。
+
+旧 `canonical_operating_points.json` 是兼容历史 CLI 的 official-mapping recipe，
+不能直接作为 current candidate registry。尤其不要用旧 `--point 2k/4k` 选择新权重。
+Coding/rate/metric convention 与 Original Unicorn 对齐；模型权重、数据和大型运行输出
+不作为源码资产。`drafts/`/`results/` 中的历史证据仍保留，其路径可能被分析脚本引用。
+
+<details>
+<summary>Original upstream Unicorn README (retained attribution and historical setup)</summary>
+
 # Unicorn: A Versatile Point Cloud Compressor Using Universal Multiscale Conditional Coding
 
 ## Abstract
@@ -45,3 +75,5 @@ For more information, please visit our homepage: https://njuvision.github.io/Uni
 ## Authors
 
 These files are provided by Nanjing University [Vision Lab](https://vision.nju.edu.cn/). Thanks to Prof. Dandan Ding from Hangzhou Normal University and Prof. Yi Lin from Fudan University for their help. Please contact us (mazhan@nju.edu.cn) if you have any questions.
+
+</details>
