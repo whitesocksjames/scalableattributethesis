@@ -43,3 +43,11 @@ availability gates.
 Each GPU test uses a new codec working directory. Cross-GPU floating-point or
 bitstream byte equality is not required; encode/decode equality is checked
 within each run after coordinate alignment.
+
+The slow gate performs exactly one physical Prefix encode/decode per operating
+point, then reuses that decoded state for Base synthesis and Enhancement
+encode/decode. It reports separate Prefix encode, Prefix decode, Base synthesis,
+Enhancement encode and Enhancement decode timings, plus explicit counters for
+one Prefix encode and zero native-r5 encode/consume calls. Set
+`SCALABLE_TEST_TARGET` to a single unittest method to run 2K and 4K as separate
+single-GPU jobs. The fast CPU gate never performs physical coding.

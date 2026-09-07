@@ -1,4 +1,6 @@
 import os
+import json
+import time
 import unittest
 from pathlib import Path
 
@@ -83,6 +85,78 @@ def make_4k_model(fixtures):
     return model
 
 
+def timed_hard_path_from_one_prefix(model, attribute):
+    """Run one physical Prefix and reuse its decoded state for Base and Full."""
+    import MinkowskiEngine as ME
+
+    prefix = model.base.prefix
+    native = prefix.model
+    lmb = model.conditioning_lambda
+    counters = {"prefix_physical_encode_calls": 0,
+                "prefix_decode_calls": 0,
+                "native_r5_encode_calls": 0,
+                "native_r5_consume_calls": 0}
+    timings = {}
+
+    started = time.monotonic()
+    counters["prefix_physical_encode_calls"] += 1
+    encoded, x_low, gpcc_bits = native(
+        attribute, training=False, lmb=lmb, encode=True,
+        max_residual_stages=4)
+    timings["prefix_encode_seconds"] = time.monotonic() - started
+    counters["native_r5_encode_calls"] = int(len(encoded) > 4)
+    if len(encoded) != 4:
+        raise AssertionError("physical Prefix did not produce exactly r1-r4")
+
+    x0 = ME.SparseTensor(
+        features=torch.zeros_like(attribute.F),
+        coordinate_map_key=attribute.coordinate_map_key,
+        coordinate_manager=attribute.coordinate_manager,
+        device=attribute.device)
+    started = time.monotonic()
+    counters["prefix_decode_calls"] += 1
+    x4, f4, d4 = native.decode(
+        x0=x0, x_low=x_low, enc_set_list=encoded, lmb=lmb,
+        max_residual_stages=4, return_state=True)
+    counters["native_r5_consume_calls"] = int(len(encoded) > 4)
+    timings["prefix_decode_seconds"] = time.monotonic() - started
+    state = prefix._complete_state(x4, f4, d4)
+    residual_bits = [int(len(item["strings"]) * 8) for item in encoded]
+    prefix_rate = {
+        "bits_xlow": int(gpcc_bits),
+        "residual_bits": residual_bits,
+        "num_residual_streams": len(encoded),
+        "base_bits": int(gpcc_bits + sum(residual_bits)),
+    }
+
+    started = time.monotonic()
+    base = model.base.reconstruct_from_state(state)
+    base["prefix_rate"] = prefix_rate
+    timings["base_synthesis_seconds"] = time.monotonic() - started
+
+    embedding = model._embedding(attribute.device)
+    started = time.monotonic()
+    encoded_enhancement = model.enhancement.encode(
+        base["Base"], attribute, base["F_B"], base["d5p"], embedding)
+    timings["enhancement_encode_seconds"] = time.monotonic() - started
+    payload = {name: encoded_enhancement[name]
+               for name in ("strings", "min_v", "max_v")}
+    started = time.monotonic()
+    decoded_enhancement = model.enhancement.decode(
+        payload, base["Base"], base["F_B"], base["d5p"], embedding)
+    timings["enhancement_decode_seconds"] = time.monotonic() - started
+    full = model._result(base, decoded_enhancement)
+    enhancement_bits = int(len(payload["strings"]) * 8)
+    full.update({
+        "encoded_Full": encoded_enhancement["x_out"],
+        "base_bits": prefix_rate["base_bits"],
+        "enhancement_bits": enhancement_bits,
+        "full_bits": prefix_rate["base_bits"] + enhancement_bits,
+        "prefix_rate": prefix_rate,
+    })
+    return base, full, counters, timings
+
+
 @unittest.skipUnless(os.environ.get("SCALABLE_RUN_GPU_TESTS") == "1",
                      "GPU integration tests not requested")
 class GPUIntegrationTests(unittest.TestCase):
@@ -119,9 +193,15 @@ class GPUIntegrationTests(unittest.TestCase):
     os.chdir(codec)
     self.addCleanup(os.chdir, previous)
 
-    base_only = model.base_forward(attribute, hard=True)
-    full = model.hard_reconstruct(attribute)
+    base_only, full, counters, timings = timed_hard_path_from_one_prefix(
+        model, attribute)
+    print("SCALABLE_CONTRACT_TIMINGS " + json.dumps(
+        {**counters, **timings}, sort_keys=True), flush=True)
     rate = full["prefix_rate"]
+    self.assertEqual(counters["prefix_physical_encode_calls"], 1)
+    self.assertEqual(counters["prefix_decode_calls"], 1)
+    self.assertEqual(counters["native_r5_encode_calls"], 0)
+    self.assertEqual(counters["native_r5_consume_calls"], 0)
     self.assertEqual(rate["num_residual_streams"], 4)
     self.assertEqual(len(rate["residual_bits"]), 4)
     self.assertEqual(full["base_bits"], rate["bits_xlow"] + sum(rate["residual_bits"]))
