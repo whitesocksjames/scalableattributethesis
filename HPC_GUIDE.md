@@ -3,8 +3,9 @@
 > 2026-09-07 阶段性整理：下文旧 `thpc submit-train/submit-eval/retry` sweep
 > 工作流依赖已不存在的 legacy entrypoints/spec，不可作为当前 canonical 提交入口。
 > 当前代码导航见 [training](docs/repository/CURRENT_TRAINING_ENTRYPOINTS.md) /
-> [evaluation](docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md)。本次仅标记历史说明，
-> 未改写 scheduler、运行参数或正在执行的 source。
+> [evaluation](docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md)。Batch 2 已将两份失效
+> sweep wrapper 移至 `archive/legacy_hpc/`；旧 submit-train/submit-eval 在同步或 SSH
+> 前直接报错。未改写当前 scheduler recipe、运行参数或正在执行的 source。
 
 这份手册只用于 FAU TinyGPU。N30R3作为 primary training平台的规则见 [N30_GUIDE.md](N30_GUIDE.md)。Project-level dual-cluster policy见 [HPC.md](HPC.md)。
 

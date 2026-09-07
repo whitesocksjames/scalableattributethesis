@@ -100,62 +100,17 @@ def common_submit_command(script, args):
 
 
 def submit_train(args):
-    if not args.no_sync:
-        sync_source()
-    command = common_submit_command(
-        "scripts/hpc/submit_train_sweep.py", args)
-    if args.val_data_root:
-        command.extend(["--val-data-root", remote_value(args.val_data_root)])
-    if args.afterok:
-        command.extend(["--afterok", shlex.quote(args.afterok)])
-    result = subprocess.run(
-        ["ssh", SSH_ALIAS, remote_prefix() + " ".join(command)],
-        text=True, capture_output=True)
-    print(result.stdout, end="")
-    print(result.stderr, end="", file=sys.stderr)
-    output = result.stdout
-    if args.submit_eval_after_train:
-        if args.dry_run:
-            names = re.findall(r"^train:\s+(\S+)\s+->", output,
-                               flags=re.MULTILINE)
-            submitted = [(name, "TRAIN_JOB_ID") for name in names]
-        else:
-            submitted = re.findall(r"^SUBMITTED\s+(\S+)\s+(\d+)\s*$",
-                                   output, flags=re.MULTILINE)
-        eval_failures = []
-        for name, job_id in submitted:
-            eval_args = argparse.Namespace(**vars(args))
-            eval_args.only = [name]
-            eval_args.afterok = job_id
-            eval_args.no_sync = True
-            eval_args.profile = DEFAULT_RESOURCE_PROFILES["eval"]
-            try:
-                submit_eval(eval_args)
-            except subprocess.CalledProcessError as error:
-                eval_failures.append(name)
-                print("afterok eval submission failed for {}: {}".format(
-                    name, error), file=sys.stderr)
-        if eval_failures:
-            raise RuntimeError(
-                "afterok eval submission failed for: {}".format(
-                    ", ".join(eval_failures)))
-    result.check_returncode()
+    raise RuntimeError(
+        "Historical sweep training is retired: its train.py target no longer "
+        "exists. See docs/repository/CURRENT_TRAINING_ENTRYPOINTS.md. "
+        "No source sync or job submission was performed.")
 
 
 def submit_eval(args):
-    if not args.no_sync:
-        sync_source()
-    command = common_submit_command(
-        "scripts/hpc/submit_eval_sweep.py", args)
-    command.extend(["--gpcc-binary", '"{}"'.format(GPCC_BINARY)])
-    if getattr(args, "afterok", None):
-        command.extend(["--afterok", shlex.quote(args.afterok)])
-    result = subprocess.run(
-        ["ssh", SSH_ALIAS, remote_prefix() + " ".join(command)],
-        text=True, capture_output=True)
-    print(result.stdout, end="")
-    print(result.stderr, end="", file=sys.stderr)
-    result.check_returncode()
+    raise RuntimeError(
+        "Historical sweep evaluation is retired: its evaluate.py target no "
+        "longer exists. See docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md. "
+        "No source sync or job submission was performed.")
 
 
 def submit_reference(args):

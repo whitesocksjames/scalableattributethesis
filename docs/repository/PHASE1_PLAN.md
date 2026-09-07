@@ -9,6 +9,32 @@ and two root packages were relocated unchanged. The earlier "no move" entries
 below describe the completed navigation phase, not the later cleanup authorization.
 See [relocation and recovery](../../archive/README.md).
 
+### Physical cleanup Batch 2 verification
+
+On 2026-09-07, source-only archives of `17f8ab0` were checked in isolated
+directories with the existing N30 and FAU environments. Both returned
+`CPU_SMOKE_PASS`: canonical/prefix/enhancement/scalable-model imports, native
+`lossy_attribute.model` and attribute I/O imports, operating-point config loading,
+candidate registry JSON parsing, and `--help` for `train_base`, `train_enhancement`,
+`train_joint_endpoint`, `evaluate_base_formal`, `evaluate_scalable_formal`, and
+`evaluate_8ivfb_sequence`. No GPU, dataset/checkpoint loading, or Slurm submission.
+This verifies imports, not numerical codec behavior or remote checkpoint paths.
+
+Retained remote logs:
+
+- N30: `/data/run01/scz0ade/Tanzeyu/phase1_cpu_smoke_17f8ab0.66ixQL/smoke.log`
+- FAU: `/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/phase1_cpu_smoke_17f8ab0.Pf5UHM/smoke.log`
+
+Local CU121 lacks PyTorch3D; its import failure is an environment limitation,
+not evidence of a cleanup regression. No packages were installed. Remote
+torchac used the existing cached extension (`ninja: no work to do`).
+
+Batch 2 moves and their caller/recovery evidence are recorded in
+`archive/README.md`. The broken sweep submission paths now reject before
+source sync/SSH rather than dispatching nonexistent entrypoints. Their retired
+dispatch implementation is recoverable in Git history. Queue/reference helpers,
+current model/training/evaluation code, candidate data and all results stay put.
+
 Completed on 2026-09-07 following manager approval. The root README now provides
 five current navigation routes. Inventory and candidate provenance are published;
 stale runtime selection and broken historical HPC submission instructions are

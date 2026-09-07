@@ -8,6 +8,11 @@
 > targets and sweep_spec.py no longer exist. Do not launch it as a canonical run.
 > Resource/account documentation is retained; scheduler state still requires live checks.
 
+Batch 2: the two broken sweep wrappers now live in `archive/legacy_hpc/`.
+`remote_submit.py submit-train/submit-eval` explicitly reject before sync/SSH;
+the historical examples below are not launch instructions. Queue/reference
+helpers remain in place; canonical jobs use explicit current entrypoints.
+
 本文件记录 project-level compute policy。N30操作见 [N30_GUIDE.md](N30_GUIDE.md)，FAU TinyGPU操作见 [HPC_GUIDE.md](HPC_GUIDE.md)。
 
 ## Dual-cluster compute policy
