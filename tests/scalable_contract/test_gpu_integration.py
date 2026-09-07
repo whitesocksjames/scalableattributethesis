@@ -1,10 +1,14 @@
+import time
+_MODULE_IMPORT_STARTED = time.monotonic()
+
 import os
 import json
-import time
 import unittest
 from pathlib import Path
 
 import torch
+
+_MODULE_IMPORT_SECONDS = time.monotonic() - _MODULE_IMPORT_STARTED
 
 FIXTURES = {
     "sample_h5": "SCALABLE_TEST_H5",
@@ -161,6 +165,7 @@ def timed_hard_path_from_one_prefix(model, attribute):
                      "GPU integration tests not requested")
 class GPUIntegrationTests(unittest.TestCase):
  def setUp(self):
+    started = time.monotonic()
     missing = [variable for variable in FIXTURES.values()
                if not os.environ.get(variable)
                or not Path(os.environ[variable]).exists()]
@@ -175,6 +180,7 @@ class GPUIntegrationTests(unittest.TestCase):
         self.skipTest("CUDA unavailable")
     self.fixtures = {name: str(Path(os.environ[variable]).resolve())
                      for name, variable in FIXTURES.items()}
+    self._fixture_setup_seconds = time.monotonic() - started
 
  def test_2k_real_hard_scalable_contract(self):
     self._check(make_2k_model)
@@ -184,30 +190,102 @@ class GPUIntegrationTests(unittest.TestCase):
 
  def _check(self, factory):
     import tempfile
+    check_started = time.monotonic()
+    timings = {
+        "module_import_seconds": _MODULE_IMPORT_SECONDS,
+        "fixture_setup_seconds": self._fixture_setup_seconds,
+    }
+
+    started = time.monotonic()
+    # Import and initialize the complete runtime before attributing time to H5
+    # preparation or checkpoint construction. The factories import these same
+    # cached modules again, so no production API needs to change.
+    import MinkowskiEngine  # noqa: F401
+    from data_utils.attribute.inout import read_h5  # noqa: F401
+    from scalable_attribute.canonical.config import BaseSynthesisConfig  # noqa: F401
+    from scalable_attribute.canonical.model import CanonicalBaseModel  # noqa: F401
+    from scalable_attribute.canonical.scalable_model import (  # noqa: F401
+        CanonicalScalableModel, load_finetuned_scalable, load_frozen_base)
+    torch.cuda.init()
+    torch.cuda.synchronize()
+    timings["imports_environment_initialization_seconds"] = (
+        _MODULE_IMPORT_SECONDS + time.monotonic() - started)
+
+    started = time.monotonic()
     attribute = load_attribute(self.fixtures["sample_h5"])
+    torch.cuda.synchronize()
+    timings["h5_data_preparation_seconds"] = time.monotonic() - started
+
+    started = time.monotonic()
     model = factory(self.fixtures)
-    codec = Path(tempfile.mkdtemp(prefix="scalable_codec_"))
+    torch.cuda.synchronize()
+    timings["checkpoint_load_model_construction_seconds"] = (
+        time.monotonic() - started)
+
+    started = time.monotonic()
+    codec_context = tempfile.TemporaryDirectory(prefix="scalable_codec_")
+    codec = Path(codec_context.name)
     os.symlink(self.fixtures["gpcc"], codec / "tmc3_v21")
     (codec / "output" / "gpcc").mkdir(parents=True)
     previous = Path.cwd()
     os.chdir(codec)
-    self.addCleanup(os.chdir, previous)
+    timings["fixture_setup_seconds"] += time.monotonic() - started
+    counters = {
+        "prefix_physical_encode_calls": 0,
+        "prefix_decode_calls": 0,
+        "native_r5_encode_calls": 0,
+        "native_r5_consume_calls": 0,
+    }
 
-    base_only, full, counters, timings = timed_hard_path_from_one_prefix(
-        model, attribute)
-    print("SCALABLE_CONTRACT_TIMINGS " + json.dumps(
-        {**counters, **timings}, sort_keys=True), flush=True)
-    rate = full["prefix_rate"]
-    self.assertEqual(counters["prefix_physical_encode_calls"], 1)
-    self.assertEqual(counters["prefix_decode_calls"], 1)
-    self.assertEqual(counters["native_r5_encode_calls"], 0)
-    self.assertEqual(counters["native_r5_consume_calls"], 0)
-    self.assertEqual(rate["num_residual_streams"], 4)
-    self.assertEqual(len(rate["residual_bits"]), 4)
-    self.assertEqual(full["base_bits"], rate["bits_xlow"] + sum(rate["residual_bits"]))
-    self.assertEqual(full["full_bits"], full["base_bits"] + full["enhancement_bits"])
-    self.assertTrue(sparse_equal(base_only["Base"], full["Base"]))
-    self.assertEqual(base_only["prefix_rate"]["base_bits"], full["base_bits"])
-    self.assertEqual(list(full["Base"].tensor_stride), [1])
-    self.assertTrue(torch.equal(full["Base"].C, attribute.C))
-    self.assertTrue(sparse_equal(full["encoded_Full"], full["Full"]))
+    try:
+        base_only, full, counters, codec_timings = (
+            timed_hard_path_from_one_prefix(model, attribute))
+        timings.update(codec_timings)
+
+        started = time.monotonic()
+        rate = full["prefix_rate"]
+        self.assertEqual(counters["prefix_physical_encode_calls"], 1)
+        self.assertEqual(counters["prefix_decode_calls"], 1)
+        self.assertEqual(counters["native_r5_encode_calls"], 0)
+        self.assertEqual(counters["native_r5_consume_calls"], 0)
+        self.assertEqual(rate["num_residual_streams"], 4)
+        self.assertEqual(len(rate["residual_bits"]), 4)
+        self.assertEqual(full["base_bits"],
+                         rate["bits_xlow"] + sum(rate["residual_bits"]))
+        self.assertEqual(full["full_bits"],
+                         full["base_bits"] + full["enhancement_bits"])
+        self.assertTrue(sparse_equal(base_only["Base"], full["Base"]))
+        self.assertEqual(base_only["prefix_rate"]["base_bits"],
+                         full["base_bits"])
+        self.assertTrue(all(int(value) == 1
+                            for value in full["Base"].tensor_stride))
+        self.assertEqual(len(list(full["Base"].tensor_stride)), 3)
+        self.assertTrue(torch.equal(full["Base"].C, attribute.C))
+        self.assertTrue(sparse_equal(full["encoded_Full"], full["Full"]))
+        timings["contract_assertions_seconds"] = time.monotonic() - started
+    finally:
+        started = time.monotonic()
+        os.chdir(previous)
+        codec_context.cleanup()
+        torch.cuda.synchronize()
+        timings["teardown_seconds"] = time.monotonic() - started
+        timings["total_test_walltime_seconds"] = (
+            _MODULE_IMPORT_SECONDS + self._fixture_setup_seconds
+            + time.monotonic() - check_started)
+        accounted = sum(timings.get(name, 0.0) for name in (
+            "fixture_setup_seconds",
+            "imports_environment_initialization_seconds",
+            "checkpoint_load_model_construction_seconds",
+            "h5_data_preparation_seconds",
+            "prefix_encode_seconds",
+            "prefix_decode_seconds",
+            "base_synthesis_seconds",
+            "enhancement_encode_seconds",
+            "enhancement_decode_seconds",
+            "contract_assertions_seconds",
+            "teardown_seconds",
+        ))
+        timings["unattributed_test_seconds"] = max(
+            0.0, timings["total_test_walltime_seconds"] - accounted)
+        print("SCALABLE_CONTRACT_TIMINGS " + json.dumps(
+            {**counters, **timings}, sort_keys=True), flush=True)
