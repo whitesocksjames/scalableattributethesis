@@ -46,6 +46,13 @@ format restores only BaseSynthesis, leaves the released Prefix unchanged,
 freezes the complete Base, and rejects missing or unexpected BaseSynthesis
 keys. This is synthetic and performs no physical coding.
 
+Two lightweight single-GPU pre-refactor gates load the real selected 4K joint
+checkpoint and the real selected 8K standard Base plus independent Enhancement.
+They perform one deterministic Base/Full reconstruction and validate strict
+state keys, provenance metadata, support, stride, channels and finite values.
+Mocks fail closed if either test attempts physical Prefix coding or arithmetic
+Enhancement encode/decode.
+
 Each GPU test uses a new codec working directory. Cross-GPU floating-point or
 bitstream byte equality is not required; encode/decode equality is checked
 within each run after coordinate alignment.
