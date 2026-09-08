@@ -72,7 +72,7 @@ than moving internal modules behind re-export shims.
 
 | Current file | Proposed implementation file | Responsibility |
 | --- | --- | --- |
-| `canonical/config.py` | `models/config.py` | Immutable BaseSynthesis architecture configuration. The compatibility CLI helper remains temporarily and moves to `runtime/cli.py` in a later reviewed batch. |
+| `canonical/config.py` | `models/config.py` | Immutable BaseSynthesis architecture configuration. The compatibility CLI helper remains temporarily; its final support location is decided by the boundary review rather than by creating a module in advance. |
 | `canonical/prefix.py` | `models/prefix.py` | `PrefixState`, released Unicorn r1-r4 traversal, decoded native transition to x5p/f5p/d5p, synthesis access and lambda embedding. |
 | `canonical/base_synthesis.py` | `models/base_synthesis.py` | x4/f4 to feature compensation c_B. No rate, training loop or metrics. |
 | `canonical/model.py` | `models/base.py` | `CanonicalBaseModel`, Base reconstruction and native Base baselines. |
@@ -88,12 +88,13 @@ Prefix -> BaseSynthesis -> Base -> Enhancement -> Scalable Base/Full model
 Two known boundaries are intentionally deferred rather than mixed into the
 move-only batches:
 
-- `add_base_architecture_arguments()` is CLI/runtime support. Its final home is
-  `runtime/cli.py`; `models/config.py` ultimately contains architecture config
-  only.
+- `add_base_architecture_arguments()` is CLI/runtime support. `models/config.py`
+  ultimately contains architecture config only, but the final support location
+  may be an existing runtime/CLI module rather than a new one-file wrapper.
 - `CanonicalScalableModel.set_trainable_scope()` and related freeze/unfreeze
   behavior are training policy. Batch 1/2 retain their methods and public API;
-  a later review may extract their implementation to `training/scopes.py`.
+  a later review decides whether extraction or consolidation into an existing
+  training module actually improves readability.
 
 ### Checkpoint and runtime support
 
@@ -334,6 +335,15 @@ scope policy to `training/` where compatibility risk permits. PyTorch
 `train()` overrides and model-owned differentiable forwards are not moved merely
 for directory purity. This is a reviewed boundary decision after Batch 5, not a
 change authorized by the move-only batches.
+
+Directory boundaries (`models`, `training`, `evaluation`, and `runtime`) express
+responsibility, not mandatory file granularity. The final review favors the
+smallest structure that lets a thesis reader follow each dataflow without
+unnecessary file jumping: small, tightly coupled modules may be consolidated;
+thin wrappers without independent conceptual value need not become permanent;
+and files are split only when they contain genuinely distinct responsibilities.
+Any consolidation/cleanup is kept in a separate small commit from move-only and
+compatibility changes so semantic drift remains easy to identify.
 
 ### Deferred experiment/result organization
 
