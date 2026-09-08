@@ -2,12 +2,12 @@
 
 | Input / endpoint | Entry point |
 | --- | --- |
-| H5 Base+Full physical hard (RWTT-28Lite / existing Full28 contract) | [evaluate_scalable_formal.py](../../scripts/scalable_attribute/canonical/evaluate_scalable_formal.py) |
-| External PLY sequences, Base/Full including joint | [evaluate_8ivfb_sequence.py](../../scripts/scalable_attribute/canonical/evaluate_8ivfb_sequence.py) (also existing Owlii prepared input) |
-| Canonical Base-only physical | [evaluate_base_formal.py](../../scripts/scalable_attribute/canonical/evaluate_base_formal.py) |
-| Rescued Base physical | [evaluate_base_rescue.py](../../scripts/scalable_attribute/canonical/evaluate_base_rescue.py), [arm wrapper](../../scripts/scalable_attribute/canonical/evaluate_base_rescue_arm.py) |
-| Tensor distortion / training validation | [evaluate_base.py](../../scripts/scalable_attribute/canonical/evaluate_base.py) |
-| Existing locally reproduced Unicorn reference | [evaluate_unicorn_reference.py](../../scripts/scalable_attribute/evaluate_unicorn_reference.py) |
+| H5 Base+Full physical hard (RWTT-28Lite / existing Full28 contract) | [evaluate_scalable_formal.py](../../scripts/scalable_attribute/evaluation/evaluate_scalable_formal.py) |
+| External PLY sequences, Base/Full including joint | [evaluate_8ivfb_sequence.py](../../scripts/scalable_attribute/evaluation/evaluate_8ivfb_sequence.py) (also existing Owlii prepared input) |
+| Canonical Base-only physical | [evaluate_base_formal.py](../../scripts/scalable_attribute/evaluation/evaluate_base_formal.py) |
+| Rescued Base physical | [evaluate_base_rescue.py](../../scripts/scalable_attribute/historical/evaluate_base_rescue.py), [arm wrapper](../../scripts/scalable_attribute/historical/evaluate_base_rescue_arm.py) |
+| Tensor distortion / training validation | [evaluate_base.py](../../scripts/scalable_attribute/evaluation/evaluate_base.py) |
+| Existing locally reproduced Unicorn reference | [evaluate_unicorn_reference.py](../../scripts/scalable_attribute/evaluation/evaluate_unicorn_reference.py) |
 
 Names do not establish provenance: the existing reference evaluator imports this
 repository's native implementation. It is not yet the proposed independent
@@ -32,3 +32,8 @@ Slurm templates are recipe-specific, not authorization to relaunch experiments.
 
 No evaluation was submitted by Phase 1. Regression tests, independent upstream
 workspace and new comparison runs belong to later reviewed phases.
+
+The old root and `canonical/` paths remain CLI compatibility wrappers. New
+invocations should use `evaluation/`; aggregation, plotting, and probes are
+classified under `diagnostics/`. See the
+[script index](../../scripts/scalable_attribute/README.md).

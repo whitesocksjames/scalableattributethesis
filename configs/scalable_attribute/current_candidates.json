@@ -17,13 +17,13 @@
   "evidence_policy": "Each candidate names retained resolved_args/raw summary files and the loader script family used by those records.",
   "loader_scripts": {
     "formal_rwtt": {
-      "path": "scripts/scalable_attribute/canonical/evaluate_scalable_formal.py",
+      "path": "scripts/scalable_attribute/evaluation/evaluate_scalable_formal.py",
       "origin_root": "repository",
       "sha256": null,
       "verification": "unverified"
     },
     "external_sequence": {
-      "path": "scripts/scalable_attribute/canonical/evaluate_8ivfb_sequence.py",
+      "path": "scripts/scalable_attribute/evaluation/evaluate_8ivfb_sequence.py",
       "origin_root": "repository",
       "sha256": null,
       "verification": "unverified"
