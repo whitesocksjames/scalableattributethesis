@@ -13,7 +13,7 @@ import torch
 
 from data_utils.dataloaders.attribute_dataloader import PCDataset
 from scalable_attribute.canonical.config import BaseSynthesisConfig
-from scalable_attribute.canonical.evaluation import evaluate_base
+from scalable_attribute.evaluation.base_validation import evaluate_base
 from scalable_attribute.canonical.model import CanonicalBaseModel
 from scalable_attribute.data import h5_files
 from scalable_attribute.evaluation import psnr

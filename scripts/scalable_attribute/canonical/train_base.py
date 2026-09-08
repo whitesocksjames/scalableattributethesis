@@ -19,9 +19,9 @@ from data_utils.dataloaders.attribute_dataloader import make_data_loader
 from scalable_attribute.canonical.base_synthesis import BaseSynthesis
 from scalable_attribute.canonical.config import (
     BaseSynthesisConfig, add_base_architecture_arguments)
-from scalable_attribute.canonical.evaluation import evaluate_base
+from scalable_attribute.evaluation.base_validation import evaluate_base
 from scalable_attribute.canonical.model import CanonicalBaseModel
-from scalable_attribute.canonical.operating_points import (
+from scalable_attribute.runtime.operating_points import (
     DEFAULT_CONFIG, resolve_operating_point)
 from scalable_attribute.data import UncachedPCDataset, h5_files
 

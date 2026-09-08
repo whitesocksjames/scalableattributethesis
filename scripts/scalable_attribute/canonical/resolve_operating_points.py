@@ -8,7 +8,7 @@ import subprocess
 
 import torch
 
-from scalable_attribute.canonical.operating_points import (
+from scalable_attribute.runtime.operating_points import (
     DEFAULT_CONFIG, load_operating_points, resolve_operating_point)
 
 

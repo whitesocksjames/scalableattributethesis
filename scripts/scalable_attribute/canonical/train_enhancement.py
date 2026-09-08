@@ -22,7 +22,7 @@ from scalable_attribute.canonical.config import BaseSynthesisConfig
 from scalable_attribute.training.data_schedule import (
     ContinuationBatchSampler, require_compatible_schedule)
 from scalable_attribute.canonical.model import CanonicalBaseModel
-from scalable_attribute.canonical.operating_points import (
+from scalable_attribute.runtime.operating_points import (
     DEFAULT_CONFIG, OperatingPointConfig)
 from scalable_attribute.canonical.scalable_model import (
     CanonicalScalableModel, load_frozen_base)

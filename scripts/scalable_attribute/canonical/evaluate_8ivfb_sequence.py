@@ -19,7 +19,7 @@ from scalable_attribute.canonical.base_synthesis import BaseSynthesis
 from scalable_attribute.canonical.config import BaseSynthesisConfig
 from scalable_attribute.canonical.enhancement import EnhancementVAE
 from scalable_attribute.canonical.model import CanonicalBaseModel
-from scalable_attribute.canonical.operating_points import (
+from scalable_attribute.runtime.operating_points import (
     DEFAULT_CONFIG, point_for_lambda, resolve_operating_point)
 from scalable_attribute.canonical.scalable_model import load_frozen_base
 from scalable_attribute.reference_points import OFFICIAL_RWTT_REFERENCE_POINTS

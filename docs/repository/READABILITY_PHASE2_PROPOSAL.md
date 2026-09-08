@@ -130,6 +130,7 @@ commands depend on them.
 
 | Current file | Proposed location | Responsibility |
 | --- | --- | --- |
+| `scalable_attribute/evaluation.py` | `evaluation/__init__.py` | Preserve the existing public PSNR, sample-identity and model-aggregation import surface while converting the module into a package. |
 | `canonical/evaluation.py` | `evaluation/base_validation.py` | Tensor distortion and Base validation aggregation. |
 | `scripts/.../canonical/evaluate_scalable_formal.py` | `scripts/.../evaluation/evaluate_scalable_formal.py` | H5 physical Base/Full evaluation. |
 | `scripts/.../canonical/evaluate_8ivfb_sequence.py` | `scripts/.../evaluation/evaluate_external_sequence.py` | Existing 8i/Owlii prepared-input physical evaluation. The rename is deferred until callers are audited. |
@@ -318,6 +319,21 @@ Run the complete fast suite and the existing 4K/8K lightweight gates. Run one
 2K slow physical-code integration gate only once after all batches, not after
 every move. The expected outcome is identical reconstruction/rate contracts;
 performance benchmarking is not a refactor acceptance criterion.
+
+### Final readability boundary review
+
+After Batch 4-5 and their existing equivalence gates pass, review the remaining
+training-policy coupling in `models/base.py` and `models/scalable.py` symbol by
+symbol. In particular, classify `TRAINABLE_SCOPES`, `set_trainable_scope()`,
+freeze/unfreeze parameter policy, and the `base_synthesis_only`, `base_path`,
+`full`, and `enhancement_only` policies.
+
+The goal is to keep architecture, model state, and necessary differentiable
+forward interfaces in `models/`, while moving experiment-specific trainable
+scope policy to `training/` where compatibility risk permits. PyTorch
+`train()` overrides and model-owned differentiable forwards are not moved merely
+for directory purity. This is a reviewed boundary decision after Batch 5, not a
+change authorized by the move-only batches.
 
 ### Deferred experiment/result organization
 

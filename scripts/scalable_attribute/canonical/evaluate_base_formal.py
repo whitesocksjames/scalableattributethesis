@@ -18,7 +18,7 @@ from data_utils.attribute.inout import read_h5, write_ply_ascii
 from scalable_attribute.canonical.base_synthesis import BaseSynthesis
 from scalable_attribute.canonical.config import BaseSynthesisConfig
 from scalable_attribute.canonical.model import CanonicalBaseModel
-from scalable_attribute.canonical.operating_points import (
+from scalable_attribute.runtime.operating_points import (
     DEFAULT_CONFIG, point_for_lambda, resolve_operating_point)
 from scalable_attribute.canonical.scalable_model import load_frozen_base
 from scalable_attribute.data import h5_files
