@@ -4,9 +4,10 @@ The implementation follows the decoder dataflow:
 
 ``Prefix -> BaseSynthesis -> Base -> Enhancement``.
 
-Training policy, evaluation, checkpoint loading, and command-line parsing are
-separate concerns.  A small amount of legacy coupling remains during the
-move-only refactor and is documented in the readability proposal.
+Training entry points choose optimization scopes, while model-owned lifecycle
+invariants and differentiable endpoint forwards remain beside the graph they
+control. Evaluation, checkpoint loading, and command-line parsing are separate
+concerns. The final boundary decisions are documented in the repository guide.
 """
 
 from scalable_attribute.models.config import BaseSynthesisConfig
