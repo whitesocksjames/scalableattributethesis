@@ -17,9 +17,9 @@ checkpoint/profile/lambda options recorded in retained commands. In particular,
 4K joint target lambda=4096 with source family=32k8k is not official R04 (8k256).
 Do not replace a full-state checkpoint by its initial Base checkpoint.
 
-Source definitions: [data schedule](../../scalable_attribute/canonical/data_schedule.py),
-[joint objective](../../scalable_attribute/canonical/joint_endpoint.py),
-[rescue support](../../scalable_attribute/canonical/base_rescue.py).
+Source definitions: [data schedule](../../scalable_attribute/training/data_schedule.py),
+[joint objective](../../scalable_attribute/training/joint_endpoint.py),
+[rescue support](../../scalable_attribute/training/base_rescue.py).
 Architecture, optimizer recipe and sampler history remain separate concerns.
 Stage-2 D611 continues to require an explicit manager decision.
 

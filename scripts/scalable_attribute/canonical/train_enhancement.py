@@ -19,7 +19,7 @@ import torch
 from basic_models.loss import get_bits
 from data_utils.dataloaders.attribute_dataloader import collate_pointcloud_fn
 from scalable_attribute.canonical.config import BaseSynthesisConfig
-from scalable_attribute.canonical.data_schedule import (
+from scalable_attribute.training.data_schedule import (
     ContinuationBatchSampler, require_compatible_schedule)
 from scalable_attribute.canonical.model import CanonicalBaseModel
 from scalable_attribute.canonical.operating_points import (

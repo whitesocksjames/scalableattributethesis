@@ -20,8 +20,8 @@ import torch
 
 from data_utils.dataloaders.attribute_dataloader import collate_pointcloud_fn
 from scalable_attribute.canonical.config import BaseSynthesisConfig
-from scalable_attribute.canonical.data_schedule import ContinuationBatchSampler
-from scalable_attribute.canonical.joint_endpoint import (
+from scalable_attribute.training.data_schedule import ContinuationBatchSampler
+from scalable_attribute.training.joint_endpoint import (
     joint_endpoint_objective, sample_endpoint)
 from scalable_attribute.canonical.model import CanonicalBaseModel
 from scalable_attribute.canonical.scalable_model import (

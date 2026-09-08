@@ -18,7 +18,7 @@ import numpy as np
 import torch
 
 from data_utils.dataloaders.attribute_dataloader import collate_pointcloud_fn
-from scalable_attribute.canonical.base_rescue import (
+from scalable_attribute.training.base_rescue import (
     DeterministicWeightedBatchSampler, base_rescue_objective,
     classify_difficulty, load_difficulty_scores, sample_key)
 from scalable_attribute.canonical.config import (
