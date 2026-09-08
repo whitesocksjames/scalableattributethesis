@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scalable_attribute.canonical.scalable_model import (
+from scalable_attribute.runtime.checkpoints import (
     FINE_TUNE_ARCHITECTURE, load_finetuned_scalable, load_frozen_base)
 
 

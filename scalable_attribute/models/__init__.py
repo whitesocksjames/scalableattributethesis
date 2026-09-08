@@ -14,6 +14,7 @@ from scalable_attribute.models.prefix import FrozenUnicornPrefix, PrefixState
 from scalable_attribute.models.base_synthesis import BaseSynthesis
 from scalable_attribute.models.base import CanonicalBaseModel
 from scalable_attribute.models.enhancement import EnhancementVAE
+from scalable_attribute.models.scalable import CanonicalScalableModel
 
 __all__ = [
     "BaseSynthesisConfig",
@@ -22,4 +23,5 @@ __all__ = [
     "BaseSynthesis",
     "CanonicalBaseModel",
     "EnhancementVAE",
+    "CanonicalScalableModel",
 ]

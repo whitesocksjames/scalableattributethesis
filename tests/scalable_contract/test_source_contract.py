@@ -73,7 +73,7 @@ class SourceContractTests(unittest.TestCase):
 
 
  def test_hard_path_uses_upstream_rate_convention(self):
-    tree = parsed("scalable_attribute/canonical/scalable_model.py")
+    tree = parsed("scalable_attribute/models/scalable.py")
     hard = function_node(tree, "CanonicalScalableModel", "hard_reconstruct")
     calls = [node for node in ast.walk(hard) if isinstance(node, ast.Call)]
     len_calls = [node for node in calls if isinstance(node.func, ast.Name)

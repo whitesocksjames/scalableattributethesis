@@ -319,6 +319,22 @@ Run the complete fast suite and the existing 4K/8K lightweight gates. Run one
 every move. The expected outcome is identical reconstruction/rate contracts;
 performance benchmarking is not a refactor acceptance criterion.
 
+### Deferred experiment/result organization
+
+The current `results/`, `drafts/`, plotting artifacts and historical evidence
+remain in place throughout the code-structure refactor. After the readability
+batches, a separately reviewed `Experiment / Result / Figure organization`
+phase will distinguish:
+
+- raw experiment outputs;
+- aggregated result tables;
+- analysis and plotting scripts;
+- final thesis figures.
+
+That later phase must support the independent Unicorn baseline, CTC evaluation,
+BD-BR analysis and thesis RD figures. Nothing in these artifact trees is moved
+or deleted by the current readability batches.
+
 ## 8. Risks and stop conditions
 
 - Import cycles can appear if checkpoint loaders remain in the model module;
