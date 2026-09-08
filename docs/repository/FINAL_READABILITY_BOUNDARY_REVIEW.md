@@ -84,13 +84,20 @@ review was finalized:
 | Fast contract suite | PASS: 12 tests passed; 4 explicitly requested GPU/slow tests skipped |
 | Selected 4K joint `step3000` lightweight reconstruction | PASS (`5448309`) |
 | Selected 8K Base `step3525` + Enhancement `step1763` lightweight reconstruction | PASS (`5448310`) |
+| Post-refactor selected 2K slow physical-code integration | PASS (`5448361`): Prefix encode/decode 1/1, native r5 encode/consume 0/0, Base/Full identity and Enhancement round-trip assertions passed |
 | Local source-contract tests | PASS: 5/5 |
 | Python compile and `git diff --check` | PASS |
 
-The cluster outputs are under
-`/data/run01/scz0ade/Tanzeyu/experiments/readability_final_6c3fcbf/`.
-No training, physical formal evaluation, or slow 2K hard-code integration was
-run for this private-helper consolidation.
+The fast/lightweight cluster outputs are under
+`/data/run01/scz0ade/Tanzeyu/experiments/readability_final_6c3fcbf/`. The final
+2K slow-gate evidence for reviewed HEAD `f091e58` is under
+`/data/run01/scz0ade/Tanzeyu/experiments/readability_final_f091e58/2k_slow/`.
+It completed with scheduler state `COMPLETED`, exit code `0:0`, and total job
+walltime 81 seconds. No training or physical formal evaluation was run.
+
+With this final equivalence milestone passing, the readability refactor is
+closed. Further model/training/evaluation/runtime restructuring requires a new
+reviewed scope.
 
 ## Remaining readability debt
 
