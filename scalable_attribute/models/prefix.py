@@ -94,7 +94,7 @@ class FrozenUnicornPrefix(torch.nn.Module):
         completed = int(state["completed_residual_stages"])
         if completed != self.residual_stages:
             raise RuntimeError("Differentiable Prefix did not stop after r4")
-        result = self._complete_state_trainable(
+        result = self._complete_state(
             state["x"], state["f"], state["dec"])
         likelihoods = list(output["likelihood_list"])
         if len(likelihoods) != self.residual_stages:
@@ -126,14 +126,7 @@ class FrozenUnicornPrefix(torch.nn.Module):
         state = self._complete_state(x4, f4, d4)
         return (state, details) if return_details else (state, details["base_bits"])
 
-    @torch.no_grad()
     def _complete_state(self, x4, f4, d4):
-        x5p, f5p, d5p = self.model.prepare_next_scale(
-            x4, f4, d4, self.residual_stages)
-        return PrefixState(x4=x4, f4=f4, d4=d4,
-                           x5p=x5p, f5p=f5p, d5p=d5p)
-
-    def _complete_state_trainable(self, x4, f4, d4):
         x5p, f5p, d5p = self.model.prepare_next_scale(
             x4, f4, d4, self.residual_stages)
         return PrefixState(x4=x4, f4=f4, d4=d4,
