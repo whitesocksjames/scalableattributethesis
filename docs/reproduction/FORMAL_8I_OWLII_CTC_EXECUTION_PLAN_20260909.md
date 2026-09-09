@@ -163,12 +163,15 @@ manifest.  For 4K, the one frozen joint scalable checkpoint owns Prefix,
 BaseSynthesis, and Enhancement; both endpoints must be taken from the same
 single `hard_reconstruct()` result.
 
-Every successful task must retain two independent endpoint records and two
-reconstruction files.  Each record contains integer bit components, physical
-bpp, Y/U/V/YUV611, runtime components, file hashes, and point-count/round-trip
-gates.  Base is published before Enhancement is attempted, so a Full failure
-leaves explicit `BASE_PASS_FULL_FAIL` evidence rather than erasing the Base
-result.  The task is `FORMAL_REUSABLE` only when both endpoints pass.
+Every task must retain two independent endpoint records and two reconstruction
+files when both endpoints complete.  Each record contains integer bit
+components, physical bpp, Y/U/V/YUV611, runtime components, file hashes, and
+point-count/round-trip gates.  Base is published before Enhancement is
+attempted, so a Full failure leaves explicit `BASE_PASS_FULL_FAIL` evidence
+rather than erasing the Base result.  Formal status is endpoint-level: a Base
+that passes all of its own gates is `FORMAL_REUSABLE` even if Full later fails;
+the combined task is then `PARTIAL`.  Full is `FORMAL_REUSABLE` only after all
+Base-dependency and Full-specific gates pass.
 
 The following equalities are hard gates, not descriptive claims:
 
@@ -228,10 +231,34 @@ Before any long array:
 5. Stop instead of launching the full batch if any identity, metric, rate,
    checkpoint, chunk-union, or whole-task resource gate fails.
 
-The local CPU contract command currently passes five source-only tests but cannot
-import the other four test modules because the workstation Python lacks PyTorch.
-This is an environment failure, not a test verdict; the full suite must run in
-the frozen N30 environment during preflight.
+Preflight failures use affected-branch gating.  A dataset-, loader-, sample-,
+or operating-point-specific failure places only that branch on `HOLD` while
+unaffected branches remain eligible.  A global hold is reserved for failures
+in shared metric semantics, physical-rate semantics, source/checkpoint identity
+machinery, or another scientific-contract invariant used by every branch.
+
+Commit `e264168` freezes the scientific plan only.  After the evaluator is
+implemented and its non-GPU contract and synthetic-pipeline smoke gates pass,
+create and push a distinct runtime-code commit.  The immutable N30 source
+snapshot must be created from that exact runtime-code commit; it must not use
+`e264168` as executable-code provenance.  GPU preflight then runs from that
+snapshot and remains subject to explicit pre-submission review.
+
+The runtime-code commit tracks the executable contract in these entry points:
+
+- `prepare_ctc_formal_chunks.py`: pinned 800k KD-tree partition, named PLY
+  properties, global coordinates, and source/chunk multiset verification;
+- `evaluate_unicorn_official_physical.py`: pinned upstream Original Unicorn
+  physical coding, including normalized CTC `chunk_result.json` evidence;
+- `evaluate_8ivfb_sequence.py --ours-formal`: one shared hard pass that
+  atomically publishes Base before Full and records separate endpoint bits,
+  reconstruction, quality, and component runtime;
+- `evaluate_8ivfb_sequence.py --ours-formal --formal-stop-after-base`:
+  preflight-only isolated Base invocation for the required equality check;
+- `aggregate_formal_chunk_results.py`: serial-chunk bit/runtime sums followed
+  by one merged full-sample metric per endpoint;
+- `validate_formal_static_rgb_contract.py` and `evaluate_preflight_gates.py`:
+  frozen-manifest validation and affected-branch launch eligibility.
 
 ## 5. Proposed full-batch shape
 
