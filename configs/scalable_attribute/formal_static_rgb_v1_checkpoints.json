@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "contract_id": "formal_static_rgb_v1_20260909",
+  "status": "frozen_by_user_2026-09-09",
+  "selection_policy": "Predeclared. Never change lineage, checkpoint, or point from test-set performance.",
+  "origin_root": "/data/run01/scz0ade/Tanzeyu",
+  "released_checkpoints": {
+    "32k8k": {
+      "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/32k8k/epoch_last.pth",
+      "size_bytes": 68408693,
+      "sha256": "bdd40b608ca865de3a30595ab084dcaf48450c2c9843661790c61caf9885fc90"
+    },
+    "8k256": {
+      "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/8k256/epoch_last.pth",
+      "size_bytes": 68408693,
+      "sha256": "c3e38cd37b9bcfae99cf87bbf3cb1001574497df9bab33be238a8927abe1d389"
+    },
+    "2k128": {
+      "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/2k128/epoch_last.pth",
+      "size_bytes": 68408693,
+      "sha256": "c8152c03adcaa0384ad4b168abda03d79da5f8474e9de2ac88d15395cbfe87aa"
+    }
+  },
+  "operating_points": [
+    {
+      "point": "32k", "lambda": 32768, "released_profile": "32k8k",
+      "base_loader": "base_synthesis", "full_loader": "sequential_enhancement",
+      "base_checkpoint": {"path": "experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth", "size_bytes": 48221073, "sha256": "f1d2b1bf36cb608065ea4446876b4f48ff0ccabf9d80043949d99af147c8aa10"},
+      "full_checkpoint": {"path": "experiments/canonical_yaware_lr5e5_r01/D611/train/checkpoints/step_3525.pth", "size_bytes": 154619525, "sha256": "e8e4a6f1a767bcc1fcc05eb26073952d3b4cf33c62657282440ed13bb2abdfef"}
+    },
+    {
+      "point": "16k", "lambda": 16384, "released_profile": "32k8k",
+      "base_loader": "base_synthesis", "full_loader": "independent_enhancement",
+      "base_checkpoint": {"path": "experiments/canonical_multirate_base_v1/training/base_16k/checkpoints/step_3525.pth", "size_bytes": 48221137, "sha256": "6b4428a8f548ad300c88963d6c43c9225db76ef1a167840058684376d1dc93ca"},
+      "full_checkpoint": {"path": "experiments/multirate_parallel_d707ce7/branch_a/16k/train/checkpoints/step_1763.pth", "size_bytes": 154622661, "sha256": "57d97afa64971e79dd3ab17bb895f0d9e3554801ff238c0f227eaa95749c0737"}
+    },
+    {
+      "point": "8k", "lambda": 8192, "released_profile": "32k8k",
+      "base_loader": "base_synthesis", "full_loader": "independent_enhancement",
+      "base_checkpoint": {"path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth", "size_bytes": 48221137, "sha256": "36363fb7cb4a88dd3deb5879900d30b65483534c3547ba4055ad6315f513ff0d"},
+      "full_checkpoint": {"path": "experiments/multirate_parallel_d707ce7/branch_a/8k/train/checkpoints/step_1763.pth", "size_bytes": 154622661, "sha256": "95e3100235d9e871239ddd3b71274a929b722985b39353d1437098ae39b7fd17"}
+    },
+    {
+      "point": "4k", "lambda": 4096, "released_profile": "32k8k",
+      "base_loader": "joint_scalable_base", "full_loader": "joint_scalable_full", "base_checkpoint_lambda": 8192,
+      "bootstrap_checkpoint": {"path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth", "size_bytes": 48221137, "sha256": "36363fb7cb4a88dd3deb5879900d30b65483534c3547ba4055ad6315f513ff0d"},
+      "base_checkpoint": {"path": "experiments/joint_8k_to_4k_856b21c/train/checkpoints/step_3000.pth", "size_bytes": 408085589, "sha256": "58d691eee4e4c58ede70231724d85e1cc2615b4bb6b931746090566596bf246b"},
+      "full_checkpoint": {"path": "experiments/joint_8k_to_4k_856b21c/train/checkpoints/step_3000.pth", "size_bytes": 408085589, "sha256": "58d691eee4e4c58ede70231724d85e1cc2615b4bb6b931746090566596bf246b"}
+    },
+    {
+      "point": "2k", "lambda": 2048, "released_profile": "8k256",
+      "base_loader": "rescued_base", "full_loader": "independent_enhancement",
+      "bootstrap_checkpoint": {"path": "experiments/canonical_multirate_base_v1/training/base_2k/checkpoints/step_3525.pth", "size_bytes": 48221137, "sha256": "82772118d7b3a6bab5942d7b83665d18150acafdb721aefc43f395709da1b897"},
+      "base_checkpoint": {"path": "experiments/base_rescue_8way/2K-U-PATH/train/checkpoints/step_500.pth", "size_bytes": 253460243, "sha256": "c7927543f544c6744bce9c9cae1d78f6e3460c213c40d283b4609f7fb61963bf"},
+      "full_checkpoint": {"path": "experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/train/checkpoints/step_1500.pth", "size_bytes": 154621253, "sha256": "ca7ac7493a3d1ec0edb7cc4a9c2d7771fb9e811da60448ca7a784bf37a08a2f0"}
+    },
+    {
+      "point": "1k", "lambda": 1024, "released_profile": "2k128",
+      "base_loader": "base_synthesis", "full_loader": "independent_enhancement",
+      "base_checkpoint": {"path": "experiments/multirate_parallel_d707ce7/branch_b/base_1k/train/checkpoints/step_3525.pth", "size_bytes": 48221201, "sha256": "1dbe72e98e2371ab4ace28f42056eb02b223f83c49d8920a1db5adb57893494d"},
+      "full_checkpoint": {"path": "experiments/lowrate_enhancement_stage1_d707ce7/1k/train/checkpoints/step_1763.pth", "size_bytes": 154620357, "sha256": "679f20fb0c48bce082ad0453963724b1e8c2224ca95b5eb2730816b5971e8dbc"}
+    },
+    {
+      "point": "512", "lambda": 512, "released_profile": "2k128",
+      "base_loader": "base_synthesis", "full_loader": "independent_enhancement",
+      "base_checkpoint": {"path": "experiments/multirate_parallel_d707ce7/branch_b/base_512/train/checkpoints/step_3525.pth", "size_bytes": 48221201, "sha256": "caee3d47baca68eb0600326b487fce5f18c45a6f6eb6908f0a4addbafb474def"},
+      "full_checkpoint": {"path": "experiments/lowrate_enhancement_stage1_d707ce7/512/train/checkpoints/step_1763.pth", "size_bytes": 154620357, "sha256": "106fac286ad89199ad95941936738bdc4ff174f31ae2515b008cdcefe7fafea6"}
+    }
+  ]
+}
