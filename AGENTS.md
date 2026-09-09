@@ -55,13 +55,18 @@ for work inside this repository.
 
 ## Formal CTC packing
 
-- Prefer sample-level Slurm packing for formal CTC evaluation.
-- One sample job may serially execute its remaining Original Unicorn and Ours
-  operating points.
+- Prefer a small number of long, sample-level or adjacent-sample Slurm packs for
+  formal CTC evaluation. One job may serially execute the remaining Original
+  Unicorn and Ours operating points for one or a few explicitly listed samples.
 - Every operating point must retain an independent subprocess, status, output,
   and provenance record. One point failure must not prevent subsequent valid
   points from running.
-- Avoid method-wide jobs spanning many samples unless a concrete scheduler
+- Long formal packs must be resumable. A later attempt must validate and skip
+  points already marked `FORMAL_REUSABLE`/`PASS`, preserve failed-attempt
+  evidence, and run only missing or explicitly retryable points.
+- Estimate walltime from existing runtime evidence with margin; do not fragment
+  jobs merely to shorten walltime.
+- Avoid method-wide mega-jobs spanning many samples unless a concrete scheduler
   constraint requires them.
 
 ## HPC data transfers
