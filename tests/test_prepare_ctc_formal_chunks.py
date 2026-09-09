@@ -373,8 +373,6 @@ def test_prepare_reuses_verified_existing_chunks_without_overwrite(tmp_path: Pat
         source, output_root, **_partition_kwargs())
     chunk = output_root / first["sources"][0]["chunks"][0]["path"]
     chunk_before = chunk.read_bytes()
-    (output_root / "manifest.json").unlink()
-    (output_root / "manifest.tsv").unlink()
 
     second = MODULE.prepare_ctc_formal_chunks(
         source, output_root, reuse_existing=True, **_partition_kwargs())

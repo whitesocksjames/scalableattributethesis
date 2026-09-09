@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import ast
 import csv
+import io
 import hashlib
 import inspect
 import json
@@ -872,15 +873,23 @@ def _write_tsv(
     if path.exists():
         raise FileExistsError(f"refusing to overwrite {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("x", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=_TSV_FIELDS, delimiter="\t", lineterminator="\n")
-        writer.writeheader()
-        for source_order, source in enumerate(sources):
-            union = source["union_verification"]
-            chunks = source["chunks"]
-            for chunk in chunks:
-                writer.writerow(
-                    {
+    path.write_text(_render_tsv(sources, max_num, partition), encoding="utf-8")
+
+
+def _render_tsv(
+    sources: Sequence[Mapping[str, Any]],
+    max_num: int,
+    partition: Mapping[str, Any],
+) -> str:
+    handle = io.StringIO(newline="")
+    writer = csv.DictWriter(handle, fieldnames=_TSV_FIELDS, delimiter="\t", lineterminator="\n")
+    writer.writeheader()
+    for source_order, source in enumerate(sources):
+        union = source["union_verification"]
+        chunks = source["chunks"]
+        for chunk in chunks:
+            writer.writerow(
+                {
                         "source_order": source_order,
                         "source_path": source["source_path"],
                         "source_sha256": source["source_sha256"],
@@ -903,8 +912,27 @@ def _write_tsv(
                         "union_verified": union["verified"],
                         "source_multiset_sha256": union["source_multiset_sha256"],
                         "chunks_multiset_sha256": union["chunks_multiset_sha256"],
-                    }
-                )
+                }
+            )
+    return handle.getvalue()
+
+
+def _verify_existing_json(path: Path, expected: Mapping[str, Any]) -> None:
+    try:
+        actual = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(f"existing manifest JSON is unreadable: {path}: {exc}") from exc
+    if actual != expected:
+        raise RuntimeError(f"existing manifest JSON identity mismatch: {path}")
+
+
+def _verify_existing_tsv(path: Path, expected: str) -> None:
+    try:
+        actual = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise RuntimeError(f"existing manifest TSV is unreadable: {path}: {exc}") from exc
+    if actual != expected:
+        raise RuntimeError(f"existing manifest TSV identity mismatch: {path}")
 
 
 def prepare_ctc_formal_chunks(
@@ -938,9 +966,12 @@ def prepare_ctc_formal_chunks(
     json_path, tsv_path = _resolve_manifest_paths(
         output_root_path, manifest_json, manifest_tsv, output_manifest
     )
-    # Manifest paths are checked before reading or writing any source so a
-    # rerun cannot leave a fresh partial output beside an existing manifest.
-    _check_new_paths((json_path, tsv_path))
+    # Default behavior remains create-only. Explicit reuse validates complete
+    # manifests and chunks rather than treating existence as sufficient.
+    if reuse_existing:
+        _check_distinct_paths((json_path, tsv_path))
+    else:
+        _check_new_paths((json_path, tsv_path))
 
     # Verify the pinned source without importing an external checkout, then
     # execute the repository-local function whose complete body was compared.
@@ -1048,8 +1079,17 @@ def prepare_ctc_formal_chunks(
         "manifest_json": str(json_path.absolute()),
         "manifest_tsv": str(tsv_path.absolute()),
     }
-    _write_json(json_path, manifest)
-    _write_tsv(tsv_path, source_records, max_num, partition_record)
+    tsv_content = _render_tsv(source_records, max_num, partition_record)
+    if reuse_existing and json_path.exists():
+        _verify_existing_json(json_path, manifest)
+    else:
+        _write_json(json_path, manifest)
+    if reuse_existing and tsv_path.exists():
+        _verify_existing_tsv(tsv_path, tsv_content)
+    else:
+        tsv_path.parent.mkdir(parents=True, exist_ok=True)
+        with tsv_path.open("x", encoding="utf-8", newline="") as handle:
+            handle.write(tsv_content)
     return manifest
 
 
