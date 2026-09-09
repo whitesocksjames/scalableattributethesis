@@ -779,13 +779,19 @@ def _resolve_manifest_paths(
     return Path(manifest_json), Path(manifest_tsv)
 
 
-def _check_new_paths(paths: Iterable[Path]) -> None:
+def _check_distinct_paths(paths: Iterable[Path]) -> None:
     seen: set[Path] = set()
     for path in paths:
         resolved = path.resolve(strict=False)
         if resolved in seen:
             raise ValueError(f"manifest and chunk paths collide: {path}")
         seen.add(resolved)
+
+
+def _check_new_paths(paths: Iterable[Path]) -> None:
+    paths = tuple(paths)
+    _check_distinct_paths(paths)
+    for path in paths:
         if path.exists():
             raise FileExistsError(f"refusing to overwrite {path}")
 
@@ -913,6 +919,7 @@ def prepare_ctc_formal_chunks(
     manifest_json: os.PathLike[str] | str | None = None,
     manifest_tsv: os.PathLike[str] | str | None = None,
     output_manifest: os.PathLike[str] | str | None = None,
+    reuse_existing: bool = False,
 ) -> dict[str, Any]:
     """Convert one PLY or a manifest list into deterministic formal chunks.
 
@@ -958,7 +965,11 @@ def prepare_ctc_formal_chunks(
             output_root_path / _chunk_relative_path(output_root_path, source_order, source_path, order)
             for order in range(len(parts))
         ]
-        _check_new_paths((*target_paths, json_path, tsv_path))
+        all_output_paths = (*target_paths, json_path, tsv_path)
+        if reuse_existing:
+            _check_distinct_paths(all_output_paths)
+        else:
+            _check_new_paths(all_output_paths)
 
         chunk_records: list[dict[str, Any]] = []
         readback_coords: list[np.ndarray] = []
@@ -973,7 +984,9 @@ def prepare_ctc_formal_chunks(
                 )
             part_coords = np.asarray(part[:, :3], dtype=np.int32).copy()
             part_rgb = np.asarray(part[:, 3:], dtype=np.uint8).copy()
-            _write_ascii_chunk(target_path, part_coords, part_rgb)
+            was_existing = target_path.exists()
+            if not was_existing:
+                _write_ascii_chunk(target_path, part_coords, part_rgb)
             chunk_hash = _sha256_file(target_path)
             decoded_coords, decoded_rgb, decoded_format, decoded_schema = read_ply_with_metadata(target_path)
             if decoded_format != OUTPUT_FORMAT or decoded_schema["vertex"]["properties"] != [
@@ -986,7 +999,8 @@ def prepare_ctc_formal_chunks(
             ]:
                 raise RuntimeError(f"chunk schema readback mismatch: {target_path}")
             if not np.array_equal(decoded_coords, part_coords) or not np.array_equal(decoded_rgb, part_rgb):
-                raise RuntimeError(f"chunk value readback mismatch: {target_path}")
+                qualifier = "existing " if reuse_existing and was_existing else ""
+                raise RuntimeError(f"{qualifier}chunk value readback mismatch: {target_path}")
             readback_coords.append(decoded_coords)
             readback_rgb.append(decoded_rgb)
             relative_path = target_path.relative_to(output_root_path).as_posix()
@@ -1083,6 +1097,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_MAX_NUM,
         help="KD-tree maximum chunk size; formal default is 800000",
     )
+    parser.add_argument(
+        "--reuse-existing",
+        action="store_true",
+        help=("verify and reuse existing canonical chunk files; identity "
+              "mismatches fail without overwriting"),
+    )
     return parser
 
 
@@ -1098,6 +1118,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         manifest_json=args.manifest_json,
         manifest_tsv=args.manifest_tsv,
         output_manifest=args.output_manifest,
+        reuse_existing=args.reuse_existing,
     )
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0

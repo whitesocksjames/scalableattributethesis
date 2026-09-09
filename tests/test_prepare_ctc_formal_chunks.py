@@ -359,6 +359,56 @@ def test_prepare_refuses_to_overwrite_existing_output(tmp_path: Path) -> None:
     assert after == before
 
 
+def test_prepare_reuses_verified_existing_chunks_without_overwrite(tmp_path: Path) -> None:
+    source = tmp_path / "source.ply"
+    properties = [
+        ("x", "int"), ("y", "int"), ("z", "int"),
+        ("red", "uchar"), ("green", "uchar"), ("blue", "uchar"),
+    ]
+    _write_ply(source, properties, [
+        (1, 2, 3, 4, 5, 6), (7, 8, 9, 10, 11, 12),
+    ])
+    output_root = tmp_path / "out"
+    first = MODULE.prepare_ctc_formal_chunks(
+        source, output_root, **_partition_kwargs())
+    chunk = output_root / first["sources"][0]["chunks"][0]["path"]
+    chunk_before = chunk.read_bytes()
+    (output_root / "manifest.json").unlink()
+    (output_root / "manifest.tsv").unlink()
+
+    second = MODULE.prepare_ctc_formal_chunks(
+        source, output_root, reuse_existing=True, **_partition_kwargs())
+
+    assert chunk.read_bytes() == chunk_before
+    assert second["sources"][0]["chunks"] == first["sources"][0]["chunks"]
+    assert second["union_verification"]["verified"] is True
+
+
+def test_prepare_rejects_mismatched_existing_chunk_without_overwrite(tmp_path: Path) -> None:
+    source = tmp_path / "source.ply"
+    properties = [
+        ("x", "int"), ("y", "int"), ("z", "int"),
+        ("red", "uchar"), ("green", "uchar"), ("blue", "uchar"),
+    ]
+    _write_ply(source, properties, [(1, 2, 3, 4, 5, 6)])
+    output_root = tmp_path / "out"
+    first = MODULE.prepare_ctc_formal_chunks(
+        source, output_root, **_partition_kwargs())
+    chunk = output_root / first["sources"][0]["chunks"][0]["path"]
+    (output_root / "manifest.json").unlink()
+    (output_root / "manifest.tsv").unlink()
+    _write_ply(chunk, properties, [(1, 2, 3, 40, 50, 60)])
+    mismatched = chunk.read_bytes()
+
+    with pytest.raises(RuntimeError, match="existing chunk value readback mismatch"):
+        MODULE.prepare_ctc_formal_chunks(
+            source, output_root, reuse_existing=True, **_partition_kwargs())
+
+    assert chunk.read_bytes() == mismatched
+    assert not (output_root / "manifest.json").exists()
+    assert not (output_root / "manifest.tsv").exists()
+
+
 def test_library_requires_partition_provenance(tmp_path: Path) -> None:
     source = tmp_path / "source.ply"
     properties = [
