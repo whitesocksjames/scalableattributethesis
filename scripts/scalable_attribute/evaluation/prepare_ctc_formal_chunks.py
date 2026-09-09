@@ -123,12 +123,21 @@ class _Header:
 
     @property
     def vertex(self) -> _Element:
-        if len(self.elements) != 1 or self.elements[0].name != "vertex":
+        vertices = [element for element in self.elements if element.name == "vertex"]
+        if len(vertices) != 1:
             raise PLYError(
-                "only one vertex element is supported; extra elements could "
-                "change the vertex payload"
+                "exactly one vertex element is required"
             )
-        return self.elements[0]
+        nonempty_extras = [
+            element for element in self.elements
+            if element.name != "vertex" and element.count != 0
+        ]
+        if nonempty_extras:
+            raise PLYError(
+                "non-empty non-vertex elements are unsupported because they "
+                "change the PLY payload"
+            )
+        return vertices[0]
 
 
 def _fail(path: Path, message: str) -> PLYError:
@@ -249,7 +258,7 @@ def _parse_header(handle: Any, path: Path) -> _Header:
     if not saw_end_header or format_name is None or format_version is None:
         raise _fail(path, "incomplete PLY header")
     header = _Header(format_name, format_version, tuple(elements), handle.tell())
-    vertex = header.vertex  # Also rejects extra elements before/after vertex.
+    vertex = header.vertex  # Allows only payload-free zero-count extra elements.
     if not vertex.properties:
         raise _fail(path, "vertex element has no properties")
     names = [prop.name for prop in vertex.properties]

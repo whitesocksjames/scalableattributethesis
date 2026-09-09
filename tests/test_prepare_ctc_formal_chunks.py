@@ -276,7 +276,7 @@ def test_manifest_list_has_stable_sources_shape(tmp_path: Path) -> None:
             "ascii",
             [("x", "int"), ("y", "int"), ("z", "int"), ("red", "uchar"), ("green", "uchar"), ("blue", "uchar")],
             [(1, 2, 3, 4, 5, 6)],
-            ["element face 0", "property list uchar int vertex_indices"],
+            ["element face 1", "property list uchar int vertex_indices"],
         ),
         (
             "fractional_coordinate.ply",
@@ -299,6 +299,21 @@ def test_invalid_vertex_schema_fails_closed(
     _write_ply(path, properties, rows, format_name=format_name, extra_header=extra_header)
     with pytest.raises((MODULE.PLYError, ValueError)):
         MODULE.read_ply(path)
+
+
+def test_zero_count_face_element_is_payload_free_and_accepted(tmp_path: Path) -> None:
+    path = tmp_path / "zero_faces.ply"
+    properties = [
+        ("x", "float"), ("y", "float"), ("z", "float"),
+        ("red", "uchar"), ("green", "uchar"), ("blue", "uchar"),
+    ]
+    _write_ply(
+        path, properties, [(1, 2, 3, 4, 5, 6)],
+        extra_header=["element face 0", "property list uchar int vertex_indices"],
+    )
+    coords, rgb = MODULE.read_ply(path)
+    assert coords.tolist() == [[1, 2, 3]]
+    assert rgb.tolist() == [[4, 5, 6]]
 
 
 def test_big_endian_is_rejected_before_payload_decode(tmp_path: Path) -> None:
