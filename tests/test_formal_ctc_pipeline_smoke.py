@@ -30,7 +30,12 @@ def _write_ply(path, rows):
 
 
 def _fake_pc_error(source, reconstruction, res=1, show=False):
-    del source, reconstruction, res, show
+    del res, show
+    for path in (source, reconstruction):
+        header = Path(path).read_text(encoding="ascii").split("end_header", 1)[0]
+        assert "property float x" in header
+        assert "property float y" in header
+        assert "property float z" in header
     return {
         "  c[0],    F": 1.0, "  c[1],    F": 2.0,
         "  c[2],    F": 3.0, "  c[0],PSNRF": 30.0,
@@ -140,6 +145,12 @@ class FormalCTCPipelineSmoke(unittest.TestCase):
                 "FORMAL_REUSABLE")
             self.assertEqual(
                 partial["endpoints"]["Ours Full"]["status"], "FAILED")
+
+    def test_aggregate_cli_propagates_formal_failure_exit_status(self):
+        source = Path(aggregate_formal_chunk_results.__file__)
+        text = source.read_text(encoding="utf-8")
+        self.assertIn('return 0 if summary["status"] == "PASS" else 1', text)
+        self.assertIn("raise SystemExit(main())", text)
 
 
 if __name__ == "__main__":

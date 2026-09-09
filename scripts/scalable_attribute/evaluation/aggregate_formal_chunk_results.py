@@ -47,8 +47,10 @@ For every selected endpoint, reconstruction PLYs are read through the named
 ``x,y,z,red,green,blue`` reader from ``prepare_ctc_formal_chunks.py``.  The
 RGB values may be lossy, but the multiset of global XYZ coordinates and the
 point count must match the canonical source exactly.  The merged reconstruction
-is six-column ASCII and ``pc_error`` is called once against the full canonical
-source.  No per-chunk quality values are accepted or averaged.
+and metric-only source representation are six-column ASCII with float-declared
+XYZ, while retaining the canonical integer-valued global coordinate and RGB
+payloads.  ``pc_error`` is called once against that full canonical content.  No
+per-chunk quality values are accepted or averaged.
 
 The default metric is the repository's ``third_party.pc_error_attr.pc_error``
 wrapper (resolution 1, color enabled by that wrapper).  ``--pc-error`` may
@@ -1448,9 +1450,9 @@ def _write_six_column_ascii(path: Path, coords: np.ndarray, rgb: np.ndarray) -> 
         "ply\n"
         "format ascii 1.0\n"
         f"element vertex {len(coords)}\n"
-        "property int x\n"
-        "property int y\n"
-        "property int z\n"
+        "property float x\n"
+        "property float y\n"
+        "property float z\n"
         "property uchar red\n"
         "property uchar green\n"
         "property uchar blue\n"
@@ -1698,10 +1700,15 @@ def aggregate_formal_chunk_results(
         output_dir, output_json, output_csv, merged_dir, selected_endpoints
     )
 
-    # Temp files live beside their final targets so the no-clobber hard-link
-    # publication remains atomic on ordinary local filesystems.  Without
-    # output targets, a private temporary directory is enough for metric input.
-    private_temp_dir: tempfile.TemporaryDirectory[str] | None = None
+    # Temp merged files live beside their final targets so publication remains
+    # atomic.  MPEG pc_error 0.13.4 cannot read some native CTC PLY headers, so
+    # build one metric-only named-field representation from the already
+    # verified canonical arrays.  Payload values, duplicates, global
+    # coordinates, and point count remain unchanged for both methods.
+    private_temp_dir = tempfile.TemporaryDirectory(prefix="aggregate-formal-")
+    private_root = Path(private_temp_dir.name)
+    metric_source_path = private_root / "canonical_metric_source.ply"
+    _write_six_column_ascii(metric_source_path, source_coords, source_rgb)
     if outputs["merged"]:
         temp_merged = {
             endpoint_name: _new_temp_path(
@@ -1710,8 +1717,6 @@ def aggregate_formal_chunk_results(
             for endpoint_name, final_path in outputs["merged"].items()
         }
     else:
-        private_temp_dir = tempfile.TemporaryDirectory(prefix="aggregate-formal-")
-        private_root = Path(private_temp_dir.name)
         temp_merged = {
             endpoint_name: private_root / f"merged_{index:03d}.ply"
             for index, endpoint_name in enumerate(selected_endpoints)
@@ -1731,7 +1736,7 @@ def aggregate_formal_chunk_results(
                     endpoint_name,
                     ordered_results,
                     manifest_chunks,
-                    source_path,
+                    metric_source_path,
                     source_coords,
                     source_info,
                     temp_merged[endpoint_name],
@@ -1868,8 +1873,7 @@ def aggregate_formal_chunk_results(
             _remove_path(path)
         raise
     finally:
-        if private_temp_dir is not None:
-            private_temp_dir.cleanup()
+        private_temp_dir.cleanup()
 
 
 # Short aliases make the public operation discoverable without duplicating the
@@ -1963,8 +1967,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (AggregateError, FileExistsError, FileNotFoundError, OSError, RuntimeError) as exc:
         parser.error(str(exc))
     print(json.dumps(summary, sort_keys=True))
-    return 0
+    return 0 if summary["status"] == "PASS" else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
