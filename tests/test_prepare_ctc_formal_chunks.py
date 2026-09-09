@@ -175,6 +175,11 @@ def test_prepare_preserves_global_coordinates_and_verifies_multiset(tmp_path: Pa
     manifest = MODULE.prepare_ctc_formal_chunks(
         source, output_root, max_num=2, **_partition_kwargs()
     )
+    first_chunk = output_root / manifest["sources"][0]["chunks"][0]["path"]
+    header = first_chunk.read_text(encoding="ascii").split("end_header", 1)[0]
+    assert "property float x" in header
+    assert "property float y" in header
+    assert "property float z" in header
     assert manifest["max_num"] == 2
     assert manifest["global_coordinates"] is True
     assert manifest["no_recenter"] is True

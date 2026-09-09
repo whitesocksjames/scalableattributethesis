@@ -655,9 +655,13 @@ def _write_ascii_chunk(path: Path, coords: np.ndarray, rgb: np.ndarray) -> None:
         "ply\n"
         "format ascii 1.0\n"
         f"element vertex {len(coords)}\n"
-        "property int x\n"
-        "property int y\n"
-        "property int z\n"
+        # MPEG pc_error 0.13.4 rejects ASCII PLY references declaring integer
+        # XYZ properties.  Declare the exact integer-valued coordinates as
+        # float, matching the official 8i/Owlii PLY convention; the payload
+        # tokens and global coordinate values remain unchanged.
+        "property float x\n"
+        "property float y\n"
+        "property float z\n"
         "property uchar red\n"
         "property uchar green\n"
         "property uchar blue\n"
@@ -964,9 +968,9 @@ def prepare_ctc_formal_chunks(
             chunk_hash = _sha256_file(target_path)
             decoded_coords, decoded_rgb, decoded_format, decoded_schema = read_ply_with_metadata(target_path)
             if decoded_format != OUTPUT_FORMAT or decoded_schema["vertex"]["properties"] != [
-                {"name": "x", "type": "int", "kind": "scalar"},
-                {"name": "y", "type": "int", "kind": "scalar"},
-                {"name": "z", "type": "int", "kind": "scalar"},
+                {"name": "x", "type": "float", "kind": "scalar"},
+                {"name": "y", "type": "float", "kind": "scalar"},
+                {"name": "z", "type": "float", "kind": "scalar"},
                 {"name": "red", "type": "uchar", "kind": "scalar"},
                 {"name": "green", "type": "uchar", "kind": "scalar"},
                 {"name": "blue", "type": "uchar", "kind": "scalar"},

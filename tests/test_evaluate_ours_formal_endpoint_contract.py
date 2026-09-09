@@ -98,6 +98,7 @@ class OursFormalEndpointContractTests(unittest.TestCase):
         self.assertIn("stop_after_base=args.formal_stop_after_base", source)
         self.assertIn("isolated Base-only preflight completed", source)
         self.assertIn("Base endpoint was not published before Full", source)
+        self.assertIn("raise SystemExit(main())", source)
 
     def test_chunk_envelope_keeps_endpoint_runtime_and_bits(self):
         row = {

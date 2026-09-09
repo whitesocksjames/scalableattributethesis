@@ -56,6 +56,9 @@ class FormalCTCPipelineSmoke(unittest.TestCase):
                 expected_partition_sha256=_sha256(PARTITION_SOURCE),
             )
             self.assertTrue(manifest["union_verification"]["verified"])
+            first_chunk = prepared / manifest["sources"][0]["chunks"][0]["path"]
+            header = first_chunk.read_text(encoding="ascii").split("end_header", 1)[0]
+            self.assertIn("property float x", header)
 
             result_paths = []
             for chunk in manifest["sources"][0]["chunks"]:
