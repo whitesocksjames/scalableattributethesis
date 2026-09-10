@@ -9,6 +9,106 @@ Scheduler states in this document are historical observations, not live
 claims. On recovery, inspect point artifacts and query each scheduler at most
 once when the user requests a status audit. Do not poll continuously.
 
+## Latest recovery checkpoint — A100 closure jobs submitted
+
+This section is the newest operational state and supersedes older scheduler
+observations later in this document. It records the most recent user-requested
+FAU query on 2026-09-10; it is not a live scheduler claim.
+
+### Formal matrix
+
+- Current artifact-verified count: **318/320 logical points
+  `FORMAL_REUSABLE`**.
+- 8iVFB: Original 36/36 and Ours 28/28.
+- Owlii: Original 36/36 and Ours 28/28.
+- CTC: Original 108/108 and Ours 82/84.
+- The only missing logical points are House Ours 32K and Shiva Ours 32K.
+- A submitted replacement run does not increase this count. The matrix remains
+  exactly 320 logical points, and complete-sample reruns must be deduplicated
+  against the same logical IDs.
+
+Facade is complete at 16/16. House and Shiva each have 15/16 reusable logical
+points from retained evidence, but their complete-sample A100 reruns below are
+still pending. Existing valid results remain preserved and are not overwritten.
+
+### Runtime implementation and immutable source
+
+- Memory-optimized evaluator commit:
+  `6150f45a7144bb4d43f7196ae342f20b260d7fd6`.
+- Immutable FAU runtime snapshot: `formal_static_rgb_6150f45`.
+- The optimization moves validation-only tensor residency to CPU and releases
+  encoded GPU outputs before decode; it does not change model, checkpoint,
+  bitstream, reconstruction, chunk, endpoint, metric, or timing semantics.
+- Old-vs-new equivalence smoke passed 25/25 checks, including exact physical
+  bits and exact Base/Full reconstruction SHA values.
+
+### Current FAU closure jobs
+
+The latest single scheduler query found all four jobs below `PENDING`, with no
+node assigned, zero elapsed runtime, and no point output yet:
+
+| job | purpose | allocation contract | points | output root suffix | latest state |
+| --- | --- | --- | ---: | --- | --- |
+| `1809097` | House 32K fresh-process diagnostic | A100, default allocator | diagnostic only | `formal_house32k_chunk0007_diag_5f717fbb_a01` | PENDING |
+| `1809098` | House 32K allocator diagnostic | A100, `max_split_size_mb:128` if baseline fails | diagnostic only | same diagnostic root | PENDING |
+| `1809256` | House complete hardware-consistent rerun | **A100 40GB only**, one allocation | Original 9 + Ours 7 | `formal_static_rgb_house_6150f45_a100_a01` | PENDING, 0/16 |
+| `1809401` | Shiva complete hardware-consistent rerun | **A100 40GB only**, one allocation | Original 9 + Ours 7 | `formal_static_rgb_shiva_6150f45_a100_a02` | PENDING, 0/16 |
+
+Both complete-sample jobs use the frozen canonical input and shared chunk
+manifest, pinned official Unicorn source, frozen seven-point Ours checkpoint
+mapping, physical-bit and metric contract, failure-continue behavior, and
+point-level resume/evidence. Each also has a job-side A100 40GB hardware gate.
+Do not cancel, replace, or duplicate these jobs without a new reason supported
+by scheduler or artifact evidence.
+
+### Retained Shiva V100 attempt
+
+Job `1809252` ran the same 16-point Shiva pack on a V100 32GB and ended
+`FAILED` only at the pack level because one point failed:
+
+- Original Unicorn R01-R09: 9/9 `FORMAL_REUSABLE`.
+- Ours 16K through 512: 6/6 `FORMAL_REUSABLE`.
+- Ours 32K: Base passed on chunk 0, but Full OOM requested an additional
+  3.15 GiB with 3.06 GiB free; no valid 32K aggregate exists.
+- The V100 run therefore produced 15/16 valid point aggregates and remains
+  historical/formal evidence, but it is not the final hardware-consistent
+  runtime set. The A100-only job `1809401` must run all 16 points.
+
+### Read-only pre-final audits
+
+The 318-point integrity audit found zero pipeline/scientific hard errors:
+checkpoint mapping, pinned official provenance, endpoint completeness,
+physical-bit identities, YUV611 identity, CTC aggregation, and runtime fields
+all passed. House/Shiva incomplete points remain unresolved rather than being
+treated as errors.
+
+The classified RD competitiveness review is committed at
+`ab01e86251de3d978d2aff6f9a964df5929336d5` under
+`results/comparisons/formal_rd_competitiveness_20260910/`. Its primary entry is
+the directory `README.md`, followed by `report/REVIEW.md`; figures, summary
+tables, and normalized non-sensitive evidence are separated into dedicated
+subdirectories. At the 318-point boundary it reports 17 competitive samples,
+one mixed sample (Facade), no clearly weaker sample, and House/Shiva pending.
+This is a descriptive performance review, not a replacement for the frozen
+BD-BR contract.
+
+### Exact continuation procedure
+
+1. Do not query FAU again unless the user explicitly asks; then query once and
+   inspect point aggregates/status, not scheduler state alone.
+2. For `1809256` and `1809401`, require all 16 point aggregates to be `PASS`
+   and `FORMAL_REUSABLE`; Ours requires both Base and Full endpoint status.
+3. Confirm every point in each new sample set records the same A100 40GB model,
+   then compare new RD, physical bits, and reconstruction evidence with the
+   retained runs. Timing comparison for House/Shiva should use the complete
+   A100-only sets, not mixed V100/RTX3090/A100 timing.
+4. If both missing Ours 32K points pass, recount the deduplicated matrix as
+   320/320. Do not count the complete-sample reruns as additional logical
+   points.
+5. Preserve all failed and superseded attempts as evidence. Do not delete
+   inconvenient raw points or alter the frozen checkpoint, chunk, rate,
+   metric, or BD-BR interpolation contract.
+
 ## Frozen scientific contract
 
 - Contract ID: `formal_static_rgb_v1_20260909`.
