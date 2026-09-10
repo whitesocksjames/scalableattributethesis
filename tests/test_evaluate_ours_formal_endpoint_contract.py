@@ -176,6 +176,22 @@ class OursFormalEndpointContractTests(unittest.TestCase):
         self.assertIn("Base endpoint was not published before Full", source)
         self.assertIn("raise SystemExit(main())", source)
 
+    def test_formal_validation_tensors_are_streamed_to_cpu_outside_timers(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("value.C.detach().cpu().clone()", source)
+        self.assertIn("value.F.detach().cpu().clone()", source)
+        self.assertIn("encoded_full_snapshot = _formal_sparse_snapshot", source)
+        self.assertIn('del encoded\n    torch.cuda.empty_cache()', source)
+        self.assertIn('"encoded_Full_snapshot": encoded_full_snapshot', source)
+        self.assertNotIn('base_box["snapshot"]', source)
+        self.assertNotIn('identity["base_result"]', source)
+        encode_position = source.index("encoded = model.enhancement.encode(")
+        snapshot_position = source.index(
+            'encoded_full_snapshot = _formal_sparse_snapshot(encoded["x_out"])')
+        decode_position = source.index("decoded = model.enhancement.decode(")
+        self.assertLess(encode_position, snapshot_position)
+        self.assertLess(snapshot_position, decode_position)
+
     def test_chunk_envelope_keeps_endpoint_runtime_and_bits(self):
         row = {
             "endpoint": "Ours Full", "endpoint_status": "FORMAL_REUSABLE",

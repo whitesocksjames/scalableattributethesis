@@ -429,7 +429,8 @@ def _formal_timed(timings, name, function, *args, **kwargs):
 
 
 def _formal_sparse_snapshot(value):
-    return (value.C.detach().clone(), value.F.detach().clone(),
+    """Keep exact validation state on CPU, outside codec timing/GPU residency."""
+    return (value.C.detach().cpu().clone(), value.F.detach().cpu().clone(),
             tuple(value.tensor_stride))
 
 
@@ -439,9 +440,62 @@ def _formal_snapshot_difference(snapshot, value):
         return float("inf"), float("inf")
     if value.C.shape != coordinates.shape or value.F.shape != features.shape:
         return float("inf"), float("inf")
-    c_diff = float((value.C - coordinates).abs().max().item()) if value.C.numel() else 0.0
-    f_diff = float((value.F - features).abs().max().item()) if value.F.numel() else 0.0
+    current_coordinates = value.C.detach().cpu()
+    current_features = value.F.detach().cpu()
+    c_diff = float((current_coordinates - coordinates).abs().max().item()) \
+        if current_coordinates.numel() else 0.0
+    f_diff = float((current_features - features).abs().max().item()) \
+        if current_features.numel() else 0.0
     return f_diff, c_diff
+
+
+def _formal_snapshot_max_difference(snapshot, value, label):
+    """Apply the former sparse exact-roundtrip gate to a CPU snapshot."""
+    coordinates, features, stride = snapshot
+    if tuple(value.tensor_stride) != stride:
+        raise RuntimeError(label + " tensor strides differ")
+    if value.C.shape != coordinates.shape or value.F.shape != features.shape:
+        raise RuntimeError(label + " tensor shapes differ")
+    current_coordinates = value.C.detach().cpu()
+    current_features = value.F.detach().cpu()
+    if not torch.equal(coordinates, current_coordinates):
+        raise RuntimeError(label + " coordinates differ")
+    return float((features - current_features).abs().max().item()) \
+        if current_features.numel() else 0.0
+
+
+def _formal_streamed_hard_reconstruct(model, attribute):
+    """Run one hard Base+Full path without retaining encoded validation tensors.
+
+    CPU validation copies happen after Enhancement encode timing and before
+    Enhancement decode timing.  Codec payload, model operations, bit accounting,
+    and decoded endpoint semantics are unchanged.
+    """
+    base = model.base_forward(attribute, hard=True)
+    embedding = model._embedding(attribute.device)  # pylint: disable=protected-access
+    encoded = model.enhancement.encode(
+        base["Base"], attribute, base["F_B"], base["d5p"], embedding)
+    encoded_full_snapshot = _formal_sparse_snapshot(encoded["x_out"])
+    payload = {
+        "strings": encoded["strings"],
+        "min_v": encoded["min_v"],
+        "max_v": encoded["max_v"],
+    }
+    del encoded
+    torch.cuda.empty_cache()
+    decoded = model.enhancement.decode(
+        payload, base["Base"], base["F_B"], base["d5p"], embedding)
+    result = model._result(base, decoded)  # pylint: disable=protected-access
+    enhancement_bits = int(len(payload["strings"]) * 8)
+    result.update({
+        "enhancement_payload": payload,
+        "enhancement_bits": enhancement_bits,
+        "base_bits": base["prefix_rate"]["base_bits"],
+        "full_bits": base["prefix_rate"]["base_bits"] + enhancement_bits,
+        "prefix_rate": base["prefix_rate"],
+        "encoded_Full_snapshot": encoded_full_snapshot,
+    })
+    return result
 
 
 def _formal_hard_once(model, attribute, timings, on_base, identity,
@@ -518,7 +572,6 @@ def _formal_hard_once(model, attribute, timings, on_base, identity,
     def base_forward(attribute_value, hard=False):
         result = original_base_forward(attribute_value, hard=hard)
         if hard:
-            identity["base_result"] = result
             identity["snapshot"] = _formal_sparse_snapshot(result["Base"])
             on_base(result)
             if stop_after_base:
@@ -528,7 +581,7 @@ def _formal_hard_once(model, attribute, timings, on_base, identity,
 
     model.base_forward = base_forward
     try:
-        return model.hard_reconstruct(attribute)
+        return _formal_streamed_hard_reconstruct(model, attribute)
     finally:
         del model.base_forward
         for owner, name, original in reversed(originals):
@@ -869,8 +922,6 @@ def _run_ours_formal(args, operating_point, canonical_profile, released_checkpoi
     base_box, identity = {}, {}
 
     def publish_base(result):
-        base_box["result"] = result
-        base_box["snapshot"] = _formal_sparse_snapshot(result["Base"])
         rate = validate_base_rate_details(result["prefix_rate"])
         base_box["rate"] = rate
         gates = {"base_bits_xlow_plus_r1_r4": True,
@@ -906,8 +957,8 @@ def _run_ours_formal(args, operating_point, canonical_profile, released_checkpoi
             "base_decode_feature_max_abs_difference": decode_diff[0],
             "base_decode_coordinate_max_abs_difference": decode_diff[1],
         }
-        roundtrip = sparse_max_difference(
-            hard["encoded_Full"], hard["Full"], "Ours Full hard")
+        roundtrip = _formal_snapshot_max_difference(
+            hard["encoded_Full_snapshot"], hard["Full"], "Ours Full hard")
         full_gates = {
             "full_bits_base_plus_enhancement": (
                 int(hard["full_bits"]) == int(hard["base_bits"]) +
