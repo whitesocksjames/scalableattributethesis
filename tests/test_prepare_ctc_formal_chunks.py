@@ -382,6 +382,29 @@ def test_prepare_reuses_verified_existing_chunks_without_overwrite(tmp_path: Pat
     assert second["union_verification"]["verified"] is True
 
 
+def test_prepare_reuses_manifest_after_identical_code_relocation(tmp_path: Path) -> None:
+    source = tmp_path / "source.ply"
+    properties = [
+        ("x", "int"), ("y", "int"), ("z", "int"),
+        ("red", "uchar"), ("green", "uchar"), ("blue", "uchar"),
+    ]
+    _write_ply(source, properties, [(1, 2, 3, 4, 5, 6)])
+    output_root = tmp_path / "out"
+    MODULE.prepare_ctc_formal_chunks(source, output_root, **_partition_kwargs())
+
+    relocated_root = tmp_path / "relocated"
+    relocated_source = relocated_root / "data_utils/attribute/partition.py"
+    relocated_source.parent.mkdir(parents=True)
+    relocated_source.write_bytes(PARTITION_SOURCE.read_bytes())
+    MODULE.prepare_ctc_formal_chunks(
+        source, output_root, reuse_existing=True,
+        partition_source=relocated_source,
+        expected_partition_sha256=PARTITION_SHA256)
+
+    assert json.loads((output_root / "manifest.json").read_text())[
+        "union_verification"]["verified"] is True
+
+
 def test_prepare_rejects_mismatched_existing_chunk_without_overwrite(tmp_path: Path) -> None:
     source = tmp_path / "source.ply"
     properties = [

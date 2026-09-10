@@ -73,6 +73,9 @@ ENDPOINT_NOT_ATTEMPTED = "NOT_ATTEMPTED"
 TASK_PASS = "PASS"
 TASK_PARTIAL = "PARTIAL"
 TASK_FAILED = "FAIL"
+SCRIPT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+FORMAL_CHECKPOINT_MANIFEST = os.path.join(
+    SCRIPT_ROOT, "configs/scalable_attribute/formal_static_rgb_v1_checkpoints.json")
 
 
 class _FormalStopAfterBase(RuntimeError):
@@ -160,7 +163,7 @@ def validate_full_bit_identity(base_bits, enhancement_bits, full_bits):
 
 def validate_independent_enhancement_metadata(
         state, base_synthesis_checkpoint, released_checkpoint,
-        conditioning_lambda):
+        conditioning_lambda, frozen_lineage=None):
     """Require an Enhancement checkpoint to name the passed frozen lineage."""
     if not isinstance(state, dict):
         raise ValueError("Enhancement checkpoint is not a mapping")
@@ -172,7 +175,10 @@ def validate_independent_enhancement_metadata(
         actual = state.get(key)
         if not isinstance(actual, str) or not actual:
             raise ValueError("Enhancement checkpoint is missing " + key)
-        if os.path.realpath(actual) != os.path.realpath(expected):
+        expected_identity = (expected if frozen_lineage is None
+                             else frozen_lineage[key])
+        normalize = os.path.realpath if frozen_lineage is None else os.path.normpath
+        if normalize(actual) != normalize(expected_identity):
             raise ValueError("Enhancement " + key + " mismatch")
     if int(state.get("conditioning_lambda", -1)) != int(conditioning_lambda):
         raise ValueError("Enhancement conditioning lambda mismatch")
@@ -181,17 +187,22 @@ def validate_independent_enhancement_metadata(
 
 def validate_joint_checkpoint_metadata(
         state, base_synthesis_checkpoint, released_checkpoint,
-        conditioning_lambda, checkpoint_profile):
+        conditioning_lambda, checkpoint_profile, frozen_lineage=None):
     """Require the complete joint checkpoint's target/bootstrap lineage."""
     if not isinstance(state, dict):
         raise ValueError("Joint checkpoint is not a mapping")
     if state.get("architecture") != "canonical_scalable_mvub_finetune_v1":
         raise ValueError("Joint checkpoint architecture mismatch")
-    if os.path.realpath(state.get("base_synthesis_initialization", "")) != \
-            os.path.realpath(base_synthesis_checkpoint):
+    normalize = os.path.realpath if frozen_lineage is None else os.path.normpath
+    expected_base = (base_synthesis_checkpoint if frozen_lineage is None else
+                     frozen_lineage["base_synthesis_initialization"])
+    expected_released = (released_checkpoint if frozen_lineage is None else
+                         frozen_lineage["released_checkpoint"])
+    if normalize(state.get("base_synthesis_initialization", "")) != \
+            normalize(expected_base):
         raise ValueError("Joint base synthesis initialization mismatch")
-    if os.path.realpath(state.get("released_checkpoint", "")) != \
-            os.path.realpath(released_checkpoint):
+    if normalize(state.get("released_checkpoint", "")) != \
+            normalize(expected_released):
         raise ValueError("Joint released checkpoint mismatch")
     if int(state.get("conditioning_lambda", -1)) != int(conditioning_lambda):
         raise ValueError("Joint conditioning lambda mismatch")
@@ -201,6 +212,86 @@ def validate_joint_checkpoint_metadata(
     if actual_profile != checkpoint_profile:
         raise ValueError("Joint checkpoint profile mismatch")
     return True
+
+
+def validate_relocated_artifact(path, descriptor, label="checkpoint"):
+    """Match a local or relocated artifact to its frozen content identity."""
+    if not isinstance(descriptor, dict):
+        raise ValueError(label + " frozen descriptor is not a mapping")
+    try:
+        expected_size = int(descriptor["size_bytes"])
+        expected_sha256 = descriptor["sha256"]
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(label + " frozen descriptor is incomplete") from error
+    if not os.path.isfile(path):
+        raise FileNotFoundError(label + " not found: " + path)
+    if os.path.getsize(path) != expected_size:
+        raise ValueError(label + " size mismatch")
+    if _sha256_file(path) != expected_sha256:
+        raise ValueError(label + " SHA-256 mismatch")
+    return True
+
+
+def frozen_artifact_lineage(origin_root, descriptor, label="checkpoint"):
+    """Return the exact lexical lineage identity declared by the frozen manifest."""
+    if not isinstance(origin_root, str) or not os.path.isabs(origin_root):
+        raise ValueError("frozen origin_root must be absolute")
+    relative = descriptor.get("path") if isinstance(descriptor, dict) else None
+    if not isinstance(relative, str) or not relative or os.path.isabs(relative):
+        raise ValueError(label + " frozen path must be relative")
+    normalized = os.path.normpath(relative)
+    if normalized == ".." or normalized.startswith(".." + os.sep):
+        raise ValueError(label + " frozen path escapes origin_root")
+    return os.path.normpath(os.path.join(origin_root, normalized))
+
+
+def _formal_checkpoint_contract(point, manifest_path=FORMAL_CHECKPOINT_MANIFEST):
+    with open(manifest_path, "r", encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    if manifest.get("contract_id") != "formal_static_rgb_v1_20260909":
+        raise ValueError("Frozen checkpoint contract ID mismatch")
+    matches = [item for item in manifest.get("operating_points", [])
+               if item.get("point") == point]
+    if len(matches) != 1:
+        raise ValueError("Frozen checkpoint point mapping is not unique: " + str(point))
+    return manifest, matches[0]
+
+
+def _validate_formal_checkpoint_selection(
+        point, mode, canonical_profile, conditioning_lambda,
+        selected_base, enhancement_path, released_checkpoint):
+    manifest, operation = _formal_checkpoint_contract(point)
+    if int(operation.get("lambda", -1)) != int(conditioning_lambda):
+        raise ValueError("Frozen checkpoint lambda mismatch")
+    if operation.get("released_profile") != canonical_profile:
+        raise ValueError("Frozen checkpoint profile mismatch")
+    if mode == "joint":
+        if (operation.get("base_loader") != "joint_scalable_base" or
+                operation.get("full_loader") != "joint_scalable_full"):
+            raise ValueError("Frozen joint loader mapping mismatch")
+        selected_base_descriptor = operation.get("bootstrap_checkpoint")
+    else:
+        if operation.get("base_loader") not in ("base_synthesis", "rescued_base"):
+            raise ValueError("Frozen Base loader mapping mismatch")
+        if operation.get("full_loader") not in (
+                "independent_enhancement", "sequential_enhancement"):
+            raise ValueError("Frozen Enhancement loader mapping mismatch")
+        selected_base_descriptor = operation.get("base_checkpoint")
+    released_descriptor = manifest["released_checkpoints"][canonical_profile]
+    full_descriptor = operation.get("full_checkpoint")
+    validate_relocated_artifact(selected_base, selected_base_descriptor,
+                                "selected Base checkpoint")
+    validate_relocated_artifact(enhancement_path, full_descriptor,
+                                "selected Full checkpoint")
+    validate_relocated_artifact(released_checkpoint, released_descriptor,
+                                "selected released checkpoint")
+    origin_root = manifest["origin_root"]
+    return {
+        "base": frozen_artifact_lineage(
+            origin_root, selected_base_descriptor, "selected Base checkpoint"),
+        "released": frozen_artifact_lineage(
+            origin_root, released_descriptor, "selected released checkpoint"),
+    }
 
 
 def derive_endpoint_status(gates):
@@ -676,6 +767,9 @@ def _run_ours_formal(args, operating_point, canonical_profile, released_checkpoi
         raise FileNotFoundError("Base checkpoint not found: " + selected_base)
     if not os.path.isfile(enhancement_path):
         raise FileNotFoundError("Enhancement checkpoint not found: " + enhancement_path)
+    frozen_identity = _validate_formal_checkpoint_selection(
+        args.point, mode, canonical_profile, args.conditioning_lambda,
+        selected_base, enhancement_path, released_checkpoint)
     output_csv = os.path.join(args.output_dir, "physical_rd.csv")
     output_json = os.path.join(args.output_dir, "physical_rd.json")
     if os.path.lexists(output_csv) or os.path.lexists(output_json):
@@ -707,11 +801,15 @@ def _run_ours_formal(args, operating_point, canonical_profile, released_checkpoi
         enhancement_state = torch.load(enhancement_path, map_location="cpu")
         validate_independent_enhancement_metadata(
             enhancement_state, selected_base, released_checkpoint,
-            args.conditioning_lambda)
+            args.conditioning_lambda, frozen_lineage={
+                "base_synthesis_checkpoint": frozen_identity["base"],
+                "released_checkpoint": frozen_identity["released"],
+            })
         from scalable_attribute.canonical.scalable_model import (  # pylint: disable=import-outside-toplevel
             CanonicalScalableModel)
         load_frozen_base(base, selected_base, released_checkpoint,
-                         args.base_checkpoint_lambda)
+                         args.base_checkpoint_lambda,
+                         released_checkpoint_lineage=frozen_identity["released"])
         model = CanonicalScalableModel(base, args.conditioning_lambda).cuda().eval()
         model.enhancement.vae.load_state_dict(
             enhancement_state["enhancement_vae"], strict=True)
@@ -725,11 +823,15 @@ def _run_ours_formal(args, operating_point, canonical_profile, released_checkpoi
         joint_state = torch.load(enhancement_path, map_location="cpu")
         validate_joint_checkpoint_metadata(
             joint_state, args.base_synthesis_checkpoint, released_checkpoint,
-            args.conditioning_lambda, canonical_profile)
+            args.conditioning_lambda, canonical_profile, frozen_lineage={
+                "base_synthesis_initialization": frozen_identity["base"],
+                "released_checkpoint": frozen_identity["released"],
+            })
         from scalable_attribute.canonical.scalable_model import (  # pylint: disable=import-outside-toplevel
             CanonicalScalableModel, load_finetuned_scalable)
         load_frozen_base(base, args.base_synthesis_checkpoint,
-                         released_checkpoint, args.base_checkpoint_lambda)
+                         released_checkpoint, args.base_checkpoint_lambda,
+                         released_checkpoint_lineage=frozen_identity["released"])
         model = CanonicalScalableModel(base, args.conditioning_lambda).cuda().eval()
         loaded_state = load_finetuned_scalable(
             model, enhancement_path, args.conditioning_lambda)

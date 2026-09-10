@@ -8,7 +8,8 @@ import torch
 FINE_TUNE_ARCHITECTURE = "canonical_scalable_mvub_finetune_v1"
 
 
-def load_frozen_base(base_model, checkpoint, released_checkpoint, base_lambda):
+def load_frozen_base(base_model, checkpoint, released_checkpoint, base_lambda,
+                     released_checkpoint_lineage=None):
     """Load either canonical Base checkpoint format and freeze the whole Base.
 
     ``canonical_base_rescue_v1`` owns a fine-tuned Prefix as well as
@@ -27,8 +28,11 @@ def load_frozen_base(base_model, checkpoint, released_checkpoint, base_lambda):
         raise ValueError("Canonical Base checkpoint lambda mismatch")
     checkpoint_released = state.get(
         "base_checkpoint", state.get("released_checkpoint", ""))
-    if os.path.realpath(checkpoint_released) != os.path.realpath(
-            released_checkpoint):
+    expected_lineage = (released_checkpoint if released_checkpoint_lineage is None
+                        else released_checkpoint_lineage)
+    normalize = (os.path.realpath if released_checkpoint_lineage is None
+                 else os.path.normpath)
+    if normalize(checkpoint_released) != normalize(expected_lineage):
         raise ValueError("Canonical Base released checkpoint mismatch")
     if architecture == "canonical_base_predict_correct":
         base_model.base_synthesis.load_state_dict(

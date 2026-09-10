@@ -1,8 +1,10 @@
 """CPU/source-only contract checks for the Ours formal evaluator helpers."""
 
 import ast
+import hashlib
 import math
 import os
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -17,11 +19,14 @@ def _load_pure_helpers():
         "derive_codec_timings", "endpoint_status", "task_status",
         "validate_base_rate_details", "validate_full_bit_identity",
         "validate_independent_enhancement_metadata",
+        "validate_joint_checkpoint_metadata", "validate_relocated_artifact",
+        "frozen_artifact_lineage",
         "_formal_chunk_endpoint",
     }
     namespace = {
         "math": math,
         "os": os,
+        "_sha256_file": lambda path: hashlib.sha256(Path(path).read_bytes()).hexdigest(),
         "FORMAL_REUSABLE": "FORMAL_REUSABLE",
         "ENDPOINT_FAILED": "FAILED",
         "TASK_PASS": "PASS",
@@ -91,6 +96,77 @@ class OursFormalEndpointContractTests(unittest.TestCase):
                     "conditioning_lambda": 4096,
                 },
                 "/tmp/base.pth", "/tmp/released.pth", 8192)
+
+    def test_relocated_checkpoint_identity_and_lineage_fail_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            relocated = root / "relocated" / "base.pth"
+            relocated.parent.mkdir()
+            payload = b"frozen checkpoint bytes\n"
+            relocated.write_bytes(payload)
+            descriptor = {
+                "path": "experiments/family/base.pth",
+                "size_bytes": len(payload),
+                "sha256": hashlib.sha256(payload).hexdigest(),
+            }
+            origin = "/data/frozen/origin"
+            frozen_base = origin + "/experiments/family/base.pth"
+            frozen_released = origin + "/released/epoch_last.pth"
+
+            self.assertTrue(HELPERS["validate_relocated_artifact"](
+                str(relocated), descriptor))
+            state = {
+                "architecture": "canonical_independent_enhancement",
+                "base_synthesis_checkpoint": frozen_base,
+                "released_checkpoint": frozen_released,
+                "conditioning_lambda": 8192,
+            }
+            self.assertTrue(HELPERS["validate_independent_enhancement_metadata"](
+                state, str(relocated), str(root / "released.pth"), 8192,
+                frozen_lineage={
+                    "base_synthesis_checkpoint": frozen_base,
+                    "released_checkpoint": frozen_released,
+                }))
+
+            relocated.write_bytes(b"wrong checkpoint bytes\n")
+            with self.assertRaisesRegex(ValueError, "size mismatch|SHA-256 mismatch"):
+                HELPERS["validate_relocated_artifact"](str(relocated), descriptor)
+
+            wrong_parent = dict(state, base_synthesis_checkpoint=origin + "/other/base.pth")
+            with self.assertRaisesRegex(ValueError, "base_synthesis_checkpoint mismatch"):
+                HELPERS["validate_independent_enhancement_metadata"](
+                    wrong_parent, str(relocated), str(root / "released.pth"), 8192,
+                    frozen_lineage={
+                        "base_synthesis_checkpoint": frozen_base,
+                        "released_checkpoint": frozen_released,
+                    })
+
+            for field, value, message in (
+                    ("conditioning_lambda", 4096, "lambda mismatch"),
+                    ("architecture", "wrong", "architecture mismatch")):
+                wrong = dict(state, **{field: value})
+                with self.assertRaisesRegex(ValueError, message):
+                    HELPERS["validate_independent_enhancement_metadata"](
+                        wrong, str(relocated), str(root / "released.pth"), 8192,
+                        frozen_lineage={
+                            "base_synthesis_checkpoint": frozen_base,
+                            "released_checkpoint": frozen_released,
+                        })
+
+            joint = {
+                "architecture": "canonical_scalable_mvub_finetune_v1",
+                "base_synthesis_initialization": frozen_base,
+                "released_checkpoint": frozen_released,
+                "conditioning_lambda": 4096,
+                "checkpoint_profile": "32k8k",
+            }
+            with self.assertRaisesRegex(ValueError, "profile mismatch"):
+                HELPERS["validate_joint_checkpoint_metadata"](
+                    joint, str(relocated), str(root / "released.pth"), 4096,
+                    "8k256", frozen_lineage={
+                        "base_synthesis_initialization": frozen_base,
+                        "released_checkpoint": frozen_released,
+                    })
 
     def test_combined_and_isolated_base_paths_are_explicit(self):
         source = SCRIPT.read_text(encoding="utf-8")

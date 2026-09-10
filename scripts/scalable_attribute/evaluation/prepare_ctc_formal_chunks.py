@@ -18,6 +18,7 @@ payloads.
 from __future__ import annotations
 
 import argparse
+import copy
 import ast
 import csv
 import io
@@ -922,7 +923,27 @@ def _verify_existing_json(path: Path, expected: Mapping[str, Any]) -> None:
         actual = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise RuntimeError(f"existing manifest JSON is unreadable: {path}: {exc}") from exc
-    if actual != expected:
+    def normalized(value: Mapping[str, Any]) -> dict[str, Any]:
+        result = copy.deepcopy(value)
+        provenance = result.get("partition_provenance")
+        if not isinstance(provenance, dict):
+            raise RuntimeError(f"existing manifest lacks partition provenance: {path}")
+        for path_key, sha_key in (
+                ("source_path", "source_sha256"),
+                ("executed_source_path", "executed_source_sha256")):
+            artifact_path = provenance.get(path_key)
+            artifact_sha = provenance.get(sha_key)
+            if not isinstance(artifact_path, str) or not isinstance(artifact_sha, str):
+                raise RuntimeError(
+                    f"existing manifest partition provenance is incomplete: {path}")
+            artifact = Path(artifact_path)
+            if not artifact.is_file() or _sha256_file(artifact) != artifact_sha:
+                raise RuntimeError(
+                    f"existing manifest partition artifact identity mismatch: {artifact}")
+            provenance[path_key] = "sha256:" + artifact_sha
+        return result
+
+    if normalized(actual) != normalized(expected):
         raise RuntimeError(f"existing manifest JSON identity mismatch: {path}")
 
 
@@ -931,7 +952,20 @@ def _verify_existing_tsv(path: Path, expected: str) -> None:
         actual = path.read_text(encoding="utf-8")
     except OSError as exc:
         raise RuntimeError(f"existing manifest TSV is unreadable: {path}: {exc}") from exc
-    if actual != expected:
+    def normalized(value: str) -> list[dict[str, str]]:
+        rows = list(csv.DictReader(io.StringIO(value), delimiter="\t"))
+        for row in rows:
+            partition_path = row.get("partition_source_path")
+            partition_sha = row.get("partition_source_sha256")
+            artifact = Path(partition_path) if partition_path else None
+            if (artifact is None or not artifact.is_file() or
+                    not partition_sha or _sha256_file(artifact) != partition_sha):
+                raise RuntimeError(
+                    f"existing manifest TSV partition artifact identity mismatch: {partition_path}")
+            row["partition_source_path"] = "sha256:" + partition_sha
+        return rows
+
+    if normalized(actual) != normalized(expected):
         raise RuntimeError(f"existing manifest TSV identity mismatch: {path}")
 
 
