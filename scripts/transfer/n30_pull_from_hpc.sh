@@ -9,10 +9,10 @@ fi
 source_path=$1
 destination_path=$2
 
-hpc_root=/home/woody/iwnt/iwnt193h
-n30_root=/data/run01/scz0ade/Tanzeyu
+hpc_root=/REDACTED/FAU_ACCOUNT_ROOT
+n30_root=/REDACTED/N30_PROJECT_ROOT
 credential_dir=$n30_root/.ssh_transfer
-identity_file=$credential_dir/id_rsa_fau_hpc
+identity_file=$credential_dir/hpc_identity
 known_hosts_file=$credential_dir/known_hosts
 
 case "$source_path" in
@@ -40,7 +40,7 @@ install -d -m 700 "$credential_dir"
 chmod 600 "$identity_file"
 mkdir -p "$destination_path"
 
-proxy_command="ssh -i $identity_file -o BatchMode=yes -o ConnectTimeout=20 -o UserKnownHostsFile=$known_hosts_file -W %h:%p iwnt193h@csnhr.nhr.fau.de"
+proxy_command="ssh -i $identity_file -o BatchMode=yes -o ConnectTimeout=20 -o UserKnownHostsFile=$known_hosts_file -W %h:%p HPC_ACCOUNT@HPC_JUMP_HOST"
 remote_shell="ssh -i $identity_file -o BatchMode=yes -o ConnectTimeout=20 -o UserKnownHostsFile=$known_hosts_file -o ProxyCommand=\"$proxy_command\""
 
 rsync \
@@ -51,5 +51,5 @@ rsync \
     --append-verify \
     --info=progress2 \
     -e "$remote_shell" \
-    "iwnt193h@tinyx.nhr.fau.de:$source_path" \
+    "HPC_LOGIN@HPC_LOGIN_HOST:$source_path" \
     "$destination_path"

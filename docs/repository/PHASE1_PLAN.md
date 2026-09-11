@@ -22,8 +22,8 @@ This verifies imports, not numerical codec behavior or remote checkpoint paths.
 
 Retained remote logs:
 
-- N30: `/data/run01/scz0ade/Tanzeyu/phase1_cpu_smoke_17f8ab0.66ixQL/smoke.log`
-- FAU: `/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/phase1_cpu_smoke_17f8ab0.Pf5UHM/smoke.log`
+- N30: `/REDACTED/N30_PROJECT_ROOT/phase1_cpu_smoke_17f8ab0.66ixQL/smoke.log`
+- FAU: `/REDACTED/FAU_PROJECT_ROOT/phase1_cpu_smoke_17f8ab0.Pf5UHM/smoke.log`
 
 Local CU121 lacks PyTorch3D; its import failure is an environment limitation,
 not evidence of a cleanup regression. No packages were installed. Remote

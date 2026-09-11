@@ -89,9 +89,9 @@ review was finalized:
 | Python compile and `git diff --check` | PASS |
 
 The fast/lightweight cluster outputs are under
-`/data/run01/scz0ade/Tanzeyu/experiments/readability_final_6c3fcbf/`. The final
+`/REDACTED/N30_PROJECT_ROOT/experiments/readability_final_6c3fcbf/`. The final
 2K slow-gate evidence for reviewed HEAD `f091e58` is under
-`/data/run01/scz0ade/Tanzeyu/experiments/readability_final_f091e58/2k_slow/`.
+`/REDACTED/N30_PROJECT_ROOT/experiments/readability_final_f091e58/2k_slow/`.
 It completed with scheduler state `COMPLETED`, exit code `0:0`, and total job
 walltime 81 seconds. No training or physical formal evaluation was run.
 

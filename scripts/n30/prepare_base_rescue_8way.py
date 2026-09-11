@@ -18,7 +18,7 @@ def main():
     if len(cfg["arms"])!=8 or len({x["name"] for x in cfg["arms"]})!=8:
         raise ValueError("Expected eight unique rescue arms")
     a.command_dir.mkdir(parents=True,exist_ok=True)
-    python="/data/run01/scz0ade/Tanzeyu/envs/unicorn-me-py38/bin/python"
+    python="/REDACTED/N30_PROJECT_ROOT/envs/unicorn-me-py38/bin/python"
     script=a.source_root/"scripts/scalable_attribute/canonical/train_base_rescue.py"
     for arm in cfg["arms"]:
         released=Path(common["released_root"])/arm["profile"]/"epoch_last.pth"

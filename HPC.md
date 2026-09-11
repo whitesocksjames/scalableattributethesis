@@ -36,10 +36,10 @@ SECONDARY: FAU TinyGPU
 N30上本 thesis 的所有 source、dataset、environment、cache、checkpoint、log 和 output只能位于：
 
 ```text
-/data/run01/scz0ade/Tanzeyu/
+/REDACTED/N30_PROJECT_ROOT/
 ```
 
-禁止进入、查看、枚举、修改、删除、移动、同步、清理或依赖共享账号中其他用户的个人目录。任何recursive/destructive command必须先验证规范化后的exact target严格位于`/data/run01/scz0ade/Tanzeyu/`内部；无法证明时必须停止。详细规则、资源、module、Slurm、`/dev/shm`和已验证环境见 [N30_GUIDE.md](N30_GUIDE.md)。
+禁止进入、查看、枚举、修改、删除、移动、同步、清理或依赖共享账号中其他用户的个人目录。任何recursive/destructive command必须先验证规范化后的exact target严格位于`/REDACTED/N30_PROJECT_ROOT/`内部；无法证明时必须停止。详细规则、资源、module、Slurm、`/dev/shm`和已验证环境见 [N30_GUIDE.md](N30_GUIDE.md)。
 
 N30不复用下面的 TinyGPU scheduler adapter。后续如实现remote submission，应使用独立、很薄的 `scripts/n30/`。
 
@@ -98,7 +98,7 @@ python scripts/hpc/remote_submit.py cancel STUDY/EXPERIMENT
 python scripts/hpc/remote_submit.py retry STUDY/EXPERIMENT --resume
 ```
 
-Submission syncs source code through SSH alias `tinyx` unless `--no-sync` is
+Submission syncs source code through SSH alias `HPC_LOGIN` unless `--no-sync` is
 given. Dataset, checkpoints, experiments, logs, upstream results, and `.git` are
 excluded. If sync or SSH fails, no Slurm submission is attempted. Persistent
 `.sbatch` files are not generated; jobs use `sbatch.tinygpu --wrap`.

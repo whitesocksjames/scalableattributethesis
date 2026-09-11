@@ -7,19 +7,19 @@
 #SBATCH --mem=32G
 #SBATCH --time=04:00:00
 #SBATCH --export=NONE
-#SBATCH --output=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/rwtt_preflight_%A_%a.out
-#SBATCH --error=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/rwtt_preflight_%A_%a.err
+#SBATCH --output=/REDACTED/FAU_PROJECT_ROOT/logs/rwtt_preflight_%A_%a.out
+#SBATCH --error=/REDACTED/FAU_PROJECT_ROOT/logs/rwtt_preflight_%A_%a.err
 
 unset SLURM_EXPORT_ENV
 set -euo pipefail
 
-REPO_DIR=/home/hpc/iwnt/iwnt193h/Scalable-Attribute-Thesis
-WORKSPACE_DIR=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis
+REPO_DIR=/REDACTED/HPC_SHARED_ROOT/HPC_ACCOUNT/Scalable-Attribute-Thesis
+WORKSPACE_DIR=/REDACTED/FAU_PROJECT_ROOT
 RWTT_DIR=${WORKSPACE_DIR}/datasets/RWTT
 EXTRACT_DIR=${RWTT_DIR}/extracted/full
 DENSE_DIR=${RWTT_DIR}/processed/dense
 TRAIN_DIR=${RWTT_DIR}/processed/train_h5
-PYTHON_BIN=/home/woody/iwnt/iwnt193h/software/private/conda/envs/unicorn-me-py38/bin/python
+PYTHON_BIN=/REDACTED/FAU_ACCOUNT_ROOT/software/private/conda/envs/unicorn-me-py38/bin/python
 
 export PYTHONPATH=${REPO_DIR}
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}

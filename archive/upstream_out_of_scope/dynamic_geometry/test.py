@@ -4,7 +4,7 @@
 import os, sys
 sys.path.append(os.path.split(__file__)[0])
 sys.path.append(os.path.split(os.path.split(__file__)[0])[0])
-sys.path.append('/media/ivc3090ti/新加卷/zjz/unicorn/UnicornV1')
+sys.path.append('/REDACTED/UPSTREAM_WORKSTATION_ROOT/zjz/unicorn/UnicornV1')
 import glob
 import torch
 from coder import CoderMultiframe

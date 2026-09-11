@@ -7,23 +7,23 @@ module load miniforge/24.1.2
 module load gcc/11.2
 module load cuda/11.7
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate /data/run01/scz0ade/Tanzeyu/envs/unicorn-me-py38
+conda activate /REDACTED/N30_PROJECT_ROOT/envs/unicorn-me-py38
 
 gxx_runtime="$(dirname "$(g++ -print-file-name=libstdc++.so.6)")"
 export LD_LIBRARY_PATH="${gxx_runtime}:/data/apps/openblas/0.3.22/lib:${LD_LIBRARY_PATH:-}"
 export LIBRARY_PATH="/data/apps/openblas/0.3.22/lib:${LIBRARY_PATH:-}"
-export TORCH_EXTENSIONS_DIR=/data/run01/scz0ade/Tanzeyu/.cache/torch_extensions
+export TORCH_EXTENSIONS_DIR=/REDACTED/N30_PROJECT_ROOT/.cache/torch_extensions
 export MAX_JOBS=2
 
-source_root=/data/run01/scz0ade/Tanzeyu/scratch/direct_d611_matched_source_20260831
-output_root=/data/run01/scz0ade/Tanzeyu/experiments/direct_d611_matched_budget_v1
+source_root=/REDACTED/N30_PROJECT_ROOT/scratch/direct_d611_matched_source_20260831
+output_root=/REDACTED/N30_PROJECT_ROOT/experiments/direct_d611_matched_budget_v1
 export PYTHONPATH="${source_root}:${PYTHONPATH:-}"
 train_root="${output_root}/train/checkpoints"
-old_m0=/data/run01/scz0ade/Tanzeyu/experiments/direct_d611_mixing_v1/train/M0/checkpoints/step_1762.pth
-two_stage=/data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_lr5e5_r01/D611/train/checkpoints/step_3525.pth
-data_root=/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis
+old_m0=/REDACTED/N30_PROJECT_ROOT/experiments/direct_d611_mixing_v1/train/M0/checkpoints/step_1762.pth
+two_stage=/REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_lr5e5_r01/D611/train/checkpoints/step_3525.pth
+data_root=/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis
 released_root="${data_root}/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt"
-base_checkpoint=/data/run01/scz0ade/Tanzeyu/experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth
+base_checkpoint=/REDACTED/N30_PROJECT_ROOT/experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth
 gpcc="${source_root}/third_party/tmc3_v21"
 
 cd "${source_root}"
@@ -41,10 +41,10 @@ checkpoint_args=(
 )
 
 for spec in \
-  "longdress:1300:/data/run01/scz0ade/Tanzeyu/data/8iVFB/longdress/longdress_vox10_1300.ply" \
-  "loot:1200:/data/run01/scz0ade/Tanzeyu/data/8iVFB/loot/loot_vox10_1200.ply" \
-  "redandblack:1550:/data/run01/scz0ade/Tanzeyu/data/8iVFB/redandblack/redandblack_vox10_1550.ply" \
-  "soldier:0690:/data/run01/scz0ade/Tanzeyu/data/8iVFB/soldier/soldier_vox10_0690.ply"
+  "longdress:1300:/REDACTED/N30_PROJECT_ROOT/data/8iVFB/longdress/longdress_vox10_1300.ply" \
+  "loot:1200:/REDACTED/N30_PROJECT_ROOT/data/8iVFB/loot/loot_vox10_1200.ply" \
+  "redandblack:1550:/REDACTED/N30_PROJECT_ROOT/data/8iVFB/redandblack/redandblack_vox10_1550.ply" \
+  "soldier:0690:/REDACTED/N30_PROJECT_ROOT/data/8iVFB/soldier/soldier_vox10_0690.ply"
 do
   IFS=: read -r sequence frame input_ply <<<"${spec}"
   python scripts/scalable_attribute/canonical/evaluate_8ivfb_sequence.py \
@@ -85,4 +85,4 @@ python scripts/scalable_attribute/canonical/analyze_direct_d611_trajectory.py \
   --initial-checkpoint "${old_m0}" \
   --output-dir "${output_root}/analysis" \
   --full28-root "${output_root}/rwtt_full28" \
-  --reference-full28 /data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_lr5e5_r01/formal/D611_step3525_full28/endpoint_summary.csv
+  --reference-full28 /REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_lr5e5_r01/formal/D611_step3525_full28/endpoint_summary.csv

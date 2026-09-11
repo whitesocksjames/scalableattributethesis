@@ -19,7 +19,7 @@
 主要结果根目录：
 
 ```text
-/home/liltan/projects/Scalable-Attribute-Thesis-results/n30_20260831/
+/REDACTED/LOCAL_REPO_ROOT-results/n30_20260831/
 ```
 
 Formal RWTT contract：28 original models / 792 H5；physical hard rate；每个 H5 先保留 channel MSE，point-weighted 聚合为 per-model MSE，再转换 PSNR，最后 model-equal average；quality 为 author `pc_error` Y/U/V 与 YUV 6:1:1。
@@ -34,7 +34,7 @@ External contract：8iVFB fixed-4，即 Longdress 1300、Loot 1200、Redandblack
 - MVUB A/B/C：`overnight_pass1_5c71343/*/train/resolved_args.json`、`MVUB_OVERNIGHT_ALL_RESULTS.csv`、`supplementary_eval_v1/`；
 - Direct-D611 mixing：`direct_d611_mixing_v1/train/*/resolved_args.json`、`8ivfb/*/physical_rd.csv`、`rwtt_full28/*/per_model.csv`。
 
-为补齐本地结果包未复制的 provenance，本轮还只读核对了 N30 `Tanzeyu` namespace 内 D111、D411、D611 和 Base 的 `resolved_args.json`。没有读取其他用户目录。
+为补齐本地结果包未复制的 provenance，本轮还只读核对了 N30 `PROJECT_USER` namespace 内 D111、D411、D611 和 Base 的 `resolved_args.json`。没有读取其他用户目录。
 
 ## 2. Model lineage：global step 不等于单段训练预算
 

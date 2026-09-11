@@ -9,7 +9,9 @@
   "selection_policy": "Predeclared; never change lineage, checkpoint, or point from test-set performance.",
   "authoritative_manifest": {
     "path": "configs/scalable_attribute/formal_static_rgb_v1_checkpoints.json",
-    "sha256": "d43641b2ba93536b9f5d95fd52fe2e796faa9eb18de2c03a76bd3e9a7b616484",
+    "sha256": "f28fffcfe6ce1aa5dae5876ad7df6d2128d75a6ac26ff5b9f16efcdccdb501e3",
+    "evaluated_runtime_sha256": "d43641b2ba93536b9f5d95fd52fe2e796faa9eb18de2c03a76bd3e9a7b616484",
+    "publication_note": "The public copy redacts origin_root only; checkpoint paths relative to that root, sizes, SHA-256 identities, loaders, profiles, lambdas, and selections are unchanged.",
     "contract_id": "formal_static_rgb_v1_20260909"
   },
   "excluded_from_final_curve": {

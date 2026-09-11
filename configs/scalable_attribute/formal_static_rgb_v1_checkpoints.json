@@ -3,7 +3,7 @@
   "contract_id": "formal_static_rgb_v1_20260909",
   "status": "frozen_by_user_2026-09-09",
   "selection_policy": "Predeclared. Never change lineage, checkpoint, or point from test-set performance.",
-  "origin_root": "/data/run01/scz0ade/Tanzeyu",
+  "origin_root": "/REDACTED/N30_PROJECT_ROOT",
   "released_checkpoints": {
     "32k8k": {
       "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/32k8k/epoch_last.pth",

@@ -284,13 +284,13 @@ Full = Base streams + Enhancement stream
 每个 Slurm job：
 
 ```text
-scratch=/dev/shm/Tanzeyu_${SLURM_JOB_ID}
+scratch=/dev/shm/PROJECT_USER_${SLURM_JOB_ID}
 mkdir -p exact scratch
-tar -xf /data/run01/scz0ade/Tanzeyu/data/MVUB/mvub10_h5.tar -C "$scratch"
+tar -xf /REDACTED/N30_PROJECT_ROOT/data/MVUB/mvub10_h5.tar -C "$scratch"
 data_root="$scratch/MVUB10_H5"
 ```
 
-- 所有 persistent checkpoint/metrics/log 写回 `/data/run01/scz0ade/Tanzeyu/experiments/...`。
+- 所有 persistent checkpoint/metrics/log 写回 `/REDACTED/N30_PROJECT_ROOT/experiments/...`。
 - job 结束只清理本 job 创建的 exact scratch path。
 - 当前 N30 tar 已核对含五个 subject 的 H5，但 archive 内未发现 summary/manifest metadata；训练 manifests 应由 sorted filenames/固定 frame rule生成并持久保存到 experiment output，不依赖 archive metadata。
 

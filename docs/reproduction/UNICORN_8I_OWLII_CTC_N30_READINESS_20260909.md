@@ -34,7 +34,7 @@ silently relabelled as physical rates.
 | Dataset | Paper samples | Released author CSVs | FAU HPC inputs | N30 status | Action |
 | --- | ---: | --- | --- | --- | --- |
 | 8iVFB vox10 | 4 | 4 x 9 rows | 4/4 | 4 x 9 upstream default and physical runs complete; aggregate PASS | Do not rerun unless a same-hardware timing rerun is wanted |
-| Owlii vox10 | 4 | 4 x 10 retained rows; paper plots first 9 | 4/4 author-compatible derivatives | 4/4 derivatives already present at `/data/run01/scz0ade/Tanzeyu/data/Owlii_vox10_floor_v1/` | Ready for pinned 9-point run |
+| Owlii vox10 | 4 | 4 x 10 retained rows; paper plots first 9 | 4/4 author-compatible derivatives | 4/4 derivatives already present at `/REDACTED/N30_PROJECT_ROOT/data/Owlii_vox10_floor_v1/` | Ready for pinned 9-point run |
 | CTC | 12 | 12 x 10 retained rows, aggregated by row index | 10/10 object ZIPs downloaded from the official NJU Box share; two native Owlii vox11 inputs were already available | 12/12 source inputs present | Freeze binary-input handling, run a representative VRAM smoke, then launch the 12 x 9 sweep |
 
 Before this audit, FAU was not a complete source: its project workspace
@@ -63,10 +63,10 @@ same-named PLY, and has matching SHA-256 on FAU and N30.
 
 Locations:
 
-- FAU ZIPs: `/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/unicorn_official/ctc_zips/`
-- N30 ZIPs: `/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_zips/`
-- N30 extracted PLYs: `/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_vox12/`
-- N30 native Owlii vox11 inputs: `/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/unicorn_official/owlii_vox11/`
+- FAU ZIPs: `/REDACTED/FAU_PROJECT_ROOT/datasets/unicorn_official/ctc_zips/`
+- N30 ZIPs: `/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_zips/`
+- N30 extracted PLYs: `/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_vox12/`
+- N30 native Owlii vox11 inputs: `/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/datasets/unicorn_official/owlii_vox11/`
 
 The resulting N30 CTC input inventory matches the 12-sample author CSV
 contract:
@@ -88,11 +88,11 @@ contract:
 
 FAU could not initiate SSH to the N30 gateway: the connection timed out before
 authentication during banner exchange. The working no-local-data route is the
-reverse direction: N30 uses the FAU key and `csnhr.nhr.fau.de` as an SSH jump
-host, then pulls from `tinyx.nhr.fau.de` with `rsync --append-verify`. The pull
+reverse direction: N30 uses the FAU key and `HPC_JUMP_HOST` as an SSH jump
+host, then pulls from `HPC_LOGIN_HOST` with `rsync --append-verify`. The pull
 completed at about 9.66 MB/s and did not route file payloads through the local
 workstation. The authorized FAU credential is isolated at
-`/data/run01/scz0ade/Tanzeyu/.ssh_transfer/id_rsa_fau_hpc` with mode 600; its
+`/REDACTED/N30_PROJECT_ROOT/.ssh_transfer/hpc_identity` with mode 600; its
 directory has mode 700.
 
 N30 already contains the pinned upstream source and all three released RWTT

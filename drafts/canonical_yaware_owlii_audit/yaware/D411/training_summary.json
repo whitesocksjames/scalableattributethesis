@@ -21,9 +21,9 @@
     "finite": true
   },
   "checkpoints": {
-    "1863": "/data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/D411/train/checkpoints/step_1863.pth",
-    "1963": "/data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/D411/train/checkpoints/step_1963.pth",
-    "2063": "/data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/D411/train/checkpoints/step_2063.pth"
+    "1863": "/REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_r01/D411/train/checkpoints/step_1863.pth",
+    "1963": "/REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_r01/D411/train/checkpoints/step_1963.pth",
+    "2063": "/REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_r01/D411/train/checkpoints/step_2063.pth"
   },
   "checkpoint_reload": true,
   "base_frozen": true,

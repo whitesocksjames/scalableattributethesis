@@ -23,10 +23,10 @@ module load miniforge/24.1.2
 module load gcc/11.2
 module load cuda/11.7
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate /data/run01/scz0ade/Tanzeyu/envs/unicorn-me-py38
+conda activate /REDACTED/N30_PROJECT_ROOT/envs/unicorn-me-py38
 export PYTHONNOUSERSITE=1
 export PYTHONDONTWRITEBYTECODE=1
-export TORCH_EXTENSIONS_DIR=/data/run01/scz0ade/Tanzeyu/.cache/torch_extensions
+export TORCH_EXTENSIONS_DIR=/REDACTED/N30_PROJECT_ROOT/.cache/torch_extensions
 export LD_LIBRARY_PATH=/data/apps/openblas/0.3.22/lib:${LD_LIBRARY_PATH:-}
 export OMP_NUM_THREADS=6
 

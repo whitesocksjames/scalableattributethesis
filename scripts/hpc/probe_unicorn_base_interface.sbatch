@@ -4,8 +4,8 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --time=00:30:00
-#SBATCH --output=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/unicorn_base_probe_%j.out
-#SBATCH --error=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/unicorn_base_probe_%j.err
+#SBATCH --output=/REDACTED/FAU_PROJECT_ROOT/logs/unicorn_base_probe_%j.out
+#SBATCH --error=/REDACTED/FAU_PROJECT_ROOT/logs/unicorn_base_probe_%j.err
 
 set -euo pipefail
 

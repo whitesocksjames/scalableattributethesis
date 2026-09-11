@@ -52,7 +52,7 @@ recoverable through Git and frozen experiment artifacts.
 
 - Datasets, released checkpoints, selected canonical checkpoints.
 - Formal `per_h5.csv`, `per_model.csv`, curve/endpoint CSV and provenance JSON.
-- Anything outside `/data/run01/scz0ade/Tanzeyu/` on N30.
+- Anything outside `/REDACTED/N30_PROJECT_ROOT/` on N30.
 - Any directory whose ownership, dependency or recovery status is uncertain.
 
 ## Safe sequence
@@ -74,14 +74,14 @@ recoverable through Git and frozen experiment artifacts.
 All persistent reads/writes and any future cleanup are restricted to:
 
 ```text
-/data/run01/scz0ade/Tanzeyu/
+/REDACTED/N30_PROJECT_ROOT/
 ```
 
 The only external namespace permitted by project policy is a job-local
 temporary directory created by that job:
 
 ```text
-/dev/shm/Tanzeyu_${SLURM_JOB_ID}/
+/dev/shm/PROJECT_USER_${SLURM_JOB_ID}/
 ```
 
 Only that exact job-local directory may be removed by the job. Do not inspect

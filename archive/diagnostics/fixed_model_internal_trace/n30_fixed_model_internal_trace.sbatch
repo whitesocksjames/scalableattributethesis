@@ -12,15 +12,15 @@ module load miniforge/24.1.2
 module load gcc/11.2
 module load cuda/11.7
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate /data/run01/scz0ade/Tanzeyu/envs/unicorn-me-py38
+conda activate /REDACTED/N30_PROJECT_ROOT/envs/unicorn-me-py38
 export PYTHONNOUSERSITE=1
-export TORCH_EXTENSIONS_DIR=/data/run01/scz0ade/Tanzeyu/.cache/torch_extensions
+export TORCH_EXTENSIONS_DIR=/REDACTED/N30_PROJECT_ROOT/.cache/torch_extensions
 export LD_LIBRARY_PATH=/data/apps/openblas/0.3.22/lib:${LD_LIBRARY_PATH:-}
-export PYTHONPATH=/data/run01/scz0ade/Tanzeyu/code/Scalable-Attribute-Thesis
+export PYTHONPATH=/REDACTED/N30_PROJECT_ROOT/code/Scalable-Attribute-Thesis
 export OMP_NUM_THREADS=6
 
-ROOT=/data/run01/scz0ade/Tanzeyu/experiments/fixed_model_internal_trace_20260903
-SOURCE=/data/run01/scz0ade/Tanzeyu/code/Scalable-Attribute-Thesis
+ROOT=/REDACTED/N30_PROJECT_ROOT/experiments/fixed_model_internal_trace_20260903
+SOURCE=/REDACTED/N30_PROJECT_ROOT/code/Scalable-Attribute-Thesis
 
 nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
 python "${SOURCE}/scripts/diagnostics/fixed_model_internal_trace.py" \

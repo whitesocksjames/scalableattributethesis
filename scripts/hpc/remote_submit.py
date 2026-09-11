@@ -15,7 +15,7 @@ from sweep_utils import checkpoint_step, read_manifest, submit_job
 from resource_profiles import DEFAULT_RESOURCE_PROFILES
 
 
-SSH_ALIAS = "tinyx"
+SSH_ALIAS = "HPC_LOGIN"
 REMOTE_REPO = "$HOME/Scalable-Attribute-Thesis"
 WORKSPACE = "$WORK/scalable_attribute_thesis"
 PYTHON = "$WORK/software/private/conda/envs/unicorn-me-py38/bin/python"

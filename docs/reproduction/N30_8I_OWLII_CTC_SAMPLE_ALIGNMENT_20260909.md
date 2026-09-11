@@ -43,9 +43,9 @@ author-linked NJU Box ZIP.
 | `redandblack_vox10_1550.ply` | 757,691 | `6091282374f7e396e6b9f01ae4a3e0d5041d0ee3a0cb22556353ff5f600906f8` | byte match |
 | `soldier_vox10_0690.ply` | 1,089,091 | `873b9e187d10314501daa041b52fbf1b1355db6974f40f9eb5d4da47ebfcd1a6` | byte match |
 
-N30 roots are `/data/run01/scz0ade/Tanzeyu/data/8iVFB/<sequence>/`.
+N30 roots are `/REDACTED/N30_PROJECT_ROOT/data/8iVFB/<sequence>/`.
 The four official ZIPs are retained on FAU at
-`/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/unicorn_official/8ivfb_zips/`.
+`/REDACTED/FAU_PROJECT_ROOT/datasets/unicorn_official/8ivfb_zips/`.
 
 ## Owlii vox10 — 4/4 deterministic contract matches
 
@@ -66,7 +66,7 @@ byte-for-byte, and all point counts matched the author CSVs.
 | `model_vox11_00000001.ply` | 2,458,429 | 657,755 | `979c17678e269c9ad97b0530a52890bcf7ffc9c29732388224aac5294ba5bbc4` | derived contract match |
 
 N30 input root:
-`/data/run01/scz0ade/Tanzeyu/data/Owlii_vox10_floor_v1/`.
+`/REDACTED/N30_PROJECT_ROOT/data/Owlii_vox10_floor_v1/`.
 
 This is stronger than a filename-only check but weaker than an official-file
 byte match: the released repository does not publish these four derived PLYs or
@@ -84,7 +84,7 @@ official bytes.”
 | `dancer_vox11_00000001.ply` | 2,592,758 | ASCII | `29bcbee86a531e509d0fe030e8623f144c853199e159e737248f6463568fe95d` | name/frame/11-bit source contract match; no published official hash |
 
 N30 root:
-`/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/unicorn_official/owlii_vox11/`.
+`/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/datasets/unicorn_official/owlii_vox11/`.
 That directory also contains `exercise` and `model`; those two are **not** CTC
 members. Do not pass this whole directory to the released recursive-glob runner.
 
@@ -107,7 +107,7 @@ official NJU Box archive. All ten comparisons are exact.
 | `Staue_Klimt_vox12.ply` | 499,660 | ASCII | `3d05ed590f17d72115a1305c994ee2e9a50bd0d764d82aae72f78cb38b3aac46` | byte match; directly loader-compatible |
 
 N30 root:
-`/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_vox12/`.
+`/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_vox12/`.
 
 ## Paper/code inconsistencies resolved by the released data
 

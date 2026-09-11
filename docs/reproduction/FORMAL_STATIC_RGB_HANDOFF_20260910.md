@@ -153,8 +153,13 @@ BD-BR contract.
   (`validate relocated formal checkpoint identity`).
 - A previously reported long SHA for this change was erroneous. The commit
   above is the sole authoritative code provenance for the repair.
-- Frozen checkpoint manifest SHA-256:
+- Evaluated runtime checkpoint-manifest SHA-256:
   `d43641b2ba93536b9f5d95fd52fe2e796faa9eb18de2c03a76bd3e9a7b616484`.
+- Publication-redacted checkpoint-manifest SHA-256:
+  `f28fffcfe6ce1aa5dae5876ad7df6d2128d75a6ac26ff5b9f16efcdccdb501e3`.
+  The publication copy changes only the private `origin_root`; checkpoint
+  relative paths, sizes, content hashes, loaders, profiles, lambdas, and the
+  frozen scientific selection are unchanged.
 
 CTC uses the frozen KD-tree chunk contract: at most 800,000 points per chunk,
 global coordinates, no recentering, no requantization, no deduplication, and

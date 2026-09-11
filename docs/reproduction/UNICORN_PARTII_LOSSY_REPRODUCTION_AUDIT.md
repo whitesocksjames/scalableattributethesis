@@ -21,14 +21,14 @@ Evidence was checked in this order:
    DOI `10.1109/TPAMI.2024.3462945`.
 2. Official upstream: <https://github.com/NJUVISION/Unicorn>, pinned at
    `b50d6c1bd033185b9e893b755d5d316cca2d4448`. The clean local checkout is
-   `/home/liltan/projects/Unicorn-Clean-Source`; its origin is the official
+   `/home/LOCAL_USER/projects/Unicorn-Clean-Source`; its origin is the official
    repository and its working tree was clean during this audit.
 3. Released source/result artifacts under
    `Unicorn-family/Unicorn-v1/results/PCAC/` in that clean checkout.
 4. Released attribute checkpoints from the official attribute checkpoint portal:
    <https://box.nju.edu.cn/f/7162590c2a46489291bd/>. The extracted local files
    currently live under the separate resource-bearing workspace
-   `/home/liltan/projects/Unicorn-NJUVISION/.../local_resources/pretrained/`.
+   `/home/LOCAL_USER/projects/Unicorn-NJUVISION/.../local_resources/pretrained/`.
 
 If the paper prose, current source, and retained CSV disagree, this report does
 not silently choose one. The discrepancy is listed in Section 7. The formal
@@ -36,7 +36,7 @@ duplicate-lambda decision is now frozen in
 `docs/reproduction/UNICORN_FORMAL_BASELINE_CONTRACT.md`.
 
 The local availability search was deliberately bounded to
-`/home/liltan/datasets`, `/home/liltan/scratch`, and `/home/liltan/projects`.
+`/home/LOCAL_USER/datasets`, `/home/LOCAL_USER/scratch`, and `/home/LOCAL_USER/projects`.
 No broad `/mnt` scan, N30/HPC scan, download, or GPU evaluation was performed.
 
 Status terms:
@@ -130,13 +130,13 @@ All four exact single frames are `AVAILABLE` and need no new download:
 
 | Sample | Local path | Size |
 | --- | --- | ---: |
-| longdress 1300 | `/home/liltan/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/longdress_vox10_1300/longdress_vox10_1300.ply` | 19,408,770 B |
-| loot 1200 | `/home/liltan/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/loot_vox10_1200/loot_vox10_1200.ply` | 17,543,324 B |
-| redandblack 1550 | `/home/liltan/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/redandblack_vox10_1550/redandblack_vox10_1550.ply` | 16,335,043 B |
-| soldier 0690 | `/home/liltan/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/soldier_vox10_0690/soldier_vox10_0690.ply` | 24,274,354 B |
+| longdress 1300 | `/home/LOCAL_USER/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/longdress_vox10_1300/longdress_vox10_1300.ply` | 19,408,770 B |
+| loot 1200 | `/home/LOCAL_USER/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/loot_vox10_1200/loot_vox10_1200.ply` | 17,543,324 B |
+| redandblack 1550 | `/home/LOCAL_USER/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/redandblack_vox10_1550/redandblack_vox10_1550.ply` | 16,335,043 B |
+| soldier 0690 | `/home/LOCAL_USER/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/soldier_vox10_0690/soldier_vox10_0690.ply` | 24,274,354 B |
 
 Duplicate copies and full 8i sequences also exist under
-`/home/liltan/datasets/pointcloud/8i/`. The formal manifest should select one
+`/home/LOCAL_USER/datasets/pointcloud/8i/`. The formal manifest should select one
 canonical copy and record its hash rather than mix roots.
 
 ### 3.2 Owlii
@@ -145,10 +145,10 @@ Owlii is `PARTIAL`, not missing. All four exact raw vox11 PLYs are present:
 
 | Sample | Local path | Size | Remaining requirement |
 | --- | --- | ---: | --- |
-| basketball_player 0200 | `/home/liltan/datasets/pointcloud/Owlii/basketball_player_vox11_00000200.ply` | 171,109,244 B | freeze author-compatible 10-bit derivative and hash |
-| dancer 0001 | `/home/liltan/datasets/pointcloud/Owlii/dancer_vox11_00000001.ply` | 145,265,491 B | same |
-| exercise 0001 | `/home/liltan/datasets/pointcloud/Owlii/exercise_vox11_00000001.ply` | 123,321,863 B | same |
-| model 0001 | `/home/liltan/datasets/pointcloud/Owlii/model_vox11_00000001.ply` | 139,467,504 B | same |
+| basketball_player 0200 | `/home/LOCAL_USER/datasets/pointcloud/Owlii/basketball_player_vox11_00000200.ply` | 171,109,244 B | freeze author-compatible 10-bit derivative and hash |
+| dancer 0001 | `/home/LOCAL_USER/datasets/pointcloud/Owlii/dancer_vox11_00000001.ply` | 145,265,491 B | same |
+| exercise 0001 | `/home/LOCAL_USER/datasets/pointcloud/Owlii/exercise_vox11_00000001.ply` | 123,321,863 B | same |
+| model 0001 | `/home/LOCAL_USER/datasets/pointcloud/Owlii/model_vox11_00000001.ply` | 139,467,504 B | same |
 
 The project has previously validated the intended conversion as coordinate
 `floor(xyz / 2)`, duplicate-voxel RGB mean, then rounding, including exact point
@@ -178,7 +178,7 @@ The set is `PARTIAL`: 10/12 exact inputs are locally available.
 | Staue_Klimt vox12 | **MISSING** | obtain `Staue_Klimt_vox12.ply` |
 
 The eight 12-bit available paths share the prefix
-`/home/liltan/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/`.
+`/home/LOCAL_USER/projects/Unicorn-NJUVISION/Unicorn-family/Unicorn-v1/local_resources/testdata/mpeg/`.
 
 The upstream README identifies the MPEG static-object source and an official
 NJU Box mirror: <https://box.nju.edu.cn/d/51327ae7c2644c0fa1c4/>. The mirror
@@ -223,7 +223,7 @@ Required before download:
 Formal `LOCALLY_REPRODUCED_UPSTREAM` results must come from an independent,
 pinned official NJUVISION/Unicorn workspace. The clean checkout at commit
 `b50d6c1...` is suitable after environment and assets are recorded. The modified
-resource-bearing `/home/liltan/projects/Unicorn-NJUVISION` workspace is useful
+resource-bearing `/home/LOCAL_USER/projects/Unicorn-NJUVISION` workspace is useful
 as an asset store but must not itself be represented as a clean upstream run.
 The thesis repository's `evaluate_unicorn_reference.py` also does not qualify.
 

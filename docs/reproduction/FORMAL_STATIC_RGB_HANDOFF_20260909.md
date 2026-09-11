@@ -17,7 +17,7 @@ scientific contract; this file records live operational state.
 | Scientific-contract freeze | `e264168` |
 | Runtime evaluator commit | `fdeff5bebae7a2df25e146564f47780285783a55` |
 | Remote branch | `origin/refactor/readability-phase2`, confirmed at `fdeff5b` |
-| N30 immutable source | `/data/run01/scz0ade/Tanzeyu/code/formal_static_rgb_fdeff5b` |
+| N30 immutable source | `/REDACTED/N30_PROJECT_ROOT/code/formal_static_rgb_fdeff5b` |
 | N30 source mode | read-only (`dr-xr-xr-x`) |
 | Source archive SHA-256 | `03a8099809ef2242a55b7a59526a614647b53d7e78db091bce9b7e106a6ab56d` |
 | Frozen manifest validation | PASS: 20 samples and 19 checkpoint records |
@@ -28,7 +28,7 @@ scientific contract; this file records live operational state.
 | Full formal jobs | NOT SUBMITTED |
 
 The hidden archive retained on N30 is
-`/data/run01/scz0ade/Tanzeyu/code/.incoming_formal_static_rgb_fdeff5b.tar.gz`.
+`/REDACTED/N30_PROJECT_ROOT/code/.incoming_formal_static_rgb_fdeff5b.tar.gz`.
 It was transferred resumably and its SHA-256 matched before extraction. The
 snapshot contains `SOURCE_COMMIT` with the full runtime commit.
 
@@ -56,11 +56,11 @@ and its training-style 100k/local-recentering path is not the formal protocol.
 
 N30 data already present:
 
-- Owlii vox10: `/data/run01/scz0ade/Tanzeyu/data/Owlii_vox10_floor_v1/`
+- Owlii vox10: `/REDACTED/N30_PROJECT_ROOT/data/Owlii_vox10_floor_v1/`
 - CTC ten vox12 objects:
-  `/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_vox12/`
+  `/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/datasets/unicorn_official/ctc_vox12/`
 - CTC native basketball/dancer vox11:
-  `/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/datasets/unicorn_official/owlii_vox11/`
+  `/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/datasets/unicorn_official/owlii_vox11/`
 
 Do not substitute Owlii vox10 basketball/dancer for the CTC native vox11
 versions, and do not use same-named vox20 files.
@@ -97,9 +97,9 @@ The full formal batch must use the combined Base+Full path.
 Evidence roots:
 
 - Original runtime attempt:
-  `/data/run01/scz0ade/Tanzeyu/experiments/formal_static_rgb_preflight_6ad2e1d_a01`
+  `/REDACTED/N30_PROJECT_ROOT/experiments/formal_static_rgb_preflight_6ad2e1d_a01`
 - Final CTC compatibility rerun:
-  `/data/run01/scz0ade/Tanzeyu/experiments/formal_static_rgb_preflight_fdeff5b_a02`
+  `/REDACTED/N30_PROJECT_ROOT/experiments/formal_static_rgb_preflight_fdeff5b_a02`
 
 | Gate | Slurm ID | Result | Peak VRAM | Slurm elapsed |
 | --- | ---: | --- | ---: | ---: |

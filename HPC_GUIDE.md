@@ -18,7 +18,7 @@ FAU TinyGPU: formal evaluation / reference / overflow
 
 因此本手册中的 V100 training命令只表示显式 FAU run或历史protocol延续，不再代表project-default training。
 
-FAU日常操作通常不需要手工登录 HPC：在本机修改 experiment spec 后，通过 SSH alias `tinyx` 完成 source sync、Slurm submission、状态查询、日志查看、取消和 retry。
+FAU日常操作通常不需要手工登录 HPC：在本机修改 experiment spec 后，通过 SSH alias `HPC_LOGIN` 完成 source sync、Slurm submission、状态查询、日志查看、取消和 retry。
 
 稳定的 workspace 和 TinyGPU 规则见 [HPC.md](HPC.md)。
 
@@ -27,7 +27,7 @@ FAU日常操作通常不需要手工登录 HPC：在本机修改 experiment spec
 本机 repository 是 source of truth：
 
 ```text
-/home/liltan/projects/Scalable-Attribute-Thesis
+/REDACTED/LOCAL_REPO_ROOT
 ```
 
 HPC 上的 source mirror：
@@ -53,7 +53,7 @@ Source sync 只传 code/scripts，不传 RWTT、checkpoints 和 experiment outpu
 先在本机 terminal 执行：
 
 ```bash
-export THESIS_REPO=/home/liltan/projects/Scalable-Attribute-Thesis
+export THESIS_REPO=/REDACTED/LOCAL_REPO_ROOT
 thpc() { python "$THESIS_REPO/scripts/hpc/remote_submit.py" "$@"; }
 ```
 
@@ -70,7 +70,7 @@ thpc logs STUDY/EXPERIMENT --follow
 不配置短命令也可以使用完整入口：
 
 ```bash
-cd /home/liltan/projects/Scalable-Attribute-Thesis
+cd /REDACTED/LOCAL_REPO_ROOT
 python scripts/hpc/remote_submit.py queue
 ```
 
@@ -310,7 +310,7 @@ $WORK/scalable_attribute_thesis/experiments/STUDY/EXPERIMENT/
 | Training/evaluation CLI defaults | `train.py` / `evaluate.py` | optimizer 和执行默认值 |
 | Experiment overrides | `scripts/hpc/sweep_spec.py` | `rd_lambda`、`lr`、batch、steps |
 | HPC resources | `scripts/hpc/resource_profiles.py` | GPU、partition、CPU、walltime |
-| Workspace/SSH paths | thin remote configuration | `tinyx`、HPC code/work root |
+| Workspace/SSH paths | thin remote configuration | `HPC_LOGIN`、HPC code/work root |
 | Base convenience profile | experiment config | released checkpoint profile/override |
 
 HPC tooling 把 `train.py` 和 `evaluate.py` 当作 black-box CLI，并把 generic key-value 转为 `--key value`。新增 model/training parameter 时，通常只改 model/entry point 和 `sweep_spec.py`；不要让 architecture semantics 渗入 scheduler layer。
@@ -339,9 +339,9 @@ FAU默认policy：hard eval/smoke使用`work,rtx3080,v100,a100 + gpu:1`，允许
 日常优先使用 `thpc`。只有 wrapper 信息不足时才直接使用：
 
 ```bash
-ssh tinyx 'squeue.tinygpu -u "$USER"'
-ssh tinyx 'sacct -M tinygpu -j JOB_ID --format=JobID,State,ExitCode,Elapsed'
-ssh tinyx 'scancel -M tinygpu JOB_ID'
+ssh HPC_LOGIN 'squeue.tinygpu -u "$USER"'
+ssh HPC_LOGIN 'sacct -M tinygpu -j JOB_ID --format=JobID,State,ExitCode,Elapsed'
+ssh HPC_LOGIN 'scancel -M tinygpu JOB_ID'
 ```
 
 经当前账户验证：submission 使用 `sbatch.tinygpu`，queue 使用 `squeue.tinygpu`，accounting 使用 `sacct -M tinygpu`，cancel 使用 `scancel -M tinygpu`。不要凭记忆换 flags，也不要为这些 GPU jobs 添加 `--mem`。

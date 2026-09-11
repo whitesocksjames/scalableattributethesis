@@ -19,26 +19,26 @@ KEEP_EVIDENCE | KEEP | drafts/canonical_mvub_finetune/ | repo-tracked | MVUB exp
 KEEP_EVIDENCE | KEEP | drafts/canonical_yaware_owlii_audit/ | repo-tracked | external evaluation evidence
 KEEP_EVIDENCE | KEEP | drafts/canonical_yaware_equilibrium_human_data_audit/ | repo-tracked | D411/D611 evidence
 
-KEEP_DATA | KEEP | /data/run01/scz0ade/Tanzeyu/data/ | NOT_MEASURED_GLOBAL_SCAN_ABORTED | datasets; never delete in cleanup phase
-KEEP_DATA | KEEP | /data/run01/scz0ade/Tanzeyu/checkpoints/ | NOT_MEASURED_GLOBAL_SCAN_ABORTED | released/selected checkpoints
-KEEP_DATA | KEEP | /data/run01/scz0ade/Tanzeyu/experiments/ | 32G_TOTAL_2026-09-01 | experiment namespace; review exact children only
+KEEP_DATA | KEEP | /REDACTED/N30_PROJECT_ROOT/data/ | NOT_MEASURED_GLOBAL_SCAN_ABORTED | datasets; never delete in cleanup phase
+KEEP_DATA | KEEP | /REDACTED/N30_PROJECT_ROOT/checkpoints/ | NOT_MEASURED_GLOBAL_SCAN_ABORTED | released/selected checkpoints
+KEEP_DATA | KEEP | /REDACTED/N30_PROJECT_ROOT/experiments/ | 32G_TOTAL_2026-09-01 | experiment namespace; review exact children only
 
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_base_r01/ | SIZE_PENDING_BOUNDED_AUDIT | preserve selected Base step5525 and E0/E1/E2 provenance
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_base_d611_r01/ | SIZE_PENDING_BOUNDED_AUDIT | Base D611 ablation evidence
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_enhancement_r01/ | SIZE_PENDING_BOUNDED_AUDIT | canonical Enhancement lineage/checkpoints
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_multirate_base_v1/ | SIZE_PENDING_BOUNDED_AUDIT | lower-rate Base checkpoints/formal data
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_mvub_finetune_v1/ | SIZE_PENDING_BOUNDED_AUDIT | A/B/C and mixing ablation evidence
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_scalable_formal_r01/ | SIZE_PENDING_BOUNDED_AUDIT | formal Base/Full evaluation artifacts
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_r01/ | SIZE_PENDING_BOUNDED_AUDIT | D111/D411/D611 lineage
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_lr5e5_r01/ | SIZE_PENDING_BOUNDED_AUDIT | LR follow-up evidence
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/canonical_yaware_equilibrium_r01/ | SIZE_PENDING_BOUNDED_AUDIT | equilibrium evidence
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/direct_d611_mixing_v1/ | SIZE_PENDING_BOUNDED_AUDIT | M0/M10/M25 evidence
-REVIEW | DEFER | /data/run01/scz0ade/Tanzeyu/experiments/direct_d611_matched_budget_v1/ | SIZE_PENDING_BOUNDED_AUDIT | matched-budget decision evidence
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_base_r01/ | SIZE_PENDING_BOUNDED_AUDIT | preserve selected Base step5525 and E0/E1/E2 provenance
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_base_d611_r01/ | SIZE_PENDING_BOUNDED_AUDIT | Base D611 ablation evidence
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_enhancement_r01/ | SIZE_PENDING_BOUNDED_AUDIT | canonical Enhancement lineage/checkpoints
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_multirate_base_v1/ | SIZE_PENDING_BOUNDED_AUDIT | lower-rate Base checkpoints/formal data
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_mvub_finetune_v1/ | SIZE_PENDING_BOUNDED_AUDIT | A/B/C and mixing ablation evidence
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_scalable_formal_r01/ | SIZE_PENDING_BOUNDED_AUDIT | formal Base/Full evaluation artifacts
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_r01/ | SIZE_PENDING_BOUNDED_AUDIT | D111/D411/D611 lineage
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_lr5e5_r01/ | SIZE_PENDING_BOUNDED_AUDIT | LR follow-up evidence
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/canonical_yaware_equilibrium_r01/ | SIZE_PENDING_BOUNDED_AUDIT | equilibrium evidence
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/direct_d611_mixing_v1/ | SIZE_PENDING_BOUNDED_AUDIT | M0/M10/M25 evidence
+REVIEW | DEFER | /REDACTED/N30_PROJECT_ROOT/experiments/direct_d611_matched_budget_v1/ | SIZE_PENDING_BOUNDED_AUDIT | matched-budget decision evidence
 
 CANDIDATE | REVIEW_EXACT_FILES_ONLY | finished experiment GPCC/torchac temporary working files | UNKNOWN | delete only exact disposable paths after manager approval
 CANDIDATE | REVIEW_EXACT_FILES_ONLY | superseded non-selected intermediate checkpoints | UNKNOWN | keep selected/resume/trajectory checkpoints; verify references first
 CANDIDATE | REVIEW_EXACT_FILES_ONLY | duplicate rendered PNG/SVG copies outside figures/rd/ | UNKNOWN | retain source CSV and one canonical render
 CANDIDATE | REVIEW_EXACT_FILES_ONLY | obsolete legacy scalable runtime files | repo-tracked/history | verify no active imports; recovery tag exists
 
-PROTECTED | NEVER_TOUCH | /data/run01/scz0ade/ outside Tanzeyu | N/A | shared-account ownership boundary
+PROTECTED | NEVER_TOUCH | /REDACTED/N30_SHARED_ROOT/ outside PROJECT_USER | N/A | shared-account ownership boundary
 PROTECTED | NEVER_TOUCH | other users' directories | N/A | do not enter, inspect, modify, move or clean

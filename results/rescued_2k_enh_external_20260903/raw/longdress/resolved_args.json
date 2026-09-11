@@ -1,24 +1,24 @@
 {
   "sequence": "longdress",
   "frame": "1300",
-  "input_ply": "/data/run01/scz0ade/Tanzeyu/data/8iVFB/longdress/longdress_vox10_1300.ply",
+  "input_ply": "/REDACTED/N30_PROJECT_ROOT/data/8iVFB/longdress/longdress_vox10_1300.ply",
   "point": null,
-  "operating_points_config": "/data/run01/scz0ade/Tanzeyu/code/joint_8k_to_4k_856b21c/configs/scalable_attribute/canonical_operating_points.json",
-  "released_checkpoint_root": "/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt",
-  "base_synthesis_checkpoint": "/data/run01/scz0ade/Tanzeyu/experiments/base_rescue_8way/2K-U-PATH/train/checkpoints/step_500.pth",
+  "operating_points_config": "/REDACTED/N30_PROJECT_ROOT/code/joint_8k_to_4k_856b21c/configs/scalable_attribute/canonical_operating_points.json",
+  "released_checkpoint_root": "/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt",
+  "base_synthesis_checkpoint": "/REDACTED/N30_PROJECT_ROOT/experiments/base_rescue_8way/2K-U-PATH/train/checkpoints/step_500.pth",
   "base_candidate": [],
   "enhancement_step1763": null,
   "enhancement_step3525": null,
   "enhancement_checkpoint": [
-    "step1500=/data/run01/scz0ade/Tanzeyu/experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/train/checkpoints/step_1500.pth",
-    "step1763=/data/run01/scz0ade/Tanzeyu/experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/train/checkpoints/step_1763.pth"
+    "step1500=/REDACTED/N30_PROJECT_ROOT/experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/train/checkpoints/step_1500.pth",
+    "step1763=/REDACTED/N30_PROJECT_ROOT/experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/train/checkpoints/step_1763.pth"
   ],
   "scalable_checkpoint": [],
-  "gpcc_binary": "/data/run01/scz0ade/Tanzeyu/code/joint_8k_to_4k_856b21c/third_party/tmc3_v21",
+  "gpcc_binary": "/REDACTED/N30_PROJECT_ROOT/code/joint_8k_to_4k_856b21c/third_party/tmc3_v21",
   "conditioning_lambda": 2048,
   "checkpoint_profile": "8k256",
   "base_checkpoint_lambda": 2048,
   "run_official": false,
   "official_rate_ids": null,
-  "output_dir": "/data/run01/scz0ade/Tanzeyu/experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/external/longdress"
+  "output_dir": "/REDACTED/N30_PROJECT_ROOT/experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/external/longdress"
 }

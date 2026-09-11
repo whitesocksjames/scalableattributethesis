@@ -12,7 +12,7 @@ python test.py --inter_mode=0 --testdata='dynamic_model' --testdata_num=100 --pr
 python test.py --inter_mode=0 --testdata='dynamic_exersice' --testdata_num=100 --prefix='intra/dynamic_exersice'
 
 
-python test.py --inter_mode=1 --testdata='/media/ivc3090ti/disk1/zjz/MPEG_CFP/datasets/dynamic/testing_datasets/exercise_vox10.ply+xyz+n+rgb' --testdata_num=30 --prefix='inter_geo/exercise_312'
+python test.py --inter_mode=1 --testdata='/REDACTED/UPSTREAM_WORKSTATION_ROOT/zjz/MPEG_CFP/datasets/dynamic/testing_datasets/exercise_vox10.ply+xyz+n+rgb' --testdata_num=30 --prefix='inter_geo/exercise_312'
 # train
 # ####################################################################################################################################
 # intra

@@ -13,7 +13,7 @@ def number_in_line(line):
         
     return number
 
-# =/home/temp/wjq/backup_new/common/extension/PCQM/build/PCQM
+# =/REDACTED/UPSTREAM_DATA_ROOT/backup_new/common/extension/PCQM/build/PCQM
 
 def get_pcqm(infile1, infile2, show=True):
     """infile1: ground truth

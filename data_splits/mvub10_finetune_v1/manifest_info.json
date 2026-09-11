@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "dataset_root_at_generation": "/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/MVUB/processed/MVUB10_H5",
+  "dataset_root_at_generation": "/REDACTED/FAU_PROJECT_ROOT/datasets/MVUB/processed/MVUB10_H5",
   "paths": "relative_to_dataset_root",
   "train_subjects": [
     "David10",

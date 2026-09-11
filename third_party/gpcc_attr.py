@@ -301,7 +301,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--src_dir", default="/media/ivc3090ti/disk1/zjz/data/kitti_test/11")
+    parser.add_argument("--src_dir", default="/REDACTED/UPSTREAM_WORKSTATION_ROOT/zjz/data/kitti_test/11")
     parser.add_argument("--tgt_dir", default="./results/qp20")
     parser.add_argument("--gqs", type=float, default=1, help="geom quant step")
     parser.add_argument("--rqs", type=int, default=20, help="relf quant step")

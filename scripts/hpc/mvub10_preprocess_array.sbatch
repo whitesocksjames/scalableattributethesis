@@ -8,15 +8,15 @@
 #SBATCH --mem=32G
 #SBATCH --time=04:00:00
 #SBATCH --export=NONE
-#SBATCH --output=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/MVUB/logs/preprocess_%A_%a.out
-#SBATCH --error=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/MVUB/logs/preprocess_%A_%a.err
+#SBATCH --output=/REDACTED/FAU_PROJECT_ROOT/datasets/MVUB/logs/preprocess_%A_%a.out
+#SBATCH --error=/REDACTED/FAU_PROJECT_ROOT/datasets/MVUB/logs/preprocess_%A_%a.err
 
 unset SLURM_EXPORT_ENV
 set -euo pipefail
 
-repo=/home/hpc/iwnt/iwnt193h/Scalable-Attribute-Thesis
-root=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/MVUB
-python=/home/woody/iwnt/iwnt193h/software/private/conda/envs/unicorn-me-py38/bin/python
+repo=/REDACTED/HPC_SHARED_ROOT/HPC_ACCOUNT/Scalable-Attribute-Thesis
+root=/REDACTED/FAU_PROJECT_ROOT/datasets/MVUB
+python=/REDACTED/FAU_ACCOUNT_ROOT/software/private/conda/envs/unicorn-me-py38/bin/python
 subjects=(Andrew10 David10 Phil10 Ricardo10 Sarah10)
 directories=(andrew10 david10 phil10 ricardo10 sarah10)
 subject=${subjects[$SLURM_ARRAY_TASK_ID]}

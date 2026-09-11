@@ -6,7 +6,7 @@
 #SBATCH --job-name=d111_28lite
 
 set -euo pipefail
-root=/data/run01/scz0ade/Tanzeyu
+root=/REDACTED/N30_PROJECT_ROOT
 src="$root/code/joint_endpoint_0c4885f"
 out="$root/experiments/joint32k_tafa_selectedbase_d111_0c4885f/comparison_eval"
 

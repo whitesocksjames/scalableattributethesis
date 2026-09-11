@@ -7,16 +7,16 @@
 #SBATCH --mem=32G
 #SBATCH --time=01:00:00
 #SBATCH --export=NONE
-#SBATCH --output=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/rwtt_smoke_%j.out
-#SBATCH --error=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/rwtt_smoke_%j.err
+#SBATCH --output=/REDACTED/FAU_PROJECT_ROOT/logs/rwtt_smoke_%j.out
+#SBATCH --error=/REDACTED/FAU_PROJECT_ROOT/logs/rwtt_smoke_%j.err
 
 unset SLURM_EXPORT_ENV
 set -euo pipefail
 
-REPO_DIR=/home/hpc/iwnt/iwnt193h/Scalable-Attribute-Thesis
-WORKSPACE_DIR=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis
+REPO_DIR=/REDACTED/HPC_SHARED_ROOT/HPC_ACCOUNT/Scalable-Attribute-Thesis
+WORKSPACE_DIR=/REDACTED/FAU_PROJECT_ROOT
 RWTT_DIR=${WORKSPACE_DIR}/datasets/RWTT
-PYTHON_BIN=/home/woody/iwnt/iwnt193h/software/private/conda/envs/unicorn-me-py38/bin/python
+PYTHON_BIN=/REDACTED/FAU_ACCOUNT_ROOT/software/private/conda/envs/unicorn-me-py38/bin/python
 SMOKE_DIR=${RWTT_DIR}/processed/smoke/job_${SLURM_JOB_ID}
 
 export PYTHONPATH=${REPO_DIR}

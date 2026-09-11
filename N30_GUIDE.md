@@ -9,7 +9,7 @@ N30R3 / RTX3090 是本项目的 primary training、architecture screening 和 ab
 N30 上所有 persistent project files，以及共享文件系统上的 project 操作，只能位于：
 
 ```text
-/data/run01/scz0ade/Tanzeyu/
+/REDACTED/N30_PROJECT_ROOT/
 ```
 
 包括 source、dataset、environment、cache、checkpoint、log 和 experiment output。禁止进入、修改、清理或依赖共享账号中其他用户的个人目录，也不要把项目文件写入 `$HOME`、用户级 cache 或 shell profile。
@@ -21,27 +21,27 @@ N30 上所有 persistent project files，以及共享文件系统上的 project 
 N30 account由多名实验室用户共享。本 thesis 在共享文件系统上的全部 read、write、modify、delete 操作必须严格限制在：
 
 ```text
-/data/run01/scz0ade/Tanzeyu/
+/REDACTED/N30_PROJECT_ROOT/
 ```
 
-不得进入、查看、枚举、修改、删除、移动、重命名、同步、清理或依赖共享账号下任何其他用户的个人目录。即使操作是只读调查，也不能把其他用户目录作为搜索范围。Slurm compute job 对自身 `/dev/shm/Tanzeyu_${SLURM_JOB_ID}/` 的临时操作是唯一例外。
+不得进入、查看、枚举、修改、删除、移动、重命名、同步、清理或依赖共享账号下任何其他用户的个人目录。即使操作是只读调查，也不能把其他用户目录作为搜索范围。Slurm compute job 对自身 `/dev/shm/PROJECT_USER_${SLURM_JOB_ID}/` 的临时操作是唯一例外。
 
 对共享文件系统执行任何 destructive或recursive command之前，包括 `rm`、`find -delete`、`rsync --delete`、cleanup script和cache cleanup，必须先解析并验证 exact target：
 
 1. target必须是绝对路径；
-2. 规范化后的路径必须严格位于 `/data/run01/scz0ade/Tanzeyu/` 内；
-3. target不得是 `/data/run01/scz0ade/Tanzeyu/` 根本身；
+2. 规范化后的路径必须严格位于 `/REDACTED/N30_PROJECT_ROOT/` 内；
+3. target不得是 `/REDACTED/N30_PROJECT_ROOT/` 根本身；
 4. 不使用未验证的 environment variable、glob、symlink或command substitution决定删除范围；
 5. 无法证明target满足以上条件时立即停止，不执行命令。
 
-对 `/dev/shm` 的清理不套用上述 Tanzeyu路径前缀，但 target必须精确等于本 job创建的 `/dev/shm/Tanzeyu_${SLURM_JOB_ID}/`；不得清理 `/dev/shm` 根目录、使用宽泛 glob或触及其他 job的目录。
+对 `/dev/shm` 的清理不套用上述 PROJECT_USER路径前缀，但 target必须精确等于本 job创建的 `/dev/shm/PROJECT_USER_${SLURM_JOB_ID}/`；不得清理 `/dev/shm` 根目录、使用宽泛 glob或触及其他 job的目录。
 
-禁止对共享账号目录使用宽泛的 recursive scan或cleanup。Source sync默认不得使用 `--delete`；如以后确需使用，必须先对解析后的 Tanzeyu内部目标做只读核验，并确保不会涉及dataset、checkpoint、environment、cache或experiment output。
+禁止对共享账号目录使用宽泛的 recursive scan或cleanup。Source sync默认不得使用 `--delete`；如以后确需使用，必须先对解析后的 PROJECT_USER内部目标做只读核验，并确保不会涉及dataset、checkpoint、environment、cache或experiment output。
 
 当前布局：
 
 ```text
-/data/run01/scz0ade/Tanzeyu/
+/REDACTED/N30_PROJECT_ROOT/
 ├── code/Scalable-Attribute-Thesis/
 ├── data/scalable_attribute_thesis/
 │   ├── datasets/
@@ -111,10 +111,10 @@ module load gcc/11.2
 module load cuda/11.7
 
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate /data/run01/scz0ade/Tanzeyu/envs/unicorn-me-py38
+conda activate /REDACTED/N30_PROJECT_ROOT/envs/unicorn-me-py38
 
 export PYTHONNOUSERSITE=1
-export TORCH_EXTENSIONS_DIR=/data/run01/scz0ade/Tanzeyu/.cache/torch_extensions
+export TORCH_EXTENSIONS_DIR=/REDACTED/N30_PROJECT_ROOT/.cache/torch_extensions
 export LD_LIBRARY_PATH=/data/apps/openblas/0.3.22/lib:${LD_LIBRARY_PATH:-}
 ```
 
@@ -158,7 +158,7 @@ Exit code:    0:0
 PASS项目包括 torch CUDA、MinkowskiEngine CUDA convolution、PyTorch3D CUDA operation、torchac actual round-trip、scalable training entrypoint import 和真实 RWTT H5读取。证据保存在：
 
 ```text
-/data/run01/scz0ade/Tanzeyu/experiments/environment_bringup/
+/REDACTED/N30_PROJECT_ROOT/experiments/environment_bringup/
 ```
 
 Open3D没有安装。Processed-H5 training不依赖其功能；Open3D-backed PLY函数采用 lazy import，只有实际调用时才要求 Open3D。
@@ -169,19 +169,19 @@ Open3D没有安装。Processed-H5 training不依赖其功能；Open3D-backed PLY
 
 使用原则：
 
-- 永久 dataset仍保存在 `/data/run01/scz0ade/Tanzeyu/data/`。
+- 永久 dataset仍保存在 `/REDACTED/N30_PROJECT_ROOT/data/`。
 - staging是 optional optimization，不是 training的前置要求；第一版可以直接从 `/data` 读取。
 - 仅在 Slurm compute job内部把该 job需要的数据 staging到：
 
   ```text
-  /dev/shm/Tanzeyu_${SLURM_JOB_ID}/
+  /dev/shm/PROJECT_USER_${SLURM_JOB_ID}/
   ```
 
 - 不使用 `/dev/shm/$USER/`：这是 shared account，不同用户或 jobs可能具有相同 `$USER`。
 - `/dev/shm` 只用于临时 dataset staging，不放 source、checkpoint、metrics、logs 或 final outputs。
 - staging成功后才启动训练；失败时 fail fast，不回写或删除永久 dataset。
-- checkpoint、metrics、command、manifest和最终结果始终写回 Tanzeyu experiment root。
-- job结束时只允许清理本 job明确创建的 `/dev/shm/Tanzeyu_${SLURM_JOB_ID}/`；不得使用宽泛 glob、模糊变量或 recursive cleanup影响任何其他目录。
+- checkpoint、metrics、command、manifest和最终结果始终写回 PROJECT_USER experiment root。
+- job结束时只允许清理本 job明确创建的 `/dev/shm/PROJECT_USER_${SLURM_JOB_ID}/`；不得使用宽泛 glob、模糊变量或 recursive cleanup影响任何其他目录。
 
 只有 DataLoader throughput或 GPU utilization显示 I/O bottleneck时才启用 staging。判断时只需做简单的 direct-read/staged-read A/B measurement，不建立 benchmark framework。
 
@@ -190,7 +190,7 @@ Open3D没有安装。Processed-H5 training不依赖其功能；Open3D-backed PLY
 每个 experiment使用稳定 output root，例如：
 
 ```text
-/data/run01/scz0ade/Tanzeyu/experiments/STUDY/EXPERIMENT/
+/REDACTED/N30_PROJECT_ROOT/experiments/STUDY/EXPERIMENT/
 ├── manifest.json
 ├── train/
 │   ├── resolved_args.json

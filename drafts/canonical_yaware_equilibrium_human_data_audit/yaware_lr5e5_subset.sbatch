@@ -6,7 +6,7 @@
 #SBATCH --job-name=yaw5e5_eval
 
 set -eu
-root=/data/run01/scz0ade/Tanzeyu
+root=/REDACTED/N30_PROJECT_ROOT
 src="$root/code/Scalable-Attribute-Thesis"
 new="$root/experiments/canonical_yaware_lr5e5_r01"
 old="$root/experiments/canonical_yaware_r01"

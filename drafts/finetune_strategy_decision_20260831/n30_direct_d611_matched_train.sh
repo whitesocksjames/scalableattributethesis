@@ -7,17 +7,17 @@ module load miniforge/24.1.2
 module load gcc/11.2
 module load cuda/11.7
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate /data/run01/scz0ade/Tanzeyu/envs/unicorn-me-py38
+conda activate /REDACTED/N30_PROJECT_ROOT/envs/unicorn-me-py38
 
 gxx_runtime="$(dirname "$(g++ -print-file-name=libstdc++.so.6)")"
 export LD_LIBRARY_PATH="${gxx_runtime}:/data/apps/openblas/0.3.22/lib:${LD_LIBRARY_PATH:-}"
 export LIBRARY_PATH="/data/apps/openblas/0.3.22/lib:${LIBRARY_PATH:-}"
-export TORCH_EXTENSIONS_DIR=/data/run01/scz0ade/Tanzeyu/.cache/torch_extensions
+export TORCH_EXTENSIONS_DIR=/REDACTED/N30_PROJECT_ROOT/.cache/torch_extensions
 export MAX_JOBS=2
 
-source_root=/data/run01/scz0ade/Tanzeyu/scratch/direct_d611_matched_source_20260831
-output_root=/data/run01/scz0ade/Tanzeyu/experiments/direct_d611_matched_budget_v1
-data_root=/data/run01/scz0ade/Tanzeyu/data/scalable_attribute_thesis
+source_root=/REDACTED/N30_PROJECT_ROOT/scratch/direct_d611_matched_source_20260831
+output_root=/REDACTED/N30_PROJECT_ROOT/experiments/direct_d611_matched_budget_v1
+data_root=/REDACTED/N30_PROJECT_ROOT/data/scalable_attribute_thesis
 export PYTHONPATH="${source_root}:${PYTHONPATH:-}"
 
 cd "${source_root}"
@@ -29,8 +29,8 @@ python scripts/scalable_attribute/canonical/train_enhancement_mixed.py \
   --mvub-file-list "${output_root}/unused_mvub.txt" \
   --andrew-file-list "${output_root}/unused_andrew.txt" \
   --released-checkpoint "${data_root}/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/32k8k/epoch_last.pth" \
-  --base-synthesis-checkpoint /data/run01/scz0ade/Tanzeyu/experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth \
-  --resume-checkpoint /data/run01/scz0ade/Tanzeyu/experiments/direct_d611_mixing_v1/train/M0/checkpoints/step_1762.pth \
+  --base-synthesis-checkpoint /REDACTED/N30_PROJECT_ROOT/experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth \
+  --resume-checkpoint /REDACTED/N30_PROJECT_ROOT/experiments/direct_d611_mixing_v1/train/M0/checkpoints/step_1762.pth \
   --conditioning-lambda 32768 \
   --rd-lambda 32768 \
   --distortion-weights 6,1,1 \

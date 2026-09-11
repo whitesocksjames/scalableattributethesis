@@ -6,7 +6,7 @@
 #SBATCH --job-name=yaw_ld_6
 
 set -eu
-root=/data/run01/scz0ade/Tanzeyu
+root=/REDACTED/N30_PROJECT_ROOT
 src="$root/code/Scalable-Attribute-Thesis"
 out="$root/experiments/canonical_yaware_equilibrium_r01/longdress/D611"
 source /etc/profile.d/modules.sh

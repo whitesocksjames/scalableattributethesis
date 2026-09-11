@@ -18,7 +18,7 @@ groups={'train_low':frame.iloc[:20],
 rows=[]
 for group,part in groups.items():
     for _,row in part.iterrows():
-        rel=Path(row.source).relative_to('/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/datasets/RWTT/processed/train_h5/h5/100000')
+        rel=Path(row.source).relative_to('/REDACTED/FAU_PROJECT_ROOT/datasets/RWTT/processed/train_h5/h5/100000')
         rows.append(('RWTT_Train',group,str(Path(a.n30_h5_root)/rel),'h5'))
 for line in Path(a.val28_manifest).read_text().splitlines():
     if line.strip(): rows.append(('RWTT_Val','val28',str(Path(a.n30_h5_root)/line.strip()),'h5'))

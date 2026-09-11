@@ -7,13 +7,13 @@
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
 #SBATCH --export=NONE
-#SBATCH --output=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/rwtt_extract_%j.out
-#SBATCH --error=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis/logs/rwtt_extract_%j.err
+#SBATCH --output=/REDACTED/FAU_PROJECT_ROOT/logs/rwtt_extract_%j.out
+#SBATCH --error=/REDACTED/FAU_PROJECT_ROOT/logs/rwtt_extract_%j.err
 
 unset SLURM_EXPORT_ENV
 set -euo pipefail
 
-WORKSPACE_DIR=/home/woody/iwnt/iwnt193h/scalable_attribute_thesis
+WORKSPACE_DIR=/REDACTED/FAU_PROJECT_ROOT
 RWTT_DIR=${WORKSPACE_DIR}/datasets/RWTT
 RAW_DIR=${RWTT_DIR}/raw
 EXTRACT_DIR=${RWTT_DIR}/extracted/full

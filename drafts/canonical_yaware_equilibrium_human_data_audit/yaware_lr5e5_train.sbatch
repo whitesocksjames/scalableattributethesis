@@ -8,7 +8,7 @@
 set -eu
 arm="$1"
 weights="$2"
-root=/data/run01/scz0ade/Tanzeyu
+root=/REDACTED/N30_PROJECT_ROOT
 src="$root/code/Scalable-Attribute-Thesis"
 out="$root/experiments/canonical_yaware_lr5e5_r01/$arm/train"
 source /etc/profile.d/modules.sh

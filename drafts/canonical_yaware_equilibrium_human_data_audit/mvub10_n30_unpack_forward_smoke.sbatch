@@ -6,16 +6,16 @@
 #SBATCH --job-name=mvub10_smoke
 
 set -eu
-root=/data/run01/scz0ade/Tanzeyu
+root=/REDACTED/N30_PROJECT_ROOT
 src="$root/code/Scalable-Attribute-Thesis"
 tarfile="$root/data/MVUB/mvub10_h5.tar"
 out="$root/experiments/mvub10_transfer_smoke"
-stage="/dev/shm/Tanzeyu_${SLURM_JOB_ID}"
+stage="/dev/shm/PROJECT_USER_${SLURM_JOB_ID}"
 test ! -e "$stage"
 mkdir -p "$stage" "$out/slurm"
 cleanup() {
   case "$stage" in
-    /dev/shm/Tanzeyu_${SLURM_JOB_ID}) rm -rf -- "$stage" ;;
+    /dev/shm/PROJECT_USER_${SLURM_JOB_ID}) rm -rf -- "$stage" ;;
     *) echo "Unsafe stage cleanup target: $stage" >&2; exit 2 ;;
   esac
 }

@@ -24,9 +24,9 @@ def get_testdata_cfg(parser):
 
 
 
-data_rootdir = '/media/ivc3090ti/新加卷/zjz/MPEG_CFP/datasets/dynamic/model_vox10.ply+xyz+n+rgb'
+data_rootdir = '/REDACTED/UPSTREAM_WORKSTATION_ROOT/zjz/MPEG_CFP/datasets/dynamic/model_vox10.ply+xyz+n+rgb'
 
-lossy_rootdir = '/home/temp/wjq/unicorn/outdata/recolor/'
+lossy_rootdir = '/REDACTED/UPSTREAM_DATA_ROOT/unicorn/outdata/recolor/'
 
 ########################################################### 
 testdata_set = {
@@ -163,9 +163,9 @@ traindata_set = {
 'dynamic_8ivfb': data_rootdir+ 'dynamic_object/8iVFB_seqs/',
 
 # scannet
-# 'scan2cm':  data_rootdir+ 'ScanNet/scans_q2cm_n50k/', 
-'scan2cm': '/home/temp/wjq/dataset/failed/ScanNet/scans_q2cm_n50k/', 
-'scan2cm_small': '/home/temp/wjq/dataset/failed/ScanNet/scans_q2cm_n30k/', 
+# 'scan2cm':  data_rootdir+ 'ScanNet/scans_q2cm_n50k/',
+'scan2cm': '/REDACTED/UPSTREAM_DATA_ROOT/dataset/failed/ScanNet/scans_q2cm_n50k/',
+'scan2cm_small': '/REDACTED/UPSTREAM_DATA_ROOT/dataset/failed/ScanNet/scans_q2cm_n30k/',
 'scan5cm': data_rootdir+ 'ScanNet/scans_q5cm/', 
 
 
