@@ -1,0 +1,16 @@
+{
+  "available_comparisons": 80,
+  "comparison_count": 80,
+  "curve_count": 120,
+  "curves_with_removals": 12,
+  "newly_resolved_comparisons": 12,
+  "newly_resolved_samples": [
+    "CTC/boxer_viewdep_vox12",
+    "CTC/loot_viewdep_vox12",
+    "CTC/redandblack_viewdep_vox12"
+  ],
+  "protocol": "uniform_pareto_frontier_pchip_log_physical_bpp_shared_quality_no_extrapolation",
+  "raw_endpoint_rows": 460,
+  "removed_curve_points": 14,
+  "unavailable_comparisons": 0
+}

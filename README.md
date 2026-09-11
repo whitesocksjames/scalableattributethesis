@@ -1,95 +1,99 @@
-# Scalable Attribute Thesis
+# Scalable Point Cloud Attribute Compression Based on Unicorn Part II
 
-基于 Unicorn Part II 的 **full-resolution quality-scalable extension**：每个
-formal operating point 提供 full-resolution **Base** 与 **Full**。最终机制为
-`native truncated Unicorn prefix → learned BaseSynthesis → full-resolution Base
-→ conditional Enhancement → Full`。这项贡献扩展了 Unicorn Part II 的 lossy
-attribute progressive-refinement framework；不声称首次提出 layered coding，也不
-声称 Original Unicorn 不支持 progressive decoding。
+This repository contains the implementation and final evaluation of a
+**full-resolution quality-scalable extension of Unicorn Part II**. The method
+turns a native truncated Unicorn attribute prefix into a full-resolution Base
+reconstruction and uses an optional conditional Enhancement payload to produce
+the Full endpoint. It therefore provides two full-resolution decoding endpoints
+while retaining competitive Full-endpoint rate-distortion performance relative
+to Original Unicorn.
 
-Formal static RGB experiment 已冻结：20 samples，Original `180/180`，Ours
-`140/140`，总计 `320/320 FORMAL_REUSABLE` logical evaluations 和 460 decoded
-endpoints。最终结果入口是
-[formal_static_rgb_final_20260911](results/comparisons/formal_static_rgb_final_20260911/README.md)。
+## Method
 
-## 30 秒导航
+```text
+truncated Unicorn prefix
+    -> BaseSynthesis
+    -> full-resolution Base
+    -> conditional Enhancement
+    -> Full
+```
 
-| 我要找什么？ | 直接打开 |
-| --- | --- |
-| 当前模型 / 新增 Base module | [CURRENT_ARCHITECTURE](docs/repository/CURRENT_ARCHITECTURE.md) |
-| Frozen checkpoints / 2K rescue / 4K joint | [CURRENT_OPERATING_POINTS](docs/repository/CURRENT_OPERATING_POINTS.md) · [machine-readable registry](configs/scalable_attribute/current_candidates.json) |
-| 当前训练入口 | [CURRENT_TRAINING_ENTRYPOINTS](docs/repository/CURRENT_TRAINING_ENTRYPOINTS.md) |
-| Formal evaluation contract / runtime 定义 | [CURRENT_EVALUATION_ENTRYPOINTS](docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md) |
-| Final tables / RD 图 / evidence | [CURRENT_RESULT_INDEX](docs/repository/CURRENT_RESULT_INDEX.md) |
-| 哪些 active / historical / broken？ | [Repository inventory](docs/repository/INVENTORY.md) |
-| 本次整理范围 | [Phase 1 plan](docs/repository/PHASE1_PLAN.md) |
-| N30 / HPC 使用规则 | [N30](N30_GUIDE.md) · [HPC](HPC_GUIDE.md) |
+- The Base payload consists of `x_low` and `r1-r4`.
+- BaseSynthesis generates feature compensation for the full-resolution Base
+  path without additional payload bits.
+- The Full payload consists of the Base payload plus the Enhancement payload.
+- Full decoding reuses the same decoded Base reconstruction.
+- Base and Full are reconstructed on the original full-resolution geometry
+  support.
 
-Frozen Ours curve 固定为 `512/1K/2K/4K/8K/16K/32K`。2K 使用 U-PATH
-Base step500 + D111 Enhancement step1500；4K 使用 8K→4K joint step3000
-Base/Full。256 仅保留为 historical screening evidence，不属于 final curve。
+## Main Results
 
-非当前的 dynamic/lossless/geometry 源码已收起到
-[archive/upstream_out_of_scope](archive/upstream_out_of_scope/)。
-原路径、依赖检查和恢复方法见 [archive](archive/README.md)。
+Full versus Original Unicorn:
 
-旧 `canonical_operating_points.json` 是兼容历史 CLI 的 recipe，不能作为 formal
-checkpoint authority。Formal identity 以 `formal_static_rgb_v1_checkpoints.json`
-和 frozen registry 为准。Coding/rate/metric convention 与 Original Unicorn 对齐；
-模型权重、数据和大型运行输出不作为源码资产。`drafts/` 和 dated result packages
-中的历史证据仍保留；CURRENT 页面与 final package 是 examiner-facing authority。
-下面的 Unicorn README 是明确标注的 upstream 原文归档，其中性能主张属于原作者，
-不是本 thesis 对 Ours 的主张。
+| Dataset | Y BD-BR | YUV611 BD-BR |
+| --- | ---: | ---: |
+| 8iVFB | +1.452% | +1.390% |
+| Owlii | +1.855% | +2.077% |
+| CTC | +0.155% | -0.696% |
 
-<details>
-<summary>Original upstream Unicorn README (retained attribution and historical setup)</summary>
+Negative values indicate bitrate savings. The complete evaluation covers 20
+samples: four 8iVFB, four Owlii, and twelve CTC samples. BD-BR is computed on
+the Pareto-efficient RD envelope using PCHIP over the shared quality range;
+all measured operating points remain visible in the raw RD plots.
 
-# Unicorn: A Versatile Point Cloud Compressor Using Universal Multiscale Conditional Coding
+The results show that the Full endpoint remains close to Original Unicorn RD
+performance while the scalable bitstream also provides an independently
+decodable Base endpoint. The results are competitive, but not uniformly
+superior.
 
-## Abstract
+See the [final thesis results](results/comparisons/formal_static_rgb_thesis_results_20260911/README.md)
+for Base results, per-sequence tables, raw RD evidence, and figures.
 
-A universal multiscale conditional coding framework, Unicorn, is proposed to compress the geometry and attribute of any given point cloud. Geometry compression is addressed in [Part I](https://ieeexplore.ieee.org/document/10682571) of this paper, while attribute compression is discussed in [Part II](https://ieeexplore.ieee.org/document/10682566).
+## Repository Structure
 
-For geometry compression, we construct the multiscale sparse tensors of each voxelized point cloud frame and properly leverage lower-scale priors in the current and (previously processed) temporal reference frames to improve the conditional probability approximation or content-aware predictive reconstruction of geometry occupancy in compression.
+```text
+scalable_attribute/
+|-- models/
+|   |-- prefix.py
+|   |-- base_synthesis.py
+|   |-- base.py
+|   |-- enhancement.py
+|   `-- scalable.py
+|-- training/
+|-- evaluation/
+`-- runtime/
+```
 
-For attribute compression, Since attribute components exhibit very different intrinsic characteristics from the geometry element, e.g., 8-bit RGB color versus 1-bit occupancy, we process the attribute residual between lower-scale reconstruction and current-scale data. Similarly, we leverage spatially lower-scale priors in the current frame and (previously processed) temporal reference frame to improve the probability estimation of attribute intensity through conditional residual prediction in lossless mode or enhance the attribute reconstruction through progressive residual refinement in lossy mode for better performance.
+- [`prefix.py`](scalable_attribute/models/prefix.py) implements truncated
+  Unicorn prefix coding and exposes the decoded prefix state.
+- [`base_synthesis.py`](scalable_attribute/models/base_synthesis.py) implements
+  learned feature compensation for the full-resolution Base path.
+- [`base.py`](scalable_attribute/models/base.py) assembles the Base
+  reconstruction path.
+- [`enhancement.py`](scalable_attribute/models/enhancement.py) implements the
+  conditional Enhancement codec.
+- [`scalable.py`](scalable_attribute/models/scalable.py) composes the Base and
+  Full endpoints.
 
-The proposed Unicorn is a versatile, learning-based solution capable of compressing static and dynamic point clouds with diverse source characteristics in both lossy and lossless modes. Following the same evaluation criteria, Unicorn significantly outperforms standard-compliant approaches like MPEG G-PCC, V-PCC, and other learning-based solutions, yielding state-of-the-art compression efficiency while presenting affordable complexity for practical implementations.
+## Key Entry Points
 
-For more information, please visit our homepage: https://njuvision.github.io/Unicorn/ 
+- Model implementation: [`scalable_attribute/models/`](scalable_attribute/models/)
+- Training: [`scripts/scalable_attribute/training/`](scripts/scalable_attribute/training/)
+- Formal scalable evaluation: [`evaluate_scalable_formal.py`](scripts/scalable_attribute/evaluation/evaluate_scalable_formal.py)
+- Original Unicorn evaluation: [`evaluate_unicorn_official_physical.py`](scripts/scalable_attribute/evaluation/evaluate_unicorn_official_physical.py)
+- Frozen checkpoint manifest: [`formal_static_rgb_v1_checkpoints.json`](configs/scalable_attribute/formal_static_rgb_v1_checkpoints.json)
+- Final results: [`formal_static_rgb_thesis_results_20260911`](results/comparisons/formal_static_rgb_thesis_results_20260911/README.md)
 
-## Environment
+## Reference
 
-* pytorch, MinkowskiEngine, etc. 
-    * You can use docker to simply configure the environment: `docker pull jianqiang1995/pytorch:1.10.0-cuda11.1-cudnn8-devel`
+This work builds on the official
+[NJUVISION/Unicorn](https://github.com/NJUVISION/Unicorn) implementation and the
+attribute-compression method described in *A Versatile Point Cloud Compressor
+Using Universal Multiscale Conditional Coding -- Part II: Attribute
+Compression*.
 
+- [Unicorn Part II paper](https://ieeexplore.ieee.org/document/10682566)
+- [Original Unicorn project page](https://njuvision.github.io/Unicorn/)
 
-## Dataset
-
-* **ShapeNet**: https://shapenet.org/ 
-* **RWTT**: https://texturedmesh.isti.cnr.it/ 
-* **MPEG Dataset (Static Objects)**: http://mpegfs.int-evry.fr/MPEG/PCC/DataSets/pointCloud/CfP/datasets/ (MPEG password is required) 
-(You can also access some of them on our NJU BOX. ( https://box.nju.edu.cn/d/51327ae7c2644c0fa1c4/ ))
-* **MPEG Dataset (Dynamic Objects)**: https://mpeg-pcc.org/index.php/pcc-content-database/
-* **KITTI**: https://www.cvlibs.net/datasets/kitti/
-* **Ford**: https://mpegfs.int-evry.fr/ws-mpegcontent/MPEG-I/Part05-PointCloudCompression/dataSets_new/Dynamic_Acquisition/Ford  (MPEG password is required) 
-(You can also access some of them on our NJU BOX. ( https://box.nju.edu.cn/d/2739fe997265478c8673/ ))
-
-
-(Note: The training dataset generation methods and the amount of training dataset are not required to be fixed. We provide some examples in `data_utils/datasets/README.sh` to show how to perform sampling, partition, quantization, and other operations on raw mesh or point cloud data to generate the training datasets.)
-
-## Pretrained Models
-
-* **Geometry** **ckpt**: [https://box.nju.edu.cn/f/57095bcf44604dc2baed/?dl=1](https://box.nju.edu.cn/d/5393fa52f42c4d918576/)
-* **Attribute** **ckpt**: [https://box.nju.edu.cn/f/57095bcf44604dc2baed/?dl=1](https://box.nju.edu.cn/f/7162590c2a46489291bd/)
-
-## Results
-
-`./results`
-
-
-## Authors
-
-These files are provided by Nanjing University [Vision Lab](https://vision.nju.edu.cn/). Thanks to Prof. Dandan Ding from Hangzhou Normal University and Prof. Yi Lin from Fudan University for their help. Please contact us (mazhan@nju.edu.cn) if you have any questions.
-
-</details>
+Please cite the Original Unicorn paper and repository when using the upstream
+method or code.
