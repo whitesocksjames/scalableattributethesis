@@ -41,12 +41,13 @@ Base = x5p + delta_B; x5p = UnP(x4)
 
 | Component | Actual source |
 | --- | --- |
-| BaseSynthesis | [base_synthesis.py](../../scalable_attribute/canonical/base_synthesis.py) |
+| BaseSynthesis | [base_synthesis.py](../../scalable_attribute/models/base_synthesis.py) |
 | Exact Backbone / ResNet definitions | [backbone.py](../../basic_models/backbone.py), [resnet.py](../../basic_models/resnet.py) |
-| Prefix and native transition | [prefix.py](../../scalable_attribute/canonical/prefix.py) |
-| Base assembly / scopes | [model.py](../../scalable_attribute/canonical/model.py) |
-| Independent EnhancementVAE | [enhancement.py](../../scalable_attribute/canonical/enhancement.py) |
-| Scalable assembly / full-state loading | [scalable_model.py](../../scalable_attribute/canonical/scalable_model.py) |
+| Prefix and native transition | [prefix.py](../../scalable_attribute/models/prefix.py) |
+| Base assembly / scopes | [base.py](../../scalable_attribute/models/base.py) |
+| Independent EnhancementVAE | [enhancement.py](../../scalable_attribute/models/enhancement.py) |
+| Scalable assembly | [scalable.py](../../scalable_attribute/models/scalable.py) |
+| Strict checkpoint restoration | [checkpoints.py](../../scalable_attribute/runtime/checkpoints.py) |
 | Native residual implementation | [model_resvae.py](../../lossy_attribute/model_resvae.py) |
 
 ## Information flow and rate
