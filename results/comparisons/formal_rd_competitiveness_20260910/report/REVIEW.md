@@ -1,5 +1,8 @@
 # Formal RD competitiveness review — 2026-09-10
 
+> **HISTORICAL / SUPERSEDED AT 318/320.** The final 320-point report is
+> [`formal_static_rgb_final_20260911/report/FINALIZATION_REPORT.md`](../../formal_static_rgb_final_20260911/report/FINALIZATION_REPORT.md).
+
 Read-only review of 318/320 FORMAL_REUSABLE logical points. House and Shiva are pending; no point was removed and no extrapolation was used.
 
 ## Classification rule

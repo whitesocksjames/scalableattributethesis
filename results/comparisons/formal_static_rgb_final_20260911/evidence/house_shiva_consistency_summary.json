@@ -1,0 +1,74 @@
+[
+  {
+    "history": "House retained pre-memory-optimization",
+    "method": "Original_Unicorn",
+    "endpoint_comparisons": 9,
+    "bits_exact": 3,
+    "reconstruction_SHA_exact": 0,
+    "checkpoint_provenance_exact": 9,
+    "chunk_provenance_exact": 9,
+    "max_abs_bits_delta": 24,
+    "max_abs_bits_relative_delta_percent": 0.0017375188231205838,
+    "max_abs_metric_delta_db": 9.999999999976694e-05
+  },
+  {
+    "history": "House retained pre-memory-optimization",
+    "method": "Ours",
+    "endpoint_comparisons": 12,
+    "bits_exact": 12,
+    "reconstruction_SHA_exact": 12,
+    "checkpoint_provenance_exact": 12,
+    "chunk_provenance_exact": 12,
+    "max_abs_bits_delta": 0,
+    "max_abs_bits_relative_delta_percent": 0.0,
+    "max_abs_metric_delta_db": 0.0
+  },
+  {
+    "history": "Shiva retained RTX3090",
+    "method": "Original_Unicorn",
+    "endpoint_comparisons": 9,
+    "bits_exact": 4,
+    "reconstruction_SHA_exact": 1,
+    "checkpoint_provenance_exact": 9,
+    "chunk_provenance_exact": 9,
+    "max_abs_bits_delta": 56,
+    "max_abs_bits_relative_delta_percent": 0.0021719569331968103,
+    "max_abs_metric_delta_db": 0.00039999999999906777
+  },
+  {
+    "history": "Shiva retained RTX3090",
+    "method": "Ours",
+    "endpoint_comparisons": 12,
+    "bits_exact": 7,
+    "reconstruction_SHA_exact": 2,
+    "checkpoint_provenance_exact": 12,
+    "chunk_provenance_exact": 12,
+    "max_abs_bits_delta": 8,
+    "max_abs_bits_relative_delta_percent": 0.0006866622720281257,
+    "max_abs_metric_delta_db": 0.00039999999999906777
+  },
+  {
+    "history": "Shiva retained V100",
+    "method": "Original_Unicorn",
+    "endpoint_comparisons": 9,
+    "bits_exact": 4,
+    "reconstruction_SHA_exact": 0,
+    "checkpoint_provenance_exact": 9,
+    "chunk_provenance_exact": 9,
+    "max_abs_bits_delta": 16,
+    "max_abs_bits_relative_delta_percent": 0.0007484217656017872,
+    "max_abs_metric_delta_db": 0.00019999999999953388
+  },
+  {
+    "history": "Shiva retained V100",
+    "method": "Ours",
+    "endpoint_comparisons": 12,
+    "bits_exact": 8,
+    "reconstruction_SHA_exact": 0,
+    "checkpoint_provenance_exact": 12,
+    "chunk_provenance_exact": 12,
+    "max_abs_bits_delta": 16,
+    "max_abs_bits_relative_delta_percent": 0.0004399897922368201,
+    "max_abs_metric_delta_db": 0.00019999999999953388
+  }
+]

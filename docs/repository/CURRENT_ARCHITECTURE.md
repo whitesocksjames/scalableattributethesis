@@ -1,9 +1,20 @@
 # Current architecture
 
-Working method: two-endpoint scalable lossy RGB Attribute coding built on Unicorn.
-Each operating point has Base and Full; the eight lambdas are not eight layers of
-one universal stream. Source is authoritative; selected weights have different
-training histories.
+The frozen thesis method is a **full-resolution quality-scalable extension of
+Unicorn Part II**. Its canonical flow is:
+
+```text
+native truncated Unicorn prefix → learned BaseSynthesis
+→ full-resolution Base → conditional Enhancement → Full
+```
+
+Each of the seven formal operating points has Base and Full; the seven lambdas
+are not seven layers of one universal stream. The contribution is this
+full-resolution extension and its verified Base/Full contract, not the first
+proposal of layered coding. Unicorn Part II already has progressive residual
+refinement, so the repository must not describe it as lacking progressive
+decoding. Source and frozen manifests are authoritative; selected weights have
+different training histories.
 
 ## Added BaseSynthesis
 
@@ -57,5 +68,6 @@ Do not confuse this estimated residual rate with final physical Base rate.
 
 Initial sequential Base training freezes native modules. Selected rescued 2K and
 joint 4K have updated native weights: calling all current native modules 'frozen
-released weights' is incorrect. Evaluation freezes all parameters. 4K Base rate
-need not be below 8K Base rate for scalable correctness. 256 remains evaluable.
+released weights' is incorrect. Formal evaluation freezes all parameters. 4K
+Base rate need not be below 8K Base rate for scalable correctness. The final
+curve is `512/1K/2K/4K/8K/16K/32K`; 256 is historical screening evidence only.

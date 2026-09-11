@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "navigation_status": "legacy_official_mapping_recipe_not_current_candidate_registry",
+  "navigation_status": "legacy_cli_recipe_not_formal_checkpoint_authority",
   "current_candidate_registry": "configs/scalable_attribute/current_candidates.json",
-  "selection_notice": "Historical selected_base_checkpoint entries are retained for existing CLI compatibility. Current 2K rescue, 4K joint and 1K/512/256 candidates are described in current_candidates.json. Do not use this file to select current comparison weights.",
+  "selection_notice": "Historical selected_base_checkpoint entries, including 256, are retained for CLI compatibility. The final curve is 512/1K/2K/4K/8K/16K/32K. Use formal_static_rgb_v1_checkpoints.json and current_candidates.json as formal checkpoint authority; do not use this file to select thesis comparison weights.",
   "canonical_base": {
     "architecture": {
       "input_mode": "x4_f4",

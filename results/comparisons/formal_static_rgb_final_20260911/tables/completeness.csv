@@ -1,0 +1,22 @@
+dataset,sample,Original_completed,Original_expected,Ours_completed,Ours_expected,logical_completed,logical_expected,status
+8iVFB,longdress,9,9,7,7,16,16,FORMAL_REUSABLE
+8iVFB,loot,9,9,7,7,16,16,FORMAL_REUSABLE
+8iVFB,redandblack,9,9,7,7,16,16,FORMAL_REUSABLE
+8iVFB,soldier,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,Facade_00009_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,House_without_roof_00057_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,Shiva_00035_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,Staue_Klimt_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,Thaidancer_viewdep_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,basketball_player_vox11_00000200,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,boxer_viewdep_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,dancer_vox11_00000001,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,longdress_viewdep_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,loot_viewdep_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,redandblack_viewdep_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+CTC,soldier_viewdep_vox12,9,9,7,7,16,16,FORMAL_REUSABLE
+Owlii,basketball_player,9,9,7,7,16,16,FORMAL_REUSABLE
+Owlii,dancer,9,9,7,7,16,16,FORMAL_REUSABLE
+Owlii,exercise,9,9,7,7,16,16,FORMAL_REUSABLE
+Owlii,model,9,9,7,7,16,16,FORMAL_REUSABLE
+ALL,20 samples,180,180,140,140,320,320,FORMAL_REUSABLE

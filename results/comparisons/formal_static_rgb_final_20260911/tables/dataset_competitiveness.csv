@@ -1,0 +1,4 @@
+dataset,samples_reviewed,pending_samples,competitive,mixed,clearly_weaker,verdict,median_sample_delta_Y_db,median_sample_delta_YUV611_db
+8iVFB,4,0,4,0,0,competitive,-0.13174966980553293,-0.087554509826683
+Owlii,4,0,4,0,0,competitive,-0.09505003272965773,-0.08159145698339643
+CTC,12,0,11,1,0,competitive,0.027205815779668185,0.04783554097799758

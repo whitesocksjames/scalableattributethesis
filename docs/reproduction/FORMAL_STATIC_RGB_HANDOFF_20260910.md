@@ -9,6 +9,39 @@ Scheduler states in this document are historical observations, not live
 claims. On recovery, inspect point artifacts and query each scheduler at most
 once when the user requests a status audit. Do not poll continuously.
 
+## Final closure — 2026-09-11
+
+This section supersedes every incomplete-count or pending-job statement later
+in this historical handoff.
+
+- The deduplicated formal matrix is **320/320 `FORMAL_REUSABLE`**: 180/180
+  Original Unicorn and 140/140 Ours logical points across 20/20 samples.
+- House job `1809256` and Shiva job `1809401` each produced a complete
+  16-point A100-SXM4-40GB set (Original 9 + Ours 7). These complete A100 sets
+  are the final House/Shiva RD and runtime selections; older V100/RTX3090
+  artifacts remain historical consistency evidence.
+- House Ours old-versus-memory-optimized results match exactly on all 12
+  shared Base/Full endpoints, including bits, reconstruction SHA-256, and
+  Y/U/V/YUV611. Cross-GPU House/Shiva comparisons preserve exact checkpoint
+  and chunk provenance and show only bounded numerical differences (at most
+  56 bits, 0.002172%, and 0.0004 dB), so cross-GPU reconstruction hashes are
+  not universally identical.
+- The final classified artifacts are under
+  `results/comparisons/formal_static_rgb_final_20260911/`.
+- The raw-point competitiveness verdict is 19 competitive, one mixed
+  (Facade), and zero clearly weaker samples.
+- Under the frozen no-pruning/no-extrapolation PCHIP contract, 68/80
+  per-sequence Base/Full × Y/YUV611 BD-BR values are available. Twelve remain
+  explicitly unavailable: four for boxer (Ours nonmonotonic) and four each for
+  CTC loot and redandblack (Official nonmonotonic).
+- All 460 selected endpoint rows have complete current-formal encode/decode
+  timings. Runtime remains hardware-labeled and House/Shiva use their complete
+  A10040 sets.
+
+The experiment-collection phase is frozen. Do not submit additional points to
+make unavailable BD-BR entries computable, and do not delete or reorder raw
+points to change those entries.
+
 ## Latest recovery checkpoint — A100 closure jobs submitted
 
 This section is the newest operational state and supersedes older scheduler

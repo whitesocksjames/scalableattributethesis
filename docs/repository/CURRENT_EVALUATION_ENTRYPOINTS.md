@@ -1,39 +1,60 @@
-# Current evaluation entry points
+# Current formal evaluation contract and entry points
 
-| Input / endpoint | Entry point |
-| --- | --- |
-| H5 Base+Full physical hard (RWTT-28Lite / existing Full28 contract) | [evaluate_scalable_formal.py](../../scripts/scalable_attribute/evaluation/evaluate_scalable_formal.py) |
-| External PLY sequences, Base/Full including joint | [evaluate_8ivfb_sequence.py](../../scripts/scalable_attribute/evaluation/evaluate_8ivfb_sequence.py) (also existing Owlii prepared input) |
-| Canonical Base-only physical | [evaluate_base_formal.py](../../scripts/scalable_attribute/evaluation/evaluate_base_formal.py) |
-| Rescued Base physical | [evaluate_base_rescue.py](../../scripts/scalable_attribute/historical/evaluate_base_rescue.py), [arm wrapper](../../scripts/scalable_attribute/historical/evaluate_base_rescue_arm.py) |
-| Tensor distortion / training validation | [evaluate_base.py](../../scripts/scalable_attribute/evaluation/evaluate_base.py) |
-| Existing locally reproduced Unicorn reference | [evaluate_unicorn_reference.py](../../scripts/scalable_attribute/evaluation/evaluate_unicorn_reference.py) |
+The formal experiment matrix is complete and frozen. These entry points document
+the implementation that produced the evidence; they are not authorization to
+submit new experiments.
 
-Names do not establish provenance: the existing reference evaluator imports this
-repository's native implementation. It is not yet the proposed independent
-upstream workspace runner. Author-provided CSV, local reproduction and ours must
-remain distinguishable.
+| Role | Entry point |
+|---|---|
+| Pinned Official Unicorn physical coding | [evaluate_unicorn_official_physical.py](../../scripts/scalable_attribute/evaluation/evaluate_unicorn_official_physical.py) |
+| Ours combined Base+Full physical coding | [evaluate_scalable_formal.py](../../scripts/scalable_attribute/evaluation/evaluate_scalable_formal.py) |
+| CTC canonical ≤800k chunk preparation | [prepare_ctc_formal_chunks.py](../../scripts/scalable_attribute/evaluation/prepare_ctc_formal_chunks.py) |
+| CTC merged aggregation | [aggregate_formal_chunk_results.py](../../scripts/scalable_attribute/evaluation/aggregate_formal_chunk_results.py) |
+| Frozen identity/contract gate | [validate_formal_static_rgb_contract.py](../../scripts/scalable_attribute/evaluation/validate_formal_static_rgb_contract.py) |
+| Resumable point orchestration | [formal_ctc_pack_resume.py](../../scripts/scalable_attribute/evaluation/formal_ctc_pack_resume.py) |
 
-Check [candidate registry](CURRENT_OPERATING_POINTS.md) before selecting a loader.
-Joint 4K needs the complete scalable state, target conditioning 4096 and actual
-32k8k profile; any bootstrap Base lambda8192 is initialization metadata. 2K needs
-the rescued Prefix+BaseSynthesis as well as selected Enhancement.
+Original Unicorn comes from pinned upstream commit
+`b50d6c1bd033185b9e893b755d5d316cca2d4448`; the thesis implementation is not
+used as a substitute. The frozen Ours checkpoint authority is
+[`formal_static_rgb_v1_checkpoints.json`](../../configs/scalable_attribute/formal_static_rgb_v1_checkpoints.json).
 
-Keep metric/bitrate/input conventions aligned with upstream. Tensor PSNR used in
-training is not interchangeable with pc_error Y/U/V and weighted YUV611.
-Soft/hard Base differences are diagnostic; residual/Enhancement hard round-trip
-and Base/Full accounting are separate checks. No container-overhead addition is
-introduced here.
+## Endpoint and runtime definitions
 
-Pass frozen manifests and actual paths explicitly. Each codec process needs its
-own working directory for upstream temporary files. N30 persistent files stay
-under `/data/run01/scz0ade/Tanzeyu/`; job-local staging follows its guide. Existing
-Slurm templates are recipe-specific, not authorization to relaunch experiments.
+Official encode time covers the synchronized GPU `model.forward(...,
+encode=True)` physical coding call, including entropy strings and physical
+G-PCC `x_low` accounting. Official decode time covers the synchronized GPU
+`model.decode(...)` call. Input reading, checkpoint loading, reconstruction PLY
+writing, and `pc_error` are outside both codec timers.
 
-No evaluation was submitted by Phase 1. Regression tests, independent upstream
-workspace and new comparison runs belong to later reviewed phases.
+Ours uses one combined `(sample, operating point)` execution so Base and Full
+share the exact native prefix and Base reconstruction:
 
-The old root and `canonical/` paths remain CLI compatibility wrappers. New
-invocations should use `evaluation/`; aggregation, plotting, and probes are
-classified under `diagnostics/`. See the
-[script index](../../scripts/scalable_attribute/README.md).
+- `Base Enc = prefix_encode`;
+- `Base Dec = prefix_decode + base_synthesis`;
+- `Full Enc = prefix_encode + enhancement_encode`;
+- `Full Dec = prefix_decode + base_synthesis + enhancement_decode`.
+
+Therefore `Base codec = Base Enc + Base Dec`, and `Full codec = Full Enc + Full
+Dec`. Full includes the complete cost needed to obtain its Base dependency. CUDA
+is synchronized at every timing boundary. Metric computation, CPU validation
+copies, PLY I/O, model/checkpoint loading, and task wall time are not mixed into
+Enc/Dec.
+
+For CTC, each component is summed over serial chunks and quality is measured
+once on the merged full-sample reconstruction. Runtime aggregation is always
+hardware-labeled and grouped by GPU model/VRAM. Unlike GPU models must never be
+combined into an unlabeled mean. House and Shiva final runtime uses each
+sample's complete A100-SXM4-40GB Original9+Ours7 set.
+
+## Scientific boundary
+
+The common contract is canonical input, shared preprocessing/chunks, physical
+rate, full-input bpp denominator, MPEG `pc_error` Y/U/V, and
+`YUV611=(6Y+U+V)/8`. CTC keeps global coordinates and does not recenter,
+requantize, or deduplicate. Base is `x_low+r1+r2+r3+r4`; Full is that exact Base
+plus the Enhancement payload.
+
+Legacy evaluators such as `evaluate_unicorn_reference.py`, Base-only screening,
+and historical rescue scripts remain diagnostic evidence. They are not the
+formal baseline/runtime authority. Final outputs are indexed in
+[CURRENT_RESULT_INDEX.md](CURRENT_RESULT_INDEX.md).

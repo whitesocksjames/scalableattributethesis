@@ -1,5 +1,9 @@
 # Formal RD competitiveness review — 2026-09-10
 
+> **HISTORICAL / SUPERSEDED AT 318/320.** House and Shiva were incomplete at
+> this audit boundary. Do not quote this package as the final thesis result;
+> use [`formal_static_rgb_final_20260911`](../formal_static_rgb_final_20260911/README.md).
+
 This directory is a read-only performance review derived from the then-current
 `318/320` `FORMAL_REUSABLE` logical results. It does not modify the frozen
 scientific contract, remove any raw operating point, or replace formal result

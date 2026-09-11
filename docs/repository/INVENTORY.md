@@ -1,5 +1,11 @@
 # Repository inventory — Phase 1
 
+> **Historical inventory with current routing addendum.** The file-level
+> classifications below retain their 2026-09-07 meaning. For final thesis
+> navigation use [`CURRENT_RESULT_INDEX.md`](CURRENT_RESULT_INDEX.md) and
+> [`HISTORICAL_DOCUMENT_STATUS.md`](HISTORICAL_DOCUMENT_STATUS.md); the final
+> static RGB package is `results/comparisons/formal_static_rgb_final_20260911/`.
+
 Physical cleanup update (2026-09-07): six non-current upstream mode directories
 now live under `archive/upstream_out_of_scope/`; two root ZIPs are retained under
 `archive/packages/`. See [exact relocation/recovery table](../../archive/README.md).

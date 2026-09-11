@@ -1,8 +1,14 @@
 # Formal 8iVFB + Owlii + CTC evaluation plan — 2026-09-09
 
-Status: **SCIENTIFIC CONTRACT APPROVED / PREFLIGHT PREPARATION**
-Checkpoint and CTC contracts were approved by the user on 2026-09-09. No full
-evaluation array has been submitted.
+Status: **SCIENTIFIC CONTRACT RETAINED / EXECUTION COMPLETE**
+
+This is the frozen pre-execution contract, preserved verbatim below where it
+describes the original preparation state. The matrix subsequently closed at
+`320/320 FORMAL_REUSABLE`; use
+`results/comparisons/formal_static_rgb_final_20260911/` for final values and
+`docs/repository/CURRENT_RESULT_INDEX.md` for current navigation. Future-tense
+submission and preflight statements in this document are historical, not live
+task status.
 
 ## 1. Objective
 

@@ -1,33 +1,45 @@
 # Scalable Attribute Thesis
 
-基于 Unicorn Part II 的两层质量可伸缩 RGB Attribute compression：每个 operating
-point 提供 full-resolution **Base** 与 **Full**。当前是阶段性开发整理，不是 final freeze。
+基于 Unicorn Part II 的 **full-resolution quality-scalable extension**：每个
+formal operating point 提供 full-resolution **Base** 与 **Full**。最终机制为
+`native truncated Unicorn prefix → learned BaseSynthesis → full-resolution Base
+→ conditional Enhancement → Full`。这项贡献扩展了 Unicorn Part II 的 lossy
+attribute progressive-refinement framework；不声称首次提出 layered coding，也不
+声称 Original Unicorn 不支持 progressive decoding。
+
+Formal static RGB experiment 已冻结：20 samples，Original `180/180`，Ours
+`140/140`，总计 `320/320 FORMAL_REUSABLE` logical evaluations 和 460 decoded
+endpoints。最终结果入口是
+[formal_static_rgb_final_20260911](results/comparisons/formal_static_rgb_final_20260911/README.md)。
 
 ## 30 秒导航
 
 | 我要找什么？ | 直接打开 |
 | --- | --- |
 | 当前模型 / 新增 Base module | [CURRENT_ARCHITECTURE](docs/repository/CURRENT_ARCHITECTURE.md) |
-| 当前 checkpoints / 2K rescue / 4K joint | [CURRENT_OPERATING_POINTS](docs/repository/CURRENT_OPERATING_POINTS.md) · [machine-readable registry](configs/scalable_attribute/current_candidates.json) |
+| Frozen checkpoints / 2K rescue / 4K joint | [CURRENT_OPERATING_POINTS](docs/repository/CURRENT_OPERATING_POINTS.md) · [machine-readable registry](configs/scalable_attribute/current_candidates.json) |
 | 当前训练入口 | [CURRENT_TRAINING_ENTRYPOINTS](docs/repository/CURRENT_TRAINING_ENTRYPOINTS.md) |
-| 当前 hard / external evaluation | [CURRENT_EVALUATION_ENTRYPOINTS](docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md) |
-| 当前汇总数据和 RD 图 | [CURRENT_RESULT_INDEX](docs/repository/CURRENT_RESULT_INDEX.md) |
+| Formal evaluation contract / runtime 定义 | [CURRENT_EVALUATION_ENTRYPOINTS](docs/repository/CURRENT_EVALUATION_ENTRYPOINTS.md) |
+| Final tables / RD 图 / evidence | [CURRENT_RESULT_INDEX](docs/repository/CURRENT_RESULT_INDEX.md) |
 | 哪些 active / historical / broken？ | [Repository inventory](docs/repository/INVENTORY.md) |
 | 本次整理范围 | [Phase 1 plan](docs/repository/PHASE1_PLAN.md) |
 | N30 / HPC 使用规则 | [N30](N30_GUIDE.md) · [HPC](HPC_GUIDE.md) |
 
-当前 2K：U-PATH Base step500 + D111 Enhancement step1500。
-当前 4K：8K→4K joint step3000 Base/Full；Base bitrate 不要求低于 8K。
-256 保留 evaluation。所有点仍是 working candidates，不因历史报告写有 FREEZE 而自动封版。
+Frozen Ours curve 固定为 `512/1K/2K/4K/8K/16K/32K`。2K 使用 U-PATH
+Base step500 + D111 Enhancement step1500；4K 使用 8K→4K joint step3000
+Base/Full。256 仅保留为 historical screening evidence，不属于 final curve。
 
 非当前的 dynamic/lossless/geometry 源码已收起到
 [archive/upstream_out_of_scope](archive/upstream_out_of_scope/)。
 原路径、依赖检查和恢复方法见 [archive](archive/README.md)。
 
-旧 `canonical_operating_points.json` 是兼容历史 CLI 的 official-mapping recipe，
-不能直接作为 current candidate registry。尤其不要用旧 `--point 2k/4k` 选择新权重。
-Coding/rate/metric convention 与 Original Unicorn 对齐；模型权重、数据和大型运行输出
-不作为源码资产。`drafts/`/`results/` 中的历史证据仍保留，其路径可能被分析脚本引用。
+旧 `canonical_operating_points.json` 是兼容历史 CLI 的 recipe，不能作为 formal
+checkpoint authority。Formal identity 以 `formal_static_rgb_v1_checkpoints.json`
+和 frozen registry 为准。Coding/rate/metric convention 与 Original Unicorn 对齐；
+模型权重、数据和大型运行输出不作为源码资产。`drafts/` 和 dated result packages
+中的历史证据仍保留；CURRENT 页面与 final package 是 examiner-facing authority。
+下面的 Unicorn README 是明确标注的 upstream 原文归档，其中性能主张属于原作者，
+不是本 thesis 对 Ours 的主张。
 
 <details>
 <summary>Original upstream Unicorn README (retained attribution and historical setup)</summary>

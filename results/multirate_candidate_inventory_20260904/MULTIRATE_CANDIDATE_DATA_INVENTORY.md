@@ -1,5 +1,10 @@
 # Multi-rate Candidate Data Inventory — 2026-09-04
 
+> **HISTORICAL / SUPERSEDED CANDIDATE INVENTORY.** This captures the 2026-09-04
+> selection boundary. Use `docs/repository/CURRENT_OPERATING_POINTS.md` and
+> `configs/scalable_attribute/formal_static_rgb_v1_checkpoints.json` for the
+> frozen seven-point mapping.
+
 ## Current working candidate mapping
 
 | Point | Base candidate | Full candidate | Status |

@@ -1,5 +1,11 @@
 # Formal static RGB evaluation handoff — 2026-09-09
 
+> **HISTORICAL / SUPERSEDED OPERATIONAL SNAPSHOT.** This file records the
+> preflight boundary on 2026-09-09. It is not current status. The final matrix
+> is `320/320 FORMAL_REUSABLE`; use
+> `FORMAL_STATIC_RGB_HANDOFF_20260910.md` and
+> `results/comparisons/formal_static_rgb_final_20260911/`.
+
 This file is the restart point if chat context is lost. Read it together with
 `FORMAL_8I_OWLII_CTC_EXECUTION_PLAN_20260909.md`. The execution plan is the
 scientific contract; this file records live operational state.

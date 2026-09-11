@@ -1,7 +1,9 @@
 # Current training entry points
 
-This page locates code; it does not authorize a new run or change a recipe.
-Use [current candidates](CURRENT_OPERATING_POINTS.md) for initialization evidence.
+This page locates reproduction code; the thesis architecture/checkpoint selection
+and formal experiment matrix are frozen. It does not authorize a new run or
+change a recipe. Use [frozen operating points](CURRENT_OPERATING_POINTS.md) for
+initialization evidence.
 
 | Purpose | Entry point | Role |
 | --- | --- | --- |
@@ -11,9 +13,9 @@ Use [current candidates](CURRENT_OPERATING_POINTS.md) for initialization evidenc
 | Base rescue scopes/samplers | [train_base_rescue.py](../../scripts/scalable_attribute/historical/train_base_rescue.py) | Historical experiment entry, still needed for reproduction |
 | MVUB-only/mixed adaptation | [train_mvub_finetune.py](../../scripts/scalable_attribute/historical/train_mvub_finetune.py), [train_enhancement_mixed.py](../../scripts/scalable_attribute/historical/train_enhancement_mixed.py) | Historical experiments; reusable code is not deletion authority |
 
-`--point` reads the old official-mapping config. It does not resolve the current
-rescued/joint candidate set. For these candidates use the existing explicit
-checkpoint/profile/lambda options recorded in retained commands. In particular,
+`--point` reads the legacy CLI recipe. It is not formal checkpoint authority and
+does not safely resolve the frozen rescued/joint set. Reproduction must use the
+frozen checkpoint manifest and explicit options recorded in retained commands. In particular,
 4K joint target lambda=4096 with source family=32k8k is not official R04 (8k256).
 Do not replace a full-state checkpoint by its initial Base checkpoint.
 
@@ -21,7 +23,7 @@ Source definitions: [data schedule](../../scalable_attribute/training/data_sched
 [joint objective](../../scalable_attribute/training/joint_endpoint.py),
 [rescue support](../../scalable_attribute/training/base_rescue.py).
 Architecture, optimizer recipe and sampler history remain separate concerns.
-Stage-2 D611 continues to require an explicit manager decision.
+No additional Stage-2 candidate selection belongs to the frozen formal matrix.
 
 The old `scripts/scalable_attribute/canonical/` command paths remain thin
 compatibility wrappers for retained commands. New invocations should use

@@ -1,5 +1,9 @@
 # Unified 256–32K Multirate Scalable RD Audit
 
+> **HISTORICAL SCREENING EVIDENCE (2026-09-04).** The formal curve later froze
+> at `512/1K/2K/4K/8K/16K/32K`; 256 is not a final thesis point. Recommendation
+> labels below do not override the frozen registry or final 320-point package.
+
 This report uses physical hard-rate evidence. Official-curve and neighbor interpolation are diagnostic local linear interpolation only; no extrapolation is used.
 
 ## Manager-facing decision table

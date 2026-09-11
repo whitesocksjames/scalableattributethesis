@@ -1,773 +1,185 @@
 {
-  "schema_version": 1,
-  "registry": "scalable_attribute.current_candidates",
-  "as_of": "2026-09-07",
-  "selection_status": "working_candidates_not_final_freeze",
-  "scope": "Current Base/Full checkpoint identities for the 256-32K scalable-attribute review.",
-  "path_policy": {
-    "repository_root": ".",
-    "artifact_paths": "Every path field is relative to its origin_root; no checkpoint path is made portable by guessing a local mount.",
-    "origin_roots": {
-      "repository": ".",
-      "run01_tanzeyu": "/data/run01/scz0ade/Tanzeyu"
-    },
-    "hash_policy": "sha256 is null when the retained evidence did not record a hash; null means unverified, not a computed or inferred value."
+  "schema_version": 2,
+  "registry": "scalable_attribute.final_formal_candidates",
+  "as_of": "2026-09-11",
+  "selection_status": "frozen_formal_static_rgb_v1_20260909",
+  "scope": "Final seven-point Base/Full checkpoint mapping used by the 320-point thesis formal matrix.",
+  "scientific_description": "full-resolution quality-scalable extension of Unicorn Part II",
+  "codec_flow": "native truncated Unicorn prefix -> learned BaseSynthesis -> full-resolution Base -> conditional Enhancement -> Full",
+  "selection_policy": "Predeclared; never change lineage, checkpoint, or point from test-set performance.",
+  "authoritative_manifest": {
+    "path": "configs/scalable_attribute/formal_static_rgb_v1_checkpoints.json",
+    "sha256": "d43641b2ba93536b9f5d95fd52fe2e796faa9eb18de2c03a76bd3e9a7b616484",
+    "contract_id": "formal_static_rgb_v1_20260909"
   },
-  "runtime_config_note": "This registry is descriptive. It does not alter configs/scalable_attribute/canonical_operating_points.json; that runtime mapping cannot represent the joint 4K source/target profile contract.",
-  "evidence_policy": "Each candidate names retained resolved_args/raw summary files and the loader script family used by those records.",
-  "loader_scripts": {
-    "formal_rwtt": {
-      "path": "scripts/scalable_attribute/evaluation/evaluate_scalable_formal.py",
-      "origin_root": "repository",
-      "sha256": null,
-      "verification": "unverified"
-    },
-    "external_sequence": {
-      "path": "scripts/scalable_attribute/evaluation/evaluate_8ivfb_sequence.py",
-      "origin_root": "repository",
-      "sha256": null,
-      "verification": "unverified"
-    }
+  "excluded_from_final_curve": {
+    "point": "256",
+    "status": "historical_screening_only"
   },
   "candidates": [
     {
       "point": "32k",
       "rate_id": "R01",
+      "lambda": 32768,
       "conditioning_lambda": 32768,
       "released_profile": "32k8k",
-      "status": "working_candidate",
-      "evaluable": true,
-      "base": {
+      "status": "FORMAL_FROZEN",
+      "base_loader": "base_synthesis",
+      "full_loader": "sequential_enhancement",
+      "base_checkpoint": {
         "label": "D111 Base step5525",
-        "loader_type": "base_synthesis",
-        "initial_loader_bootstrap": {
-          "kind": "released_profile",
-          "profile": "32k8k",
-          "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/32k8k/epoch_last.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "base_synthesis_checkpoint",
-          "step": 5525,
-          "path": "experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "objective": "D111",
-          "training_lineage": "existing cumulative step5525 lineage"
-        },
-        "source_evidence": [
-          {
-            "role": "runtime mapping context",
-            "path": "configs/scalable_attribute/canonical_operating_points.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "resolved evaluation arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/highrate_contract_completion/rwtt_28lite/32k_d611_step3525/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+        "path": "experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth",
+        "size_bytes": 48221073,
+        "sha256": "f1d2b1bf36cb608065ea4446876b4f48ff0ccabf9d80043949d99af147c8aa10"
       },
-      "full": {
-        "label": "sequential D111 to D611 step3525",
-        "loader_type": "sequential_enhancement",
-        "initial_loader_bootstrap": {
-          "kind": "frozen_base_for_enhancement",
-          "path": "experiments/canonical_base_r01/full_pass_from_step2000/checkpoints/step_5525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "enhancement_checkpoint",
-          "step": 3525,
-          "path": "experiments/canonical_yaware_lr5e5_r01/D611/train/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "objective": "D611",
-          "training_lineage": "sequential D111 to D611"
-        },
-        "source_evidence": [
-          {
-            "role": "resolved evaluation arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/highrate_contract_completion/rwtt_28lite/32k_d611_step3525/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained raw endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/highrate_contract_completion/rwtt_28lite/32k_d611_step3525/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "evaluation plan",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/highrate_contract_completion/evaluation_plan.csv",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+      "full_checkpoint": {
+        "label": "sequential D611 enhancement step3525",
+        "path": "experiments/canonical_yaware_lr5e5_r01/D611/train/checkpoints/step_3525.pth",
+        "size_bytes": 154619525,
+        "sha256": "e8e4a6f1a767bcc1fcc05eb26073952d3b4cf33c62657282440ed13bb2abdfef"
       }
     },
     {
       "point": "16k",
       "rate_id": "R02",
+      "lambda": 16384,
       "conditioning_lambda": 16384,
       "released_profile": "32k8k",
-      "status": "working_candidate",
-      "evaluable": true,
-      "base": {
+      "status": "FORMAL_FROZEN",
+      "base_loader": "base_synthesis",
+      "full_loader": "independent_enhancement",
+      "base_checkpoint": {
         "label": "canonical Base step3525",
-        "loader_type": "base_synthesis",
-        "initial_loader_bootstrap": {
-          "kind": "released_profile",
-          "profile": "32k8k",
-          "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/32k8k/epoch_last.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "base_synthesis_checkpoint",
-          "step": 3525,
-          "path": "experiments/canonical_multirate_base_v1/training/base_16k/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "training_lineage": "clean continuous Base"},
-        "source_evidence": [
-          {
-            "role": "resolved Base evaluation arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/prior_selected/evaluation/base_16k/rwtt_28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Base trajectory summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/prior_selected/evaluation/base_16k/rwtt_28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+        "path": "experiments/canonical_multirate_base_v1/training/base_16k/checkpoints/step_3525.pth",
+        "size_bytes": 48221137,
+        "sha256": "6b4428a8f548ad300c88963d6c43c9225db76ef1a167840058684376d1dc93ca"
       },
-      "full": {
+      "full_checkpoint": {
         "label": "D111 Enhancement step1763",
-        "loader_type": "independent_enhancement",
-        "initial_loader_bootstrap": {
-          "kind": "frozen_base_for_enhancement",
-          "path": "experiments/canonical_multirate_base_v1/training/base_16k/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "enhancement_checkpoint",
-          "step": 1763,
-          "path": "experiments/multirate_parallel_d707ce7/branch_a/16k/train/checkpoints/step_1763.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "objective": "D111",
-          "stage": 1,
-          "initialization": "released ResidualVAE exact independent clone"
-        },
-        "source_evidence": [
-          {
-            "role": "resolved Full evaluation arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_a/16k/rwtt_28lite/step_1763/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained raw endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_a/16k/rwtt_28lite/step_1763/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "fixed-4 external raw evaluation",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/highrate_contract_completion/8ivfb/16k/longdress/physical_rd.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+        "path": "experiments/multirate_parallel_d707ce7/branch_a/16k/train/checkpoints/step_1763.pth",
+        "size_bytes": 154622661,
+        "sha256": "57d97afa64971e79dd3ab17bb895f0d9e3554801ff238c0f227eaa95749c0737"
       }
     },
     {
       "point": "8k",
       "rate_id": "R03",
+      "lambda": 8192,
       "conditioning_lambda": 8192,
       "released_profile": "32k8k",
-      "status": "working_candidate",
-      "evaluable": true,
-      "base": {
+      "status": "FORMAL_FROZEN",
+      "base_loader": "base_synthesis",
+      "full_loader": "independent_enhancement",
+      "base_checkpoint": {
         "label": "canonical Base step3525",
-        "loader_type": "base_synthesis",
-        "initial_loader_bootstrap": {
-          "kind": "released_profile",
-          "profile": "32k8k",
-          "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/32k8k/epoch_last.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "base_synthesis_checkpoint",
-          "step": 3525,
-          "path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "training_lineage": "clean continuous Base"},
-        "source_evidence": [
-          {
-            "role": "resolved Base evaluation arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/prior_selected/evaluation/base_8k/rwtt_28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Base trajectory summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/prior_selected/evaluation/base_8k/rwtt_28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+        "path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth",
+        "size_bytes": 48221137,
+        "sha256": "36363fb7cb4a88dd3deb5879900d30b65483534c3547ba4055ad6315f513ff0d"
       },
-      "full": {
+      "full_checkpoint": {
         "label": "D111 Enhancement step1763",
-        "loader_type": "independent_enhancement",
-        "initial_loader_bootstrap": {
-          "kind": "frozen_base_for_enhancement",
-          "path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "enhancement_checkpoint",
-          "step": 1763,
-          "path": "experiments/multirate_parallel_d707ce7/branch_a/8k/train/checkpoints/step_1763.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "objective": "D111",
-          "stage": 1,
-          "initialization": "released ResidualVAE exact independent clone"
-        },
-        "source_evidence": [
-          {
-            "role": "resolved Full evaluation arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_a/8k/rwtt_28lite/step_1763/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained raw endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_a/8k/rwtt_28lite/step_1763/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "fixed-4 external raw evaluation",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/highrate_contract_completion/8ivfb/8k/longdress/physical_rd.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+        "path": "experiments/multirate_parallel_d707ce7/branch_a/8k/train/checkpoints/step_1763.pth",
+        "size_bytes": 154622661,
+        "sha256": "95e3100235d9e871239ddd3b71274a929b722985b39353d1437098ae39b7fd17"
       }
     },
     {
       "point": "4k",
       "rate_id": "R04",
+      "lambda": 4096,
       "conditioning_lambda": 4096,
       "released_profile": "32k8k",
-      "status": "working_candidate",
-      "evaluable": true,
-      "base": {
-        "label": "8K to 4K joint step3000 Base",
-        "loader_type": "joint_scalable_base",
-        "initial_loader_bootstrap": {
-          "kind": "source_base_synthesis",
-          "profile": "32k8k",
-          "conditioning_lambda": 8192,
-          "path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "joint_scalable_checkpoint",
-          "step": 3000,
-          "path": "experiments/joint_8k_to_4k_856b21c/train/checkpoints/step_3000.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "training_lineage": "8K to 4K TAFA joint",
-          "source_profile": "32k8k",
-          "source_conditioning_lambda": 8192,
-          "target_conditioning_lambda": 4096,
-          "base_checkpoint_lambda": 8192
-        },
-        "source_evidence": [
-          {
-            "role": "resolved joint RWTT arguments",
-            "path": "results/multirate_256_32k_audit_20260904/raw/4k_joint_step3000_rwtt28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained joint RWTT endpoint summary",
-            "path": "results/multirate_256_32k_audit_20260904/raw/4k_joint_step3000_rwtt28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "selected external step review",
-            "path": "results/joint_8k_to_4k_external_20260904/selected_step3000_review/SELECTED_4K_STEP3000_REVIEW.md",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+      "base_checkpoint_lambda": 8192,
+      "status": "FORMAL_FROZEN",
+      "base_loader": "joint_scalable_base",
+      "full_loader": "joint_scalable_full",
+      "bootstrap_checkpoint": {
+        "path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth",
+        "size_bytes": 48221137,
+        "sha256": "36363fb7cb4a88dd3deb5879900d30b65483534c3547ba4055ad6315f513ff0d"
       },
-      "full": {
-        "label": "8K to 4K joint step3000 Full",
-        "loader_type": "joint_scalable_full",
-        "initial_loader_bootstrap": {
-          "kind": "source_base_synthesis",
-          "profile": "32k8k",
-          "conditioning_lambda": 8192,
-          "path": "experiments/canonical_multirate_base_v1/training/base_8k/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "joint_scalable_checkpoint",
-          "step": 3000,
-          "path": "experiments/joint_8k_to_4k_856b21c/train/checkpoints/step_3000.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "training_lineage": "8K to 4K TAFA joint",
-          "source_profile": "32k8k",
-          "source_conditioning_lambda": 8192,
-          "target_conditioning_lambda": 4096,
-          "base_checkpoint_lambda": 8192
-        },
-        "source_evidence": [
-          {
-            "role": "resolved joint RWTT arguments",
-            "path": "results/multirate_256_32k_audit_20260904/raw/4k_joint_step3000_rwtt28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained joint RWTT endpoint summary",
-            "path": "results/multirate_256_32k_audit_20260904/raw/4k_joint_step3000_rwtt28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "all-checkpoint tradeoff review",
-            "path": "results/joint_8k_to_4k_external_20260904/all_checkpoints_rd_review/JOINT_4K_ALL_CHECKPOINTS_RD_REVIEW.md",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+      "base_checkpoint": {
+        "label": "8K-to-4K joint step3000 Base",
+        "path": "experiments/joint_8k_to_4k_856b21c/train/checkpoints/step_3000.pth",
+        "size_bytes": 408085589,
+        "sha256": "58d691eee4e4c58ede70231724d85e1cc2615b4bb6b931746090566596bf246b"
+      },
+      "full_checkpoint": {
+        "label": "8K-to-4K joint step3000 Full",
+        "path": "experiments/joint_8k_to_4k_856b21c/train/checkpoints/step_3000.pth",
+        "size_bytes": 408085589,
+        "sha256": "58d691eee4e4c58ede70231724d85e1cc2615b4bb6b931746090566596bf246b"
       }
     },
     {
       "point": "2k",
       "rate_id": "R05",
+      "lambda": 2048,
       "conditioning_lambda": 2048,
       "released_profile": "8k256",
-      "status": "working_candidate",
-      "evaluable": true,
-      "base": {
-        "label": "2K-U-PATH step500 Base",
-        "loader_type": "rescued_base",
-        "initial_loader_bootstrap": {
-          "kind": "rescue_initial_base",
-          "profile": "8k256",
-          "path": "experiments/canonical_multirate_base_v1/training/base_2k/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "rescued_base_checkpoint",
-          "step": 500,
-          "path": "experiments/base_rescue_8way/2K-U-PATH/train/checkpoints/step_500.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "training_lineage": "2K-U-PATH rescue",
-          "profile": "8k256",
-          "conditioning_lambda": 2048
-        },
-        "source_evidence": [
-          {
-            "role": "rescue arm definition",
-            "path": "configs/scalable_attribute/base_rescue_8way.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained selected Base external summary",
-            "path": "results/rescued_2k_u_path_step500_external_20260903/selected_2k_u_path_step500_per_sequence.csv",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+      "status": "FORMAL_FROZEN",
+      "base_loader": "rescued_base",
+      "full_loader": "independent_enhancement",
+      "bootstrap_checkpoint": {
+        "path": "experiments/canonical_multirate_base_v1/training/base_2k/checkpoints/step_3525.pth",
+        "size_bytes": 48221137,
+        "sha256": "82772118d7b3a6bab5942d7b83665d18150acafdb721aefc43f395709da1b897"
       },
-      "full": {
-        "label": "D111 Enhancement step1500",
-        "loader_type": "independent_enhancement",
-        "initial_loader_bootstrap": {
-          "kind": "frozen_rescued_base_for_enhancement",
-          "profile": "8k256",
-          "path": "experiments/base_rescue_8way/2K-U-PATH/train/checkpoints/step_500.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "enhancement_checkpoint",
-          "step": 1500,
-          "path": "experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/train/checkpoints/step_1500.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {
-          "objective": "D111",
-          "stage": 1,
-          "training_lineage": "rescued Base plus independent Enhancement",
-          "selection_note": "step1500 retained over the rescued step1763 comparison checkpoint"
-        },
-        "source_evidence": [
-          {
-            "role": "resolved RWTT arguments",
-            "path": "results/multirate_256_32k_audit_20260904/raw/2k_rescued_step1500_rwtt28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained RWTT endpoint summary",
-            "path": "results/multirate_256_32k_audit_20260904/raw/2k_rescued_step1500_rwtt28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "external comparison analysis",
-            "path": "results/rescued_2k_enh_external_20260903/RESCUED_2K_ENH_EXTERNAL_ANALYSIS.md",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+      "base_checkpoint": {
+        "label": "2K-U-PATH rescue step500",
+        "path": "experiments/base_rescue_8way/2K-U-PATH/train/checkpoints/step_500.pth",
+        "size_bytes": 253460243,
+        "sha256": "c7927543f544c6744bce9c9cae1d78f6e3460c213c40d283b4609f7fb61963bf"
+      },
+      "full_checkpoint": {
+        "label": "rescued D111 Enhancement step1500",
+        "path": "experiments/rescued_2k_u_path_step500_enh_stage1_00abab2/train/checkpoints/step_1500.pth",
+        "size_bytes": 154621253,
+        "sha256": "ca7ac7493a3d1ec0edb7cc4a9c2d7771fb9e811da60448ca7a784bf37a08a2f0"
       }
     },
     {
       "point": "1k",
       "rate_id": "R06",
+      "lambda": 1024,
       "conditioning_lambda": 1024,
       "released_profile": "2k128",
-      "status": "working_candidate",
-      "evaluable": true,
-      "base": {
-        "label": "2k128 Base step3525",
-        "loader_type": "base_synthesis",
-        "initial_loader_bootstrap": {
-          "kind": "released_profile",
-          "profile": "2k128",
-          "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/2k128/epoch_last.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "base_synthesis_checkpoint",
-          "step": 3525,
-          "path": "experiments/multirate_parallel_d707ce7/branch_b/base_1k/train/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "profile": "2k128"},
-        "source_evidence": [
-          {
-            "role": "resolved Base arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_b/base_1k/rwtt_28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Base endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_b/base_1k/rwtt_28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+      "status": "FORMAL_FROZEN",
+      "base_loader": "base_synthesis",
+      "full_loader": "independent_enhancement",
+      "base_checkpoint": {
+        "label": "1K Base step3525",
+        "path": "experiments/multirate_parallel_d707ce7/branch_b/base_1k/train/checkpoints/step_3525.pth",
+        "size_bytes": 48221201,
+        "sha256": "1dbe72e98e2371ab4ace28f42056eb02b223f83c49d8920a1db5adb57893494d"
       },
-      "full": {
+      "full_checkpoint": {
         "label": "D111 Enhancement step1763",
-        "loader_type": "independent_enhancement",
-        "initial_loader_bootstrap": {
-          "kind": "frozen_base_for_enhancement",
-          "profile": "2k128",
-          "path": "experiments/multirate_parallel_d707ce7/branch_b/base_1k/train/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "enhancement_checkpoint",
-          "step": 1763,
-          "path": "experiments/lowrate_enhancement_stage1_d707ce7/1k/train/checkpoints/step_1763.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "stage": 1},
-        "source_evidence": [
-          {
-            "role": "resolved Full arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/lowrate_enhancement_stage1/1k/rwtt_28lite/step_1763/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Full endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/lowrate_enhancement_stage1/1k/rwtt_28lite/step_1763/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+        "path": "experiments/lowrate_enhancement_stage1_d707ce7/1k/train/checkpoints/step_1763.pth",
+        "size_bytes": 154620357,
+        "sha256": "679f20fb0c48bce082ad0453963724b1e8c2224ca95b5eb2730816b5971e8dbc"
       }
     },
     {
       "point": "512",
       "rate_id": "R07",
+      "lambda": 512,
       "conditioning_lambda": 512,
       "released_profile": "2k128",
-      "status": "working_candidate",
-      "evaluable": true,
-      "base": {
-        "label": "2k128 Base step3525",
-        "loader_type": "base_synthesis",
-        "initial_loader_bootstrap": {
-          "kind": "released_profile",
-          "profile": "2k128",
-          "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/2k128/epoch_last.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "base_synthesis_checkpoint",
-          "step": 3525,
-          "path": "experiments/multirate_parallel_d707ce7/branch_b/base_512/train/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "profile": "2k128"},
-        "source_evidence": [
-          {
-            "role": "resolved Base arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_b/base_512/rwtt_28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Base endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_b/base_512/rwtt_28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+      "status": "FORMAL_FROZEN",
+      "base_loader": "base_synthesis",
+      "full_loader": "independent_enhancement",
+      "base_checkpoint": {
+        "label": "512 Base step3525",
+        "path": "experiments/multirate_parallel_d707ce7/branch_b/base_512/train/checkpoints/step_3525.pth",
+        "size_bytes": 48221201,
+        "sha256": "caee3d47baca68eb0600326b487fce5f18c45a6f6eb6908f0a4addbafb474def"
       },
-      "full": {
+      "full_checkpoint": {
         "label": "D111 Enhancement step1763",
-        "loader_type": "independent_enhancement",
-        "initial_loader_bootstrap": {
-          "kind": "frozen_base_for_enhancement",
-          "profile": "2k128",
-          "path": "experiments/multirate_parallel_d707ce7/branch_b/base_512/train/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "enhancement_checkpoint",
-          "step": 1763,
-          "path": "experiments/lowrate_enhancement_stage1_d707ce7/512/train/checkpoints/step_1763.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "stage": 1},
-        "source_evidence": [
-          {
-            "role": "resolved Full arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/lowrate_enhancement_stage1/512/rwtt_28lite/step_1763/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Full endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/lowrate_enhancement_stage1/512/rwtt_28lite/step_1763/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
-      }
-    },
-    {
-      "point": "256",
-      "rate_id": "R08",
-      "conditioning_lambda": 256,
-      "released_profile": "2k128",
-      "status": "working_candidate",
-      "evaluable": true,
-      "review_note": "256 remains evaluable; its Full payload is retained as a candidate and is not a final freeze.",
-      "base": {
-        "label": "2k128 Base step3525",
-        "loader_type": "base_synthesis",
-        "initial_loader_bootstrap": {
-          "kind": "released_profile",
-          "profile": "2k128",
-          "path": "data/scalable_attribute_thesis/checkpoints/unicorn_released/Unicorn-v1-attribute-test-only-weights/ckpts/lossy_attribute/rwtt/2k128/epoch_last.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_checkpoint": {
-          "kind": "base_synthesis_checkpoint",
-          "step": 3525,
-          "path": "experiments/multirate_parallel_d707ce7/branch_b/base_256/train/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "profile": "2k128"},
-        "source_evidence": [
-          {
-            "role": "resolved Base arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_b/base_256/rwtt_28lite/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Base endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/current_round/branch_b/base_256/rwtt_28lite/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
-      },
-      "full": {
-        "label": "D111 Enhancement step1763",
-        "loader_type": "independent_enhancement",
-        "initial_loader_bootstrap": {
-          "kind": "frozen_base_for_enhancement",
-          "profile": "2k128",
-          "path": "experiments/multirate_parallel_d707ce7/branch_b/base_256/train/checkpoints/step_3525.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "effective_full_state_checkpoint": {
-          "kind": "enhancement_checkpoint",
-          "step": 1763,
-          "path": "experiments/lowrate_enhancement_stage1_d707ce7/256/train/checkpoints/step_1763.pth",
-          "origin_root": "run01_tanzeyu",
-          "sha256": null,
-          "verification": "unverified"
-        },
-        "source": {"objective": "D111", "stage": 1},
-        "source_evidence": [
-          {
-            "role": "resolved Full arguments",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/lowrate_enhancement_stage1/256/rwtt_28lite/step_1763/resolved_args.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "retained Full endpoint summary",
-            "path": "drafts/20260901_multirate_review/03_raw_evidence/lowrate_enhancement_stage1/256/rwtt_28lite/step_1763/endpoint_summary.json",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          },
-          {
-            "role": "current 256-32K master review",
-            "path": "results/multirate_256_32k_audit_20260904/MULTIRATE_256_32K_MASTER_REVIEW.csv",
-            "origin_root": "repository",
-            "sha256": null,
-            "verification": "unverified"
-          }
-        ]
+        "path": "experiments/lowrate_enhancement_stage1_d707ce7/512/train/checkpoints/step_1763.pth",
+        "size_bytes": 154620357,
+        "sha256": "106fac286ad89199ad95941936738bdc4ff174f31ae2515b008cdcefe7fafea6"
       }
     }
   ]
