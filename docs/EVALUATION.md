@@ -26,9 +26,9 @@ Original Unicorn uses the official `NJUVISION/Unicorn` source at commit
 Lambda 8192 always uses `32k8k@8192`; checkpoints are never selected per
 sequence. Ours uses the frozen `512/1K/2K/4K/8K/16K/32K` mapping in the
 [checkpoint manifest](../configs/scalable_attribute/formal_static_rgb_v1_checkpoints.json).
-The [candidate registry](../configs/scalable_attribute/current_candidates.json)
-records concise labels and loader semantics. SHA-256, architecture, profile,
-lambda, and parent-lineage checks fail closed.
+This manifest is the formal authority for checkpoint paths, SHA-256 identities,
+loader branches, architecture, profile, lambda, and parent lineage; mismatches
+fail closed.
 
 ## Samples
 
@@ -85,7 +85,7 @@ deterministic Pareto-efficient frontier is constructed independently for every
 sample, method, endpoint, and metric. PCHIP interpolation is applied to
 `ln(physical_bpp)` over shared quality overlap only, without extrapolation or
 manual point deletion. See
-[`recompute_pareto_bdbr.py`](../scripts/scalable_attribute/diagnostics/recompute_pareto_bdbr.py).
+[`recompute_pareto_bdbr.py`](../scripts/scalable_attribute/analysis/recompute_pareto_bdbr.py).
 
 ## Reproduction entry points
 
@@ -96,6 +96,7 @@ manual point deletion. See
 | CTC chunk preparation | [`prepare_ctc_formal_chunks.py`](../scripts/scalable_attribute/evaluation/prepare_ctc_formal_chunks.py) |
 | CTC merged aggregation | [`aggregate_formal_chunk_results.py`](../scripts/scalable_attribute/evaluation/aggregate_formal_chunk_results.py) |
 | Frozen contract validation | [`validate_formal_static_rgb_contract.py`](../scripts/scalable_attribute/evaluation/validate_formal_static_rgb_contract.py) |
+| Pareto BD-BR analysis | [`recompute_pareto_bdbr.py`](../scripts/scalable_attribute/analysis/recompute_pareto_bdbr.py) |
 | Final RD plotting | [`plot_final_static_rgb_rd.py`](../scripts/scalable_attribute/analysis/plot_final_static_rgb_rd.py) |
 
 Final measurements and presentation tables are indexed by the

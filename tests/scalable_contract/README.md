@@ -1,65 +1,41 @@
 # Scalable contract regression tests
 
-These tests cover only thesis-added scalable behavior. They deliberately follow
-the upstream Unicorn coding/rate convention: no file container, fresh-process
-decode, physical G-PCC decode closure, min/max header accounting, or packaged
-byte identity is required.
+This suite validates the thesis-added Base/Full contract: four-stage Unicorn
+prefix use, Base independence from ground truth and Enhancement payloads,
+strict checkpoint restoration, Base/Full reconstruction consistency, physical
+rate accounting, and fail-closed model identity checks.
 
-## Post-cleanup dependency closure
-
-Audited before implementation at Phase 1 commit `72999db4`. Current runtime and
-config paths (`scalable_attribute`, `lossy_attribute`, `basic_models`,
-`data_utils`, `cfg`, `configs`, and active `scripts`) contain zero imports or
-launcher references to the archived HPC sweep wrappers or fixed-model trace
-bundle. Two strings in `lossy_attribute/README.md` are upstream historical
-commands for archived lossless/dynamic modes; they are neither runtime nor
-configuration dependencies and were intentionally left unchanged.
-
-## Split
+## Run
 
 ```bash
 bash scripts/tests/run_scalable_contract_cpu.sh
 bash scripts/tests/run_scalable_contract_gpu.sh
 ```
 
-The suite uses Python's standard-library `unittest`. The strict GPU command
-reads machine-specific paths from the invoking shell; launch configuration is
-intentionally outside the public repository. Hashes are optional supporting
-evidence; the gates primarily check checkpoint metadata, architecture, lambda,
-step, strict state restoration and actual reconstruction/rate contracts.
+`run_scalable_contract_cpu.sh` runs regression discovery without requesting
+physical GPU coding. `run_scalable_contract_gpu.sh` enables strict single-GPU
+integration and accepts an optional fully qualified unittest name in
+`SCALABLE_TEST_TARGET`.
 
-The 4K fixture names encode its real provenance: released R03 `32k8k` at lambda
-8192 and selected 8K Base bootstrap, followed by target-lambda 4096 joint
-checkpoint step3000. There is intentionally no `SCALABLE_RELEASED_4K` fixture.
+## Runtime assumptions
 
-The real-checkpoint gates require 2K `canonical_base_rescue_v1`, lambda2048,
-step500 and complete rescued Prefix+BaseSynthesis restoration. The 4K gate
-requires complete joint state, profile `32k8k`, source lambda8192, target
-lambda4096 and step3000. All state loads are strict: missing or unexpected keys
-fail. Optional externally recorded SHA256 values are provenance aids, not fixture
-availability gates.
+Use a Python environment containing the repository's PyTorch,
+MinkowskiEngine, PyTorch3D, NumPy, and codec dependencies. GPU tests require a
+CUDA-capable device, a writable codec working directory, and existing local
+fixtures supplied through these environment variables:
 
-The fast loader suite also exercises the standard 8K
-`canonical_base_predict_correct` branch at lambda8192. It verifies that this
-format restores only BaseSynthesis, leaves the released Prefix unchanged,
-freezes the complete Base, and rejects missing or unexpected BaseSynthesis
-keys. This is synthetic and performs no physical coding.
+```text
+SCALABLE_TEST_H5
+SCALABLE_TEST_GPCC
+SCALABLE_RELEASED_2K_R05_8K256_L2048
+SCALABLE_2K_RESCUE_U_PATH_STEP500
+SCALABLE_2K_ENHANCEMENT_D111_STEP1500
+SCALABLE_RELEASED_8K_R03_32K8K_L8192
+SCALABLE_8K_BASE_D111_STEP3525
+SCALABLE_8K_ENHANCEMENT_D111_STEP1763
+SCALABLE_4K_JOINT_FROM_8K_STEP3000
+```
 
-Two lightweight single-GPU pre-refactor gates load the real selected 4K joint
-checkpoint and the real selected 8K standard Base plus independent Enhancement.
-They perform one deterministic Base/Full reconstruction and validate strict
-state keys, provenance metadata, support, stride, channels and finite values.
-Mocks fail closed if either test attempts physical Prefix coding or arithmetic
-Enhancement encode/decode.
-
-Each GPU test uses a new codec working directory. Cross-GPU floating-point or
-bitstream byte equality is not required; encode/decode equality is checked
-within each run after coordinate alignment.
-
-The slow gate performs exactly one physical Prefix encode/decode per operating
-point, then reuses that decoded state for Base synthesis and Enhancement
-encode/decode. It reports separate Prefix encode, Prefix decode, Base synthesis,
-Enhancement encode and Enhancement decode timings, plus explicit counters for
-one Prefix encode and zero native-r5 encode/consume calls. Set
-`SCALABLE_TEST_TARGET` to a single unittest method to run 2K and 4K as separate
-single-GPU jobs. The fast CPU gate never performs physical coding.
+The GPU runner sets `SCALABLE_RUN_GPU_TESTS=1` and
+`SCALABLE_STRICT_FIXTURES=1`. Fixture paths are machine configuration and are
+not stored in the public repository.
