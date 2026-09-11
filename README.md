@@ -49,6 +49,9 @@ superior.
 See the [final thesis results](results/comparisons/formal_static_rgb_thesis_results_20260911/README.md)
 for Base results, per-sequence tables, raw RD evidence, and figures.
 
+Method and evaluation details are documented in [Method](docs/METHOD.md) and
+[Formal Evaluation](docs/EVALUATION.md).
+
 ## Repository Structure
 
 ```text

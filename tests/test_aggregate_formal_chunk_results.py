@@ -211,6 +211,7 @@ def test_aggregate_sums_bits_uses_original_denominator_and_scores_once_per_endpo
         manifest,
         results,
         endpoints=["Unicorn", "Ours Base", "Ours Full"],
+        output_dir=tmp_path / "out",
         output_json=output_json,
         output_csv=output_csv,
     )
@@ -228,7 +229,8 @@ def test_aggregate_sums_bits_uses_original_denominator_and_scores_once_per_endpo
         assert row["denominator_point_count"] == 4
         assert row["physical_bpp"] == expected_bits / 4
         assert row["coordinate_multiset_verified"] is True
-        assert row["metrics"]["yuv_psnr_611"] == 35.0
+        expected_yuv611 = (6.0 * 30.0 + 40.0 + 50.0) / 8.0
+        assert row["metrics"]["yuv_psnr_611"] == expected_yuv611
     assert summary["endpoints"]["Unicorn"]["components"] == {
         "attribute": 12,
         "geometry": 9,
@@ -293,14 +295,21 @@ def test_coordinate_multiset_mismatch_fails_before_pc_error(
     )
     calls: list[tuple[str, str]] = []
     monkeypatch.setattr(MODULE, "pc_error", _fake_pc_error(calls))
-    with pytest.raises(MODULE.AggregateError, match="coordinate multiset"):
-        MODULE.aggregate_formal_chunk_results(
-            source,
-            manifest,
-            results,
-            endpoints=["Unicorn"],
-            output_dir=tmp_path / "out",
-        )
+    summary = MODULE.aggregate_formal_chunk_results(
+        source,
+        manifest,
+        results,
+        endpoints=["Unicorn"],
+        output_dir=tmp_path / "out",
+    )
+    assert summary["status"] == "FAIL"
+    assert summary["endpoints"]["Unicorn"]["status"] == "FAILED"
+    assert summary["failure_evidence"]
+    assert any(
+        "coordinate multiset" in evidence["reason"]
+        for evidence in summary["failure_evidence"]
+    )
+    assert summary["endpoints"]["Unicorn"]["merged_reconstruction"] is None
     assert calls == []
 
 
@@ -345,11 +354,15 @@ def test_full_missing_keeps_base_formal_and_publishes_failure_evidence(
 
     assert summary["status"] == "PARTIAL"
     assert summary["endpoints"]["Ours Base"]["status"] == "FORMAL_REUSABLE"
-    assert summary["endpoints"]["Ours Full"]["status"] == "MISSING"
+    assert summary["endpoints"]["Ours Full"]["status"] == "FAILED"
     assert summary["endpoints"]["Ours Base"]["codec_runtime_seconds"] == 13.0
     assert len(calls) == 1
     assert Path(summary["endpoints"]["Ours Base"]["merged_reconstruction"]).is_file()
     assert summary["endpoints"]["Ours Full"]["merged_reconstruction"] is None
     assert summary["failure_evidence"]
+    assert any(
+        evidence["endpoint"] == "Ours Full"
+        for evidence in summary["failure_evidence"]
+    )
     assert (output_dir / "aggregate.json").is_file()
     assert (output_dir / "aggregate.csv").is_file()

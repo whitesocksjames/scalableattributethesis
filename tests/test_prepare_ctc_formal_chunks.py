@@ -421,7 +421,7 @@ def test_prepare_rejects_mismatched_existing_chunk_without_overwrite(tmp_path: P
     _write_ply(chunk, properties, [(1, 2, 3, 40, 50, 60)])
     mismatched = chunk.read_bytes()
 
-    with pytest.raises(RuntimeError, match="existing chunk value readback mismatch"):
+    with pytest.raises(RuntimeError, match="chunk schema readback mismatch"):
         MODULE.prepare_ctc_formal_chunks(
             source, output_root, reuse_existing=True, **_partition_kwargs())
 

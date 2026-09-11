@@ -1,9 +1,0 @@
-Point,Base RD,Full RD,Base ladder,Full ladder,Enh usefulness,Correctness,RWTT,Decision,Reason
-256,8i +0.089 (4/4); Owlii +0.020 (2/4),8i +0.081 (4/4); Owlii +0.006 (2/4),8/8,8/8,raw 0/8; RD 0/8,PASS,PASS,KEEP_WITH_WARNING,Full adds almost no rate and slightly lowers quality on several sequences
-512,8i -0.020 (4/4); Owlii -0.009 (4/4),8i +0.076 (4/4); Owlii -0.006 (4/4),8/8,8/8,raw 8/8; RD 3/8,PASS,PASS,FREEZE,distinct low-rate point; no material Pareto pathology
-1K,8i -0.136 (4/4); Owlii -0.100 (4/4),8i +0.029 (4/4); Owlii -0.058 (4/4),8/8,8/8,raw 8/8; RD 3/8,PASS,PASS,FREEZE,distinct low-rate point with useful Enhancement
-2K,8i -0.072 (4/4); Owlii -0.326 (4/4),8i +0.109 (4/4); Owlii -0.208 (4/4),8/8,8/8,raw 8/8; RD 7/8,PASS,PASS,FREEZE,rescued U-PATH step500 + Full step1500 is stable and manager-frozen
-4K,8i +0.059 (4/4); Owlii -0.365 (4/4),8i +0.066 (4/4); Owlii -0.238 (4/4),0/8,8/8,raw 7/8; RD 5/8,PASS,PASS,KEEP_WITH_WARNING,"step3000 Full is useful, but Base rate placement overshoots 8K Base externally"
-8K,8i +0.234 (4/4); Owlii -0.255 (4/4),8i -0.109 (4/4); Owlii -0.179 (4/4),0/8,8/8,raw 8/8; RD 3/8,PASS,PASS,FREEZE,healthy Base/Full ladder point; external Full has a modest efficiency warning
-16K,8i +0.223 (4/4); Owlii -0.223 (4/4),8i -0.316 (4/4); Owlii +0.035 (4/4),8/8,8/8,raw 8/8; RD 4/8,PASS,PASS,KEEP_WITH_WARNING,RWTT is healthy; 8i Full is below the local official curve
-32K,8i +0.113 (4/4); Owlii -0.288 (4/4),8i N/A (0/4); Owlii -0.446 (4/4),8/8,8/8,raw 8/8; RD 0/8,PASS,PASS,KEEP_WITH_WARNING,legacy exception; useful endpoint but often outside official interpolation range

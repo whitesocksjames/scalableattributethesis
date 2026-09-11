@@ -22,10 +22,9 @@ bash scripts/tests/run_scalable_contract_cpu.sh
 bash scripts/tests/run_scalable_contract_gpu.sh
 ```
 
-The suite uses Python's standard-library `unittest`; no test package is installed
-on either cluster. The strict GPU command requires the variables documented in
-`configs/test_environments/n30.env.example` or `fau_hpc.env.example`. Paths are
-machine configuration, not model provenance. Hashes are optional supporting
+The suite uses Python's standard-library `unittest`. The strict GPU command
+reads machine-specific paths from the invoking shell; launch configuration is
+intentionally outside the public repository. Hashes are optional supporting
 evidence; the gates primarily check checkpoint metadata, architecture, lambda,
 step, strict state restoration and actual reconstruction/rate contracts.
 
