@@ -6,11 +6,19 @@ samples: four from 8iVFB, four from Owlii, and twelve from CTC. Each sample has
 nine Original Unicorn operating points and seven scalable operating points;
 each scalable point yields a Base endpoint and a Full endpoint.
 
+## Dataset-level BD-BR versus Original Unicorn
+
+| Dataset | Base Y | Base YUV611 | Full Y | Full YUV611 |
+| --- | ---: | ---: | ---: | ---: |
+| 8iVFB | +5.205% | -0.723% | +1.452% | +1.390% |
+| Owlii | +10.110% | +4.992% | +1.855% | +2.077% |
+| CTC | +1.848% | -0.326% | +0.155% | -0.696% |
+
 ## Per-sequence BD-BR versus Original Unicorn
 
 All values are percentages. Negative BD-BR represents bitrate saving relative
 to Original Unicorn at equivalent quality. Average rows are read directly from
-the frozen equal-sequence dataset summary; displayed values use six decimal
+the frozen equal-sequence dataset summary; displayed values use three decimal
 places, while the [compact table source](bdbr_per_sequence_compact.csv) retains
 the complete stored precision.
 
@@ -18,39 +26,39 @@ the complete stored precision.
 
 | Sample | Base Y | Base YUV611 | Full Y | Full YUV611 |
 | --- | ---: | ---: | ---: | ---: |
-| `longdress` | +21.968931% | +11.448877% | +0.572631% | +1.794887% |
-| `loot` | +0.169039% | -5.259241% | +2.510655% | +1.051747% |
-| `redandblack` | -4.878505% | -9.229253% | -0.574927% | -0.640324% |
-| `soldier` | +3.558913% | +0.147225% | +3.300283% | +3.355673% |
-| **Average** | **+5.204595%** | **-0.723098%** | **+1.452161%** | **+1.390496%** |
+| `longdress` | +21.969% | +11.449% | +0.573% | +1.795% |
+| `loot` | +0.169% | -5.259% | +2.511% | +1.052% |
+| `redandblack` | -4.879% | -9.229% | -0.575% | -0.640% |
+| `soldier` | +3.559% | +0.147% | +3.300% | +3.356% |
+| **Average** | **+5.205%** | **-0.723%** | **+1.452%** | **+1.390%** |
 
 ### Owlii
 
 | Sample | Base Y | Base YUV611 | Full Y | Full YUV611 |
 | --- | ---: | ---: | ---: | ---: |
-| `basketball_player` | +6.223647% | +2.506407% | +1.924549% | +1.676353% |
-| `dancer` | +14.897868% | +9.356277% | +3.500272% | +3.969554% |
-| `exercise` | +6.435334% | +1.494883% | -0.568958% | -0.999246% |
-| `model` | +12.882017% | +6.610955% | +2.563152% | +3.661869% |
-| **Average** | **+10.109716%** | **+4.992131%** | **+1.854754%** | **+2.077132%** |
+| `basketball_player` | +6.224% | +2.506% | +1.925% | +1.676% |
+| `dancer` | +14.898% | +9.356% | +3.500% | +3.970% |
+| `exercise` | +6.435% | +1.495% | -0.569% | -0.999% |
+| `model` | +12.882% | +6.611% | +2.563% | +3.662% |
+| **Average** | **+10.110%** | **+4.992%** | **+1.855%** | **+2.077%** |
 
 ### CTC
 
 | Sample | Base Y | Base YUV611 | Full Y | Full YUV611 |
 | --- | ---: | ---: | ---: | ---: |
-| `basketball_player_vox11_00000200` | +1.927752% | -0.737883% | -3.559648% | -3.797633% |
-| `dancer_vox11_00000001` | +0.759691% | -2.590792% | -3.384578% | -3.880264% |
-| `Thaidancer_viewdep_vox12` | +2.269212% | -2.655915% | +0.256157% | -0.348037% |
-| `longdress_viewdep_vox12` | -0.096357% | -0.511371% | -0.622159% | -0.498555% |
-| `loot_viewdep_vox12` | -1.769466% | -3.706831% | +1.258922% | -1.218368% |
-| `redandblack_viewdep_vox12` | -4.937647% | -6.354937% | -2.933618% | -4.330641% |
-| `soldier_viewdep_vox12` | -2.006819% | -3.133605% | -0.425384% | -1.372154% |
-| `boxer_viewdep_vox12` | +0.087137% | -2.177951% | +2.583585% | -0.116084% |
-| `Facade_00009_vox12` | +4.753462% | +3.558223% | +3.942293% | +3.636108% |
-| `House_without_roof_00057_vox12` | +12.076455% | +5.521354% | +1.726482% | +0.476300% |
-| `Shiva_00035_vox12` | +5.999013% | +5.772001% | +1.419658% | +1.513442% |
-| `Staue_Klimt_vox12` | +3.116040% | +3.102106% | +1.598443% | +1.581173% |
-| **Average** | **+1.848206%** | **-0.326300%** | **+0.155013%** | **-0.696226%** |
+| `basketball_player_vox11_00000200` | +1.928% | -0.738% | -3.560% | -3.798% |
+| `dancer_vox11_00000001` | +0.760% | -2.591% | -3.385% | -3.880% |
+| `Thaidancer_viewdep_vox12` | +2.269% | -2.656% | +0.256% | -0.348% |
+| `longdress_viewdep_vox12` | -0.096% | -0.511% | -0.622% | -0.499% |
+| `loot_viewdep_vox12` | -1.769% | -3.707% | +1.259% | -1.218% |
+| `redandblack_viewdep_vox12` | -4.938% | -6.355% | -2.934% | -4.331% |
+| `soldier_viewdep_vox12` | -2.007% | -3.134% | -0.425% | -1.372% |
+| `boxer_viewdep_vox12` | +0.087% | -2.178% | +2.584% | -0.116% |
+| `Facade_00009_vox12` | +4.753% | +3.558% | +3.942% | +3.636% |
+| `House_without_roof_00057_vox12` | +12.076% | +5.521% | +1.726% | +0.476% |
+| `Shiva_00035_vox12` | +5.999% | +5.772% | +1.420% | +1.513% |
+| `Staue_Klimt_vox12` | +3.116% | +3.102% | +1.598% | +1.581% |
+| **Average** | **+1.848%** | **-0.326%** | **+0.155%** | **-0.696%** |
 
 BD-BR is computed on the
 Pareto-efficient RD envelope using PCHIP over the shared quality interval. The
