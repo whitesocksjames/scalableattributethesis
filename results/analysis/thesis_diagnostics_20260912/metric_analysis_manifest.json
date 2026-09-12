@@ -1,0 +1,34 @@
+{
+  "source": "results/comparisons/formal_static_rgb_final_20260911/evidence/final_raw_rd_points.csv",
+  "source_sha256": "da5e4af98a2b6473aa2bdea0fc556dacd2ea6d95ceca94d9ff2c6bd81b68b9eb",
+  "pairs": 140,
+  "exact_tolerance": 1e-12,
+  "near_zero_db": 0.01,
+  "counts": {
+    "Y": {
+      "positive": 132,
+      "equal": 0,
+      "negative": 8,
+      "near_zero_abs_le_0_01_db": 4
+    },
+    "U": {
+      "positive": 102,
+      "equal": 0,
+      "negative": 38,
+      "near_zero_abs_le_0_01_db": 7
+    },
+    "V": {
+      "positive": 81,
+      "equal": 0,
+      "negative": 59,
+      "near_zero_abs_le_0_01_db": 22
+    },
+    "YUV611": {
+      "positive": 127,
+      "equal": 0,
+      "negative": 13,
+      "near_zero_abs_le_0_01_db": 6
+    }
+  },
+  "frozen_package_modified": false
+}

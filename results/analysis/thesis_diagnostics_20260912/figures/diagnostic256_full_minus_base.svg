@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640">
+<style>text{font:13px sans-serif}.axis{stroke:#555}.pos{fill:#2878b5}.neg{fill:#d9534f}</style>
+<text x="20" y="25">Diagnostic 256: Full - Base YUV611 (all measured samples)</text>
+<line class="axis" x1="600" y1="45" x2="600" y2="625"/>
+<text x="20" y="65">8iVFB / longdress</text>
+<rect class="neg" x="599.68" y="52" width="0.32" height="12"/>
+<text x="610.00" y="64">-0.0027 dB</text>
+<text x="20" y="93">8iVFB / loot</text>
+<rect class="neg" x="598.99" y="80" width="1.01" height="12"/>
+<text x="610.00" y="92">-0.0084 dB</text>
+<text x="20" y="121">8iVFB / redandblack</text>
+<rect class="neg" x="599.85" y="108" width="0.15" height="12"/>
+<text x="610.00" y="120">-0.0012 dB</text>
+<text x="20" y="149">8iVFB / soldier</text>
+<rect class="neg" x="598.23" y="136" width="1.77" height="12"/>
+<text x="610.00" y="148">-0.0147 dB</text>
+<text x="20" y="177">Owlii / basketball_player</text>
+<rect class="neg" x="598.98" y="164" width="1.02" height="12"/>
+<text x="610.00" y="176">-0.0085 dB</text>
+<text x="20" y="205">Owlii / dancer</text>
+<rect class="neg" x="598.17" y="192" width="1.83" height="12"/>
+<text x="610.00" y="204">-0.0152 dB</text>
+<text x="20" y="233">Owlii / exercise</text>
+<rect class="neg" x="597.82" y="220" width="2.18" height="12"/>
+<text x="610.00" y="232">-0.0181 dB</text>
+<text x="20" y="261">Owlii / model</text>
+<rect class="neg" x="599.69" y="248" width="0.31" height="12"/>
+<text x="610.00" y="260">-0.0026 dB</text>
+<text x="20" y="289">CTC / Facade_00009_vox12</text>
+<rect class="pos" x="600.00" y="276" width="14.79" height="12"/>
+<text x="620.79" y="288">+0.1232 dB</text>
+<text x="20" y="317">CTC / House_without_roof_00057_vox12</text>
+<rect class="pos" x="600.00" y="304" width="6.80" height="12"/>
+<text x="612.80" y="316">+0.0567 dB</text>
+<text x="20" y="345">CTC / Shiva_00035_vox12</text>
+<rect class="pos" x="600.00" y="332" width="8.81" height="12"/>
+<text x="614.81" y="344">+0.0735 dB</text>
+<text x="20" y="373">CTC / Staue_Klimt_vox12</text>
+<rect class="pos" x="600.00" y="360" width="28.52" height="12"/>
+<text x="634.52" y="372">+0.2377 dB</text>
+<text x="20" y="401">CTC / Thaidancer_viewdep_vox12</text>
+<rect class="pos" x="600.00" y="388" width="0.69" height="12"/>
+<text x="610.00" y="400">+0.0057 dB</text>
+<text x="20" y="429">CTC / basketball_player_vox11_00000200</text>
+<rect class="neg" x="596.54" y="416" width="3.46" height="12"/>
+<text x="610.00" y="428">-0.0289 dB</text>
+<text x="20" y="457">CTC / boxer_viewdep_vox12</text>
+<rect class="pos" x="600.00" y="444" width="6.54" height="12"/>
+<text x="612.54" y="456">+0.0545 dB</text>
+<text x="20" y="485">CTC / dancer_vox11_00000001</text>
+<rect class="neg" x="597.21" y="472" width="2.79" height="12"/>
+<text x="610.00" y="484">-0.0233 dB</text>
+<text x="20" y="513">CTC / longdress_viewdep_vox12</text>
+<rect class="pos" x="600.00" y="500" width="6.86" height="12"/>
+<text x="612.86" y="512">+0.0572 dB</text>
+<text x="20" y="541">CTC / loot_viewdep_vox12</text>
+<rect class="pos" x="600.00" y="528" width="2.06" height="12"/>
+<text x="610.00" y="540">+0.0171 dB</text>
+<text x="20" y="569">CTC / redandblack_viewdep_vox12</text>
+<rect class="neg" x="591.77" y="556" width="8.23" height="12"/>
+<text x="610.00" y="568">-0.0686 dB</text>
+<text x="20" y="597">CTC / soldier_viewdep_vox12</text>
+<rect class="pos" x="600.00" y="584" width="2.12" height="12"/>
+<text x="610.00" y="596">+0.0176 dB</text>
+</svg>
