@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "profile": "FAU tested runtime",
+  "status": "existing compiled environment verified; fresh full installation not performed",
+  "verified_gpu": {
+    "job_id": "1871865",
+    "device": "NVIDIA GeForce RTX 3080",
+    "points": [
+      "8k",
+      "2k",
+      "4k"
+    ],
+    "torch_cuda_runtime": "11.7"
+  },
+  "python": "3.8.20",
+  "packages": {
+    "torch": "1.13.1+cu117",
+    "MinkowskiEngine": "0.5.4",
+    "torchac": "0.9.3",
+    "numpy": "1.24.4",
+    "h5py": "3.10.0",
+    "pandas": "1.5.3",
+    "tqdm": "4.66.5",
+    "ninja": "1.13.0",
+    "setuptools": "59.8.0",
+    "pip": "24.3.1"
+  },
+  "cuda": {
+    "module": "cuda/11.8.0",
+    "module_nvcc": "11.8.89",
+    "environment_cuda_nvcc_package": "11.7.99",
+    "nvcc_on_path": "11.7",
+    "pytorch_built_with": "11.7",
+    "note": "Loading the 11.8 module does not replace the environment nvcc after its bin directory is put first on PATH."
+  },
+  "observed_frontend_build_tools": {
+    "gcc": "13.3.0",
+    "g++": "13.3.0",
+    "cmake": "3.28.3"
+  },
+  "scope": {
+    "precompiled_MinkowskiEngine_reused": true,
+    "original_MinkowskiEngine_compiler_not_reconstructed": true,
+    "PyTorch3D_required": false,
+    "Open3D_required": false,
+    "fresh_dependency_solve_or_MinkowskiEngine_rebuild_verified": false
+  },
+  "validation": {
+    "fresh_torchac_cache_import": "PASS",
+    "pinned_cpp_tool_builds": "PASS",
+    "cpp_tool_quick_test": "PASS_CPU_512_POINTS",
+    "cpp_tool_quick_base_bits": 208,
+    "cpp_tool_quick_full_bits": 680,
+    "cpp_tool_metrics_equal_to_supplied_tools": true,
+    "gpu_evidence": "docs/validation/final_audit.json"
+  },
+  "handover_prepared_on": "2026-11-12",
+  "gpu_validation_date": "2026-11-11",
+  "installed_conda_libraries": {
+    "openblas": "0.3.33",
+    "libopenblas": "0.3.33",
+    "libstdcxx-ng": "15.2.0",
+    "libgcc-ng": "15.2.0"
+  }
+}

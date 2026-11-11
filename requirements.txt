@@ -1,7 +1,7 @@
-# Python 3.8; install PyTorch/CUDA and MinkowskiEngine first (docs/INSTALL.md).
+# Verified FAU Python 3.8.20 runtime; use the compiled environment in docs/INSTALL.md.
 numpy==1.24.4
 h5py==3.10.0
 pandas==1.5.3
-tqdm>=4.64,<5
+tqdm==4.66.5
 torchac==0.9.3
 ninja==1.13.0

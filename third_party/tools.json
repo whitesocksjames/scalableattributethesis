@@ -2,11 +2,39 @@
   {
     "filename": "tmc3_v21",
     "size_bytes": 4281880,
-    "sha256": "d383a2ae07c5dae73387a58b1bffe4d3137a38aec4b359360ef8014dc559add9"
+    "sha256": "d383a2ae07c5dae73387a58b1bffe4d3137a38aec4b359360ef8014dc559add9",
+    "upstream_build_reference": {
+      "repository": "https://github.com/MPEGGroup/mpeg-pcc-tmc13",
+      "tag": "release-v21.0-rc1",
+      "commit": "f2f1c8e7215f70dd43c99db7df6075b1da0abea6"
+    },
+    "separate_fau_source_build": {
+      "status": "PASS",
+      "compiler": "GCC 13.3.0",
+      "cmake": "3.28.3",
+      "build_type": "Release",
+      "artifact_sha256": "3bfe6c32eab7fd3e1813acc163080119ca8c1ee1031b766ccf40cef5001560a9",
+      "artifact_size_bytes": 1596648,
+      "scope": "both tools checked together on one CPU 512-point example; same physical bits and metrics as supplied binaries; full matrix not rerun"
+    }
   },
   {
     "filename": "pc_error_d",
     "size_bytes": 1153376,
-    "sha256": "758e1d7a744bfae3094d7781a4c1c9d15810b054d9a866785ace6c96a1ff5f96"
+    "sha256": "758e1d7a744bfae3094d7781a4c1c9d15810b054d9a866785ace6c96a1ff5f96",
+    "upstream_build_reference": {
+      "repository": "https://github.com/MPEGGroup/mpeg-pcc-dmetric",
+      "tag": "release-v0.13.4",
+      "commit": "f54b6ca30507c8fa594fe79ed9bf1cf0fed4985c"
+    },
+    "separate_fau_source_build": {
+      "status": "PASS",
+      "compiler": "GCC 13.3.0",
+      "cmake": "3.28.3",
+      "build_type": "Release",
+      "artifact_sha256": "7bf3431a637f53dd3fdbfd60fa892498ef950088310b2858ac5db0851db12a77",
+      "artifact_size_bytes": 253736,
+      "scope": "both tools checked together on one CPU 512-point example; same physical bits and metrics as supplied binaries; full matrix not rerun"
+    }
   }
 ]

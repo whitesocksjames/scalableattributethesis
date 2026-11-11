@@ -16,7 +16,7 @@ Negative BD-BR indicates bitrate savings at equivalent quality. Per-sample Base 
 
 ## Setup and evaluation
 
-See [installation instructions](docs/INSTALL.md). With a locally supplied checkpoint and the required dependencies installed, evaluate an ASCII or binary RGB PLY sample:
+Use the [verified FAU environment setup](docs/INSTALL.md) and [exact version profile](configs/fau_environment.json). With a locally supplied checkpoint and the required dependencies installed, evaluate an ASCII or binary RGB PLY sample:
 
 ```bash
 python -m scalable_attribute.evaluate \
@@ -29,13 +29,13 @@ python -m scalable_attribute.evaluate \
 
 This writes Base and Full reconstructions, trusted PyTorch payload containers, geometry support, and a rate/quality report. Rate counts G-PCC-reported `x_low` attribute bits, `r1-r4` strings, and Enhancement strings; it excludes PyTorch container overhead and geometry support. The payloads are model-specific evaluation artifacts, not standalone interoperable compressed streams. See [Evaluation](docs/EVALUATION.md) for the decoding and accounting contract.
 
-Seven exported checkpoints are recorded in `configs/checkpoints.json` and `configs/SHA256SUMS` (952,005,347 bytes total). Each has 318 tensors with exact source tensor identity. All seven pass strict independent loading and original/export Base/Full physical equivalence on the bundled 512-point example using CPU inference; Representative GPU checks for 8k, 2k, and 4k also pass on RTX 3080, including fresh-process Base/Full decoding. CPU and GPU results are not bit-exact interchangeable. See the [final audit](docs/FINAL_AUDIT.md) and [validation results](docs/VALIDATION.md). Model assets and download URLs are unpublished pending release approval. The downloader verifies supplied local files and will download only from a configured HTTPS mirror after a URL is approved:
+Seven exported checkpoints are recorded in `configs/checkpoints.json` and `configs/SHA256SUMS` (952,005,347 bytes total). Each has 318 tensors with exact source tensor identity. All seven pass strict independent loading and original/export Base/Full physical equivalence on the bundled 512-point example using CPU inference; representative GPU checks for 8k, 2k, and 4k also pass on RTX 3080, including fresh-process Base/Full decoding. CPU and GPU results are not bit-exact interchangeable. See the [final audit](docs/FINAL_AUDIT.md) and [validation results](docs/VALIDATION.md). Model assets and download URLs remain unpublished pending upstream permission and handover approval. The downloader verifies supplied local files and will download only from a configured HTTPS mirror after a URL is approved:
 
 ```bash
 python -m scalable_attribute.download --point 8k --output checkpoints
 ```
 
-Until release approval, place the supplied `ours_8k.pth` in `checkpoints/` and run `python -m scalable_attribute.download --point 8k --output checkpoints` to verify it against the manifest.
+With authorized local model supply, place the supplied `ours_8k.pth` in `checkpoints/` and run `python -m scalable_attribute.download --point 8k --output checkpoints` to verify it against the manifest.
 
 To check strict checkpoint loading:
 

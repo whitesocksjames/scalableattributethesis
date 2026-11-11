@@ -1,6 +1,6 @@
 {
   "format": "scalable_attribute_inference_v1",
-  "publication_status": "awaiting_user_acceptance",
+  "publication_status": "withheld_pending_permission_and_acceptance",
   "models": [
     {
       "point": "512",
