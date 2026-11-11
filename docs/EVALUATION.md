@@ -26,8 +26,24 @@ The runtime is verified within each tested backend. CPU and RTX 3080 results on 
 
 ## Running evaluation
 
-Datasets are not bundled. Seven self-contained pretrained checkpoints are required external delivery assets; they are available on the [GitHub Release](CHECKPOINTS.md), with GitLab delivery pending a target repository. With an authorized, hash-verified checkpoint, run the command in the repository README. Its format is defined by `scalable_attribute/runtime/checkpoints.py`: point/lambda, Prefix configuration, BaseSynthesis configuration, and the complete `model_state` are required. The seven formal state identifiers are in [checkpoints.json](../configs/checkpoints.json).
+Download and verify a pretrained checkpoint, then run the [README Quick Start](../README.md#quick-start). The [GitHub Release](https://github.com/whitesocksjames/scalableattributethesis/releases/tag/thesis-handover-v1) supplies all seven models. Datasets are obtained separately. Its format is defined by `scalable_attribute/runtime/checkpoints.py`: point/lambda, Prefix configuration, BaseSynthesis configuration, and the complete `model_state` are required. The seven formal state identifiers are in [checkpoints.json](../configs/checkpoints.json).
 
 The shipped 512-point synthetic example exercises Base/Full reconstruction and reports physical bits and optional `pc_error` metrics. The output directory must be new. To evaluate CTC, prepare its deterministic chunks, run `scalable_attribute.evaluate --chunk-manifest`, and execute the emitted `aggregate_command.txt`. Each model loads independently of historical training directories and Original Unicorn weight files.
 
 Result analysis works without checkpoints: the plotting and BD-BR scripts consume `results/final/evidence/raw_rd_points.csv`. The frozen result files can be checked with `(cd results/final && sha256sum -c SHA256SUMS)`.
+
+
+### CTC chunk evaluation
+
+From the repository root, prepare lossless global-coordinate chunks, evaluate each chunk, and merge reconstructions before full-sample quality calculation. Supply the canonical RGB PLY for the sample and use new output directories:
+
+```bash
+python scripts/scalable_attribute/evaluation/prepare_ctc_formal_chunks.py \
+  --input /path/to/canonical_sample.ply --output-root outputs/chunks
+python -m scalable_attribute.evaluate \
+  --checkpoint checkpoints/ours_8k.pth \
+  --input /path/to/canonical_sample.ply --chunk-manifest outputs/chunks/manifest.json \
+  --output outputs/chunk-evaluation \
+  --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d
+sh outputs/chunk-evaluation/aggregate_command.txt
+```

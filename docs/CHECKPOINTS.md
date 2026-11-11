@@ -44,7 +44,7 @@ python -m scalable_attribute.download --point all --output checkpoints
 
 Require seven `OK` lines. Individual files can also be downloaded from the Release page and checked against [SHA256SUMS](../configs/SHA256SUMS). Each checkpoint is about 136 MB; the seven-file total is 952,005,347 bytes. No personal HPC access or cross-platform download service is required for GitHub delivery.
 
-Follow the [README Quick Test](../README.md#verify-a-checkpoint-and-run-the-quick-test). It writes Base/Full reconstruction, payloads, physical rates and quality metrics. The output directory must be new; encode and decode on the same backend. The recorded CPU/GPU checks above predate this upload and do not certify a fresh installation.
+Follow the [README Quick Test](../README.md#quick-start). It writes Base/Full reconstruction, payloads, physical rates and quality metrics. The output directory must be new; encode and decode on the same backend. The recorded CPU/GPU checks above predate this upload and do not certify a fresh installation.
 
 ## Attribution and remaining platform work
 
