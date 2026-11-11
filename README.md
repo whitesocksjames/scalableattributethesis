@@ -16,7 +16,7 @@ BaseSynthesis completes the truncated prefix without extra payload bits. Full ad
 
 **Seven pretrained checkpoints are required for the complete handover**, supplied separately from Git objects. Each contains Prefix, BaseSynthesis and Enhancement states for both Base and Full; no Original Unicorn weight file is needed. The [manifest](configs/checkpoints.json) and [SHA-256 list](configs/SHA256SUMS) identify the audited files (952,005,347 bytes total).
 
-**Delivery status: not yet published.** GitHub Release assets and a separate GitLab package copy are prepared as the distribution targets. Redistribution permission for inherited Unicorn code and derived weights remains unconfirmed, and the GitLab repository has not been specified. No checkpoint download is currently available on either platform; see [Checkpoint delivery](docs/CHECKPOINTS.md). Datasets are not bundled.
+**Checkpoint delivery status: not yet published.** GitHub Release assets and a separate GitLab package copy are prepared as the distribution targets. Redistribution permission for inherited Unicorn code and derived weights remains unconfirmed, and the GitLab repository has not been specified. No checkpoint download is currently available on either platform; see [Checkpoint delivery](docs/CHECKPOINTS.md). Datasets are not bundled.
 
 ## Final results
 
