@@ -1,4 +1,4 @@
-# Verified FAU Python 3.8.20 runtime; use the compiled environment in docs/INSTALL.md.
+# Python 3.8.20 runtime packages; install PyTorch and MinkowskiEngine per docs/INSTALL.md.
 numpy==1.24.4
 h5py==3.10.0
 pandas==1.5.3

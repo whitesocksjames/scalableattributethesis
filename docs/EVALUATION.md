@@ -22,4 +22,12 @@ For CTC, `prepare_ctc_formal_chunks.py` verifies the upstream KD-tree partition 
 
 See [results/final](../results/final/README.md) for raw points, final BD-BR tables, figures, the frontier audit, and runtime evidence.
 
-The runtime is verified within each tested backend. CPU and RTX 3080 results on the synthetic demo are not bit-exact interchangeable: Full payloads differ by one byte and decoded feature differences are measurable. Original-stage and exported models agree exactly within the same backend, and fresh-process decoding succeeds on that backend. Cross-device payload interchange has not been certified; these findings do not modify the frozen GPU measurements. See [FINAL_AUDIT.md](FINAL_AUDIT.md).
+The runtime is verified within each tested backend. CPU and RTX 3080 results on the synthetic demo are not bit-exact interchangeable: Full payloads differ by one byte and decoded feature differences are measurable. Original-stage and exported models agree exactly within the same backend, and fresh-process decoding succeeds on that backend. Cross-device payload interchange has not been certified; these findings do not modify the frozen GPU measurements.
+
+## Running evaluation
+
+Model weights and datasets are not included. With an independently supplied, authorized self-contained inference checkpoint, run the command in the repository README. Its format is defined by `scalable_attribute/runtime/checkpoints.py`: point/lambda, Prefix configuration, BaseSynthesis configuration, and the complete `model_state` are required. The seven formal state identifiers are in [operating_points.json](../configs/operating_points.json).
+
+The shipped 512-point synthetic example exercises Base/Full reconstruction and reports physical bits and optional `pc_error` metrics. The output directory must be new. To evaluate CTC, prepare its deterministic chunks, run `scalable_attribute.evaluate --chunk-manifest`, and execute the emitted `aggregate_command.txt`. No model download or historical training directory is used.
+
+Result analysis works without checkpoints: the plotting and BD-BR scripts consume `results/final/evidence/raw_rd_points.csv`. The frozen result files can be checked with `(cd results/final && sha256sum -c SHA256SUMS)`.

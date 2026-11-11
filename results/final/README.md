@@ -26,3 +26,5 @@ Negative values indicate bitrate savings. Values are equal-sequence means of per
 - `figures/8i_raw_rd_curves.svg`, `figures/owlii_raw_rd_curves.svg`, `figures/ctc_raw_rd_curves.svg`: raw RD plots showing every measured point.
 
 All CSV and SVG artifacts are byte-preserved copies of the frozen source bundles.
+
+The frozen numeric and figure files have [SHA-256 identities](SHA256SUMS). Run `sha256sum -c SHA256SUMS` from this directory to verify them.

@@ -1,92 +1,92 @@
 # Scalable Point Cloud Attribute Compression
 
-This repository implements a full-resolution Base/Full quality-scalable extension of Unicorn Part II for static point-cloud attributes. Base decodes the truncated `x_low` and `r1-r4` prefix and synthesizes a full-resolution reconstruction. Full adds a conditional Enhancement payload and reuses the decoded Base state.
+Final implementation and evaluation of a full-resolution Base/Full quality-scalable extension of Unicorn Part II for static point-cloud attributes.
+
+## OURS architecture
+
+```text
+Base payload: x_low + r1-r4
+    -> Prefix decoding + learned BaseSynthesis
+    -> full-resolution Base and decoded features
+    -> optional conditional Enhancement decoding
+    -> full-resolution Full
+```
+
+BaseSynthesis completes the truncated prefix without extra payload bits. Full adds an independently entropy-coded Enhancement payload and reuses the decoded Base state. The seven operating points are `512 / 1k / 2k / 4k / 8k / 16k / 32k`. See [Method](docs/METHOD.md) for the graph and training objective.
+
+**Model weights and datasets are not included.** The repository has no checkpoint download service or model Release requirement. Codec inference requires an independently supplied, authorized checkpoint in the format supported by the loader. Frozen state identifiers are recorded in [operating_points.json](configs/operating_points.json).
 
 ## Final results
 
-The frozen evaluation covers 20 samples: four 8iVFB, four Owlii, and twelve CTC. Full-endpoint BD-BR relative to Original Unicorn is:
+The frozen evaluation covers 20 samples: four 8iVFB, four Owlii and twelve CTC. BD-BR relative to Original Unicorn is:
 
-| Dataset | Y | YUV611 |
-|---|---:|---:|
-| 8iVFB | +1.452% | +1.390% |
-| Owlii | +1.855% | +2.077% |
-| CTC | +0.155% | -0.696% |
+| Dataset | Base Y | Base YUV611 | Full Y | Full YUV611 |
+| --- | ---: | ---: | ---: | ---: |
+| 8iVFB | +5.205% | -0.723% | +1.452% | +1.390% |
+| Owlii | +10.110% | +4.992% | +1.855% | +2.077% |
+| CTC | +1.848% | -0.326% | +0.155% | -0.696% |
 
-Negative BD-BR indicates bitrate savings at equivalent quality. Per-sample Base and Full results, raw measurements, Pareto audit, figures, and hardware-labeled runtimes are in [results/final](results/final/README.md).
+Negative BD-BR indicates bitrate savings at equivalent quality. [Final results](results/final/README.md) contain all 460 measured endpoint rows, per-sample Base/Full and Original Unicorn comparisons, Pareto/PCHIP tables, raw RD figures and hardware-labeled runtime data. The [evaluation protocol](docs/EVALUATION.md) defines preprocessing, physical rate, metrics and interpolation.
 
-## Setup and evaluation
+## Installation and environment
 
-Use the [verified FAU environment setup](docs/INSTALL.md) and [exact version profile](configs/fau_environment.json). With a locally supplied checkpoint and the required dependencies installed, evaluate an ASCII or binary RGB PLY sample:
+[INSTALL.md](docs/INSTALL.md) provides Linux dependency setup and pinned `tmc3` / `pc_error` build commands. [environment.json](configs/environment.json) records the actual validated Python 3.8.20, PyTorch 1.13.1+cu117, MinkowskiEngine 0.5.4 and remaining runtime versions. The instructions require no personal cluster directory or account. A completely fresh dependency installation and MinkowskiEngine rebuild have not been certified.
 
-```bash
-python -m scalable_attribute.evaluate \
-  --checkpoint checkpoints/ours_8k.pth \
-  --input examples/example.ply \
-  --output outputs/example \
-  --gpcc third_party/tmc3_v21 \
-  --pc-error third_party/pc_error_d
-```
+## Repository structure
 
-This writes Base and Full reconstructions, trusted PyTorch payload containers, geometry support, and a rate/quality report. Rate counts G-PCC-reported `x_low` attribute bits, `r1-r4` strings, and Enhancement strings; it excludes PyTorch container overhead and geometry support. The payloads are model-specific evaluation artifacts, not standalone interoperable compressed streams. See [Evaluation](docs/EVALUATION.md) for the decoding and accounting contract.
+| Path | Contents |
+| --- | --- |
+| `scalable_attribute/models/` | Prefix, BaseSynthesis, Base and Enhancement composition |
+| `scalable_attribute/runtime/` | Complete-checkpoint loading and Base/Full encode/decode |
+| `scalable_attribute/evaluate.py` | RGB PLY inference, physical rates and optional quality metrics |
+| `basic_models/`, `lossy_attribute/`, `data_utils/`, `cfg/` | Required network, entropy, I/O and fixed configuration dependencies |
+| `results/final/` | Frozen measurements, BD-BR tables and RD figures |
+| `configs/`, `examples/` | Operating points, sample identities, environment record and synthetic example |
+| `scripts/scalable_attribute/` | CTC preprocessing/aggregation and result analysis |
+| `tests/`, `docs/`, `third_party/` | Focused regression tests, method/protocol, required tools and notices |
 
-Seven exported checkpoints are recorded in `configs/checkpoints.json` and `configs/SHA256SUMS` (952,005,347 bytes total). Each has 318 tensors with exact source tensor identity. All seven pass strict independent loading and original/export Base/Full physical equivalence on the bundled 512-point example using CPU inference; representative GPU checks for 8k, 2k, and 4k also pass on RTX 3080, including fresh-process Base/Full decoding. CPU and GPU results are not bit-exact interchangeable. See the [final audit](docs/FINAL_AUDIT.md) and [validation results](docs/VALIDATION.md). Model assets and download URLs remain unpublished pending upstream permission and handover approval. The downloader verifies supplied local files and will download only from a configured HTTPS mirror after a URL is approved:
+## Evaluation instructions
 
-```bash
-python -m scalable_attribute.download --point 8k --output checkpoints
-```
+### Reproduce tables and figures without weights
 
-With authorized local model supply, place the supplied `ours_8k.pth` in `checkpoints/` and run `python -m scalable_attribute.download --point 8k --output checkpoints` to verify it against the manifest.
-
-To check strict checkpoint loading:
-
-```bash
-mkdir -p outputs
-python -m scalable_attribute.verify --models checkpoints --point 8k --load-only --output outputs/verify-8k.json
-```
-
-## Results analysis
-
-Rebuild raw RD figures:
-
-```bash
-python scripts/scalable_attribute/analysis/plot_final_static_rgb_rd.py \
-  --raw results/final/evidence/raw_rd_points.csv \
-  --output-dir outputs/rd-figures
-```
-
-Recompute Pareto/PCHIP BD-BR tables and audits from the raw evidence:
+These analysis commands use only the Python standard library:
 
 ```bash
 python scripts/scalable_attribute/analysis/recompute_pareto_bdbr.py \
-  --raw results/final/evidence/raw_rd_points.csv \
-  --output outputs/pareto-bdbr
+  --raw results/final/evidence/raw_rd_points.csv --output outputs/bdbr
+python scripts/scalable_attribute/analysis/plot_final_static_rgb_rd.py \
+  --raw results/final/evidence/raw_rd_points.csv --output-dir outputs/rd-figures
+(cd results/final && sha256sum -c SHA256SUMS)
 ```
 
-Prepare CTC chunks from a local canonical source PLY, then evaluate the chunk manifest. Use the pinned upstream `partition.py` file whose SHA-256 is required by the preparation tool. The evaluator writes per-chunk records and an `aggregate_command.txt` for the merger:
+### Run inference with an externally supplied model
+
+After installing dependencies and obtaining an authorized self-contained checkpoint, provide its local path explicitly:
+
+```bash
+python -m scalable_attribute.evaluate \
+  --checkpoint /path/to/authorized/ours_8k.pth \
+  --input examples/example.ply --output outputs/example \
+  --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d
+```
+
+The synthetic example produces `base.ply`, `full.ply`, payload containers and `rates.json`; it is not a thesis benchmark sample. Use a new output directory. `--endpoint base` exercises Base without an Enhancement payload. CPU and GPU outputs are not bit-exact interchangeable; use one backend for encoding and decoding. The containers are model-specific evaluation artifacts, with geometry/container overhead excluded under the frozen physical-rate convention.
+
+For CTC, prepare lossless global-coordinate chunks, evaluate the chunk manifest and merge before full-sample quality calculation:
 
 ```bash
 python scripts/scalable_attribute/evaluation/prepare_ctc_formal_chunks.py \
-  --input /path/to/ctc_sample.ply \
-  --output-root outputs/ctc_chunks \
-  --partition-source third_party/unicorn_partition.py.txt
+  --input /path/to/canonical_sample.ply --output-root outputs/chunks
 python -m scalable_attribute.evaluate \
-  --checkpoint checkpoints/ours_8k.pth \
-  --input /path/to/ctc_sample.ply \
-  --chunk-manifest outputs/ctc_chunks/manifest.json \
-  --output outputs/ctc_ours_8k \
-  --gpcc third_party/tmc3_v21 \
-  --pc-error third_party/pc_error_d
-# Run the generated merger command:
-sh outputs/ctc_ours_8k/aggregate_command.txt
+  --checkpoint /path/to/authorized/ours_8k.pth \
+  --input /path/to/canonical_sample.ply --chunk-manifest outputs/chunks/manifest.json \
+  --output outputs/chunk-evaluation \
+  --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d
+sh outputs/chunk-evaluation/aggregate_command.txt
 ```
 
-Run the configured test suite with:
+Run focused checks with `python -m pytest -q` after installing `requirements-test.txt`; codec-dependent tests need the declared runtime. Analysis and preprocessing checks do not require pretrained weights.
 
-```bash
-python -m pip install -r requirements-test.txt
-python -m pytest -q
-```
+## Reference and attribution
 
-## Method and attribution
-
-Method and protocol details: [docs/METHOD.md](docs/METHOD.md), [docs/EVALUATION.md](docs/EVALUATION.md). This work builds on the [NJUVISION/Unicorn implementation at commit `b50d6c1`](https://github.com/NJUVISION/Unicorn/tree/b50d6c1bd033185b9e893b755d5d316cca2d4448) and *A Versatile Point Cloud Compressor Using Universal Multiscale Conditional Coding—Part II: Attribute Compression* ([paper](https://ieeexplore.ieee.org/document/10682566)). The thesis contribution is the full-resolution BaseSynthesis path and conditional Enhancement endpoint. See [third-party notices](THIRD_PARTY.md) for attribution and included dependency notices.
+This work builds on [NJUVISION/Unicorn](https://github.com/NJUVISION/Unicorn/tree/b50d6c1bd033185b9e893b755d5d316cca2d4448) and *A Versatile Point Cloud Compressor Using Universal Multiscale Conditional Coding — Part II: Attribute Compression* ([paper](https://ieeexplore.ieee.org/document/10682566)). OURS adds the learned full-resolution BaseSynthesis path and conditional Enhancement endpoint. [THIRD_PARTY.md](THIRD_PARTY.md) preserves attribution, tool notices and the unresolved redistribution status of inherited code.

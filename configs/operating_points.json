@@ -1,25 +1,19 @@
 {
   "format": "scalable_attribute_inference_v1",
-  "publication_status": "withheld_pending_permission_and_acceptance",
-  "models": [
+  "weights_in_repository": false,
+  "description": "Frozen identifiers of the seven final inference states. No model files or download service are provided.",
+  "operating_points": [
     {
       "point": "512",
       "lambda": 512,
       "filename": "ours_512.pth",
       "size_bytes": 135996037,
       "sha256": "790d1c45570009570c2123bc2d5f2d79d2bf11da8143bdd7aa642a004dee2dac",
-      "tensor_count": 318,
-      "tensor_equivalence": "PASS",
-      "inference_equivalence": "PASS_CPU_SYNTHETIC_512_POINTS",
-      "url": null,
       "source_sha256": {
         "released": "c8152c03adcaa0384ad4b168abda03d79da5f8474e9de2ac88d15395cbfe87aa",
         "base": "caee3d47baca68eb0600326b487fce5f18c45a6f6eb6908f0a4addbafb474def",
         "full": "106fac286ad89199ad95941936738bdc4ff174f31ae2515b008cdcefe7fafea6"
-      },
-      "strict_independent_load": "PASS",
-      "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      }
     },
     {
       "point": "1k",
@@ -27,18 +21,11 @@
       "filename": "ours_1k.pth",
       "size_bytes": 135995717,
       "sha256": "47dfd8646c7e55b4ee301489c37d57d420e2c00341db8ed9ad96e6b5e7dc4d9e",
-      "tensor_count": 318,
-      "tensor_equivalence": "PASS",
-      "inference_equivalence": "PASS_CPU_SYNTHETIC_512_POINTS",
-      "url": null,
       "source_sha256": {
         "released": "c8152c03adcaa0384ad4b168abda03d79da5f8474e9de2ac88d15395cbfe87aa",
         "base": "1dbe72e98e2371ab4ace28f42056eb02b223f83c49d8920a1db5adb57893494d",
         "full": "679f20fb0c48bce082ad0453963724b1e8c2224ca95b5eb2730816b5971e8dbc"
-      },
-      "strict_independent_load": "PASS",
-      "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      }
     },
     {
       "point": "2k",
@@ -46,19 +33,11 @@
       "filename": "ours_2k.pth",
       "size_bytes": 135995717,
       "sha256": "864daa9c2fd899bdcdd3e90a5f46c3e21a8ad8e4aa9f796399ea1f945e5e4103",
-      "tensor_count": 318,
-      "tensor_equivalence": "PASS",
-      "inference_equivalence": "PASS_CPU_SYNTHETIC_512_POINTS",
-      "url": null,
       "source_sha256": {
         "released": "c3e38cd37b9bcfae99cf87bbf3cb1001574497df9bab33be238a8927abe1d389",
         "base": "c7927543f544c6744bce9c9cae1d78f6e3460c213c40d283b4609f7fb61963bf",
         "full": "ca7ac7493a3d1ec0edb7cc4a9c2d7771fb9e811da60448ca7a784bf37a08a2f0"
-      },
-      "strict_independent_load": "PASS",
-      "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
-      "fresh_process_decode": "PASS_CUDA"
+      }
     },
     {
       "point": "4k",
@@ -66,19 +45,11 @@
       "filename": "ours_4k.pth",
       "size_bytes": 136030085,
       "sha256": "24c515171d9fb93f6e3823efd372e5513e26416fdfc3d19988f8fa552a744568",
-      "tensor_count": 318,
-      "tensor_equivalence": "PASS",
-      "inference_equivalence": "PASS_CPU_SYNTHETIC_512_POINTS",
-      "url": null,
       "source_sha256": {
         "released": "bdd40b608ca865de3a30595ab084dcaf48450c2c9843661790c61caf9885fc90",
         "base": "58d691eee4e4c58ede70231724d85e1cc2615b4bb6b931746090566596bf246b",
         "full": "58d691eee4e4c58ede70231724d85e1cc2615b4bb6b931746090566596bf246b"
-      },
-      "strict_independent_load": "PASS",
-      "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
-      "fresh_process_decode": "PASS_CUDA"
+      }
     },
     {
       "point": "8k",
@@ -86,19 +57,11 @@
       "filename": "ours_8k.pth",
       "size_bytes": 135995717,
       "sha256": "7ee92cb47efa06c755fca3418c8d270adce6071988cf2542e644a40a4db24267",
-      "tensor_count": 318,
-      "tensor_equivalence": "PASS",
-      "inference_equivalence": "PASS_CPU_SYNTHETIC_512_POINTS",
-      "url": null,
       "source_sha256": {
         "released": "bdd40b608ca865de3a30595ab084dcaf48450c2c9843661790c61caf9885fc90",
         "base": "36363fb7cb4a88dd3deb5879900d30b65483534c3547ba4055ad6315f513ff0d",
         "full": "95e3100235d9e871239ddd3b71274a929b722985b39353d1437098ae39b7fd17"
-      },
-      "strict_independent_load": "PASS",
-      "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
-      "fresh_process_decode": "PASS_CUDA"
+      }
     },
     {
       "point": "16k",
@@ -106,18 +69,11 @@
       "filename": "ours_16k.pth",
       "size_bytes": 135996037,
       "sha256": "4263a27c6a3bb070c9cbc3478234ce48861035b81d0d889fb1510d71227d5b31",
-      "tensor_count": 318,
-      "tensor_equivalence": "PASS",
-      "inference_equivalence": "PASS_CPU_SYNTHETIC_512_POINTS",
-      "url": null,
       "source_sha256": {
         "released": "bdd40b608ca865de3a30595ab084dcaf48450c2c9843661790c61caf9885fc90",
         "base": "6b4428a8f548ad300c88963d6c43c9225db76ef1a167840058684376d1dc93ca",
         "full": "57d97afa64971e79dd3ab17bb895f0d9e3554801ff238c0f227eaa95749c0737"
-      },
-      "strict_independent_load": "PASS",
-      "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      }
     },
     {
       "point": "32k",
@@ -125,18 +81,11 @@
       "filename": "ours_32k.pth",
       "size_bytes": 135996037,
       "sha256": "b5465b644e9b6d69a9e389783360f7b0841a4519352f530d90ef1071e89edfe2",
-      "tensor_count": 318,
-      "tensor_equivalence": "PASS",
-      "inference_equivalence": "PASS_CPU_SYNTHETIC_512_POINTS",
-      "url": null,
       "source_sha256": {
         "released": "bdd40b608ca865de3a30595ab084dcaf48450c2c9843661790c61caf9885fc90",
         "base": "f1d2b1bf36cb608065ea4446876b4f48ff0ccabf9d80043949d99af147c8aa10",
         "full": "e8e4a6f1a767bcc1fcc05eb26073952d3b4cf33c62657282440ed13bb2abdfef"
-      },
-      "strict_independent_load": "PASS",
-      "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      }
     }
   ]
 }

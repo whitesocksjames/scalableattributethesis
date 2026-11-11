@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "profile": "Validated Linux GPU runtime",
+  "python": "3.8.20",
+  "packages": {
+    "torch": "1.13.1+cu117",
+    "MinkowskiEngine": "0.5.4",
+    "torchac": "0.9.3",
+    "numpy": "1.24.4",
+    "h5py": "3.10.0",
+    "pandas": "1.5.3",
+    "tqdm": "4.66.5",
+    "ninja": "1.13.0",
+    "setuptools": "59.8.0",
+    "pip": "24.3.1"
+  },
+  "cuda": {
+    "pytorch_runtime": "11.7",
+    "toolkit_observed": "11.8.89",
+    "nvcc_package_in_observed_environment": "11.7.99",
+    "note": "The validated precompiled environment combined a CUDA 11.7 PyTorch build with a loaded CUDA 11.8 toolkit. A fresh MinkowskiEngine build was not verified."
+  },
+  "observed_cpp_tool_build_versions": {
+    "gcc": "13.3.0",
+    "g++": "13.3.0",
+    "cmake": "3.28.3"
+  },
+  "installed_library_packages": {
+    "openblas": "0.3.33",
+    "libopenblas": "0.3.33",
+    "libstdcxx-ng": "15.2.0",
+    "libgcc-ng": "15.2.0"
+  },
+  "validation": {
+    "gpu": "NVIDIA GeForce RTX 3080",
+    "representative_points": [
+      "8k",
+      "2k",
+      "4k"
+    ],
+    "example_points": 512,
+    "same_backend_original_export_equivalence": "PASS",
+    "fresh_process_decode": "PASS",
+    "fresh_torchac_cache_import": "PASS",
+    "cpp_tool_builds_and_example": "PASS",
+    "fresh_dependency_install_and_MinkowskiEngine_rebuild": "NOT_VERIFIED"
+  },
+  "required_optional_packages": {
+    "PyTorch3D": false,
+    "Open3D": false
+  }
+}

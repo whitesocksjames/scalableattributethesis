@@ -8,7 +8,7 @@
       "tag": "release-v21.0-rc1",
       "commit": "f2f1c8e7215f70dd43c99db7df6075b1da0abea6"
     },
-    "separate_fau_source_build": {
+    "source_build_validation": {
       "status": "PASS",
       "compiler": "GCC 13.3.0",
       "cmake": "3.28.3",
@@ -27,7 +27,7 @@
       "tag": "release-v0.13.4",
       "commit": "f54b6ca30507c8fa594fe79ed9bf1cf0fed4985c"
     },
-    "separate_fau_source_build": {
+    "source_build_validation": {
       "status": "PASS",
       "compiler": "GCC 13.3.0",
       "cmake": "3.28.3",
