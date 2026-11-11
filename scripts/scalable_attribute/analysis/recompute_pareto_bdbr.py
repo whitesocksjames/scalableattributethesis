@@ -154,14 +154,11 @@ def _write_csv(path: Path, fieldnames: Sequence[str], rows: Iterable[dict]) -> N
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw", type=Path, required=True)
-    parser.add_argument("--strict", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
     with args.raw.open(newline="", encoding="utf-8") as handle:
         raw_rows = list(csv.DictReader(handle))
-    with args.strict.open(newline="", encoding="utf-8") as handle:
-        strict_rows = list(csv.DictReader(handle))
     if len(raw_rows) != 460:
         raise ValueError(f"expected 460 endpoint rows, found {len(raw_rows)}")
 
@@ -219,18 +216,12 @@ def main() -> int:
                 }
             )
 
-    strict_by_key = {
-        (row["dataset"], row["sample"], row["ours_endpoint"], row["metric"]): row
-        for row in strict_rows
-    }
     sequence_rows = []
-    comparison_rows = []
     samples = sorted({(row["dataset"], row["sample"]) for row in raw_rows})
     for dataset, sample in samples:
         for endpoint in OURS_ENDPOINTS:
             for metric in METRICS:
                 key = (dataset, sample, endpoint, metric)
-                strict = strict_by_key[key]
                 try:
                     value, quality_min, quality_max = bd_br(
                         frontiers[
@@ -255,29 +246,6 @@ def main() -> int:
                         "shared_quality_min": quality_min,
                         "shared_quality_max": quality_max,
                         "reason": reason,
-                    }
-                )
-                strict_value = (
-                    float(strict["BD_BR_percent"])
-                    if strict["status"] == "AVAILABLE"
-                    else ""
-                )
-                comparison_rows.append(
-                    {
-                        "dataset": dataset,
-                        "sample": sample,
-                        "ours_endpoint": endpoint,
-                        "metric": metric,
-                        "strict_status": strict["status"],
-                        "strict_BD_BR_percent": strict_value,
-                        "pareto_status": status,
-                        "pareto_BD_BR_percent": value,
-                        "pareto_minus_strict_percentage_points": (
-                            value - strict_value
-                            if status == "AVAILABLE" and strict_value != ""
-                            else ""
-                        ),
-                        "newly_resolved": strict["status"] != "AVAILABLE" and status == "AVAILABLE",
                     }
                 )
 
@@ -330,11 +298,6 @@ def main() -> int:
         list(dataset_rows[0]),
         dataset_rows,
     )
-    _write_csv(
-        output / "tables" / "strict_vs_pareto.csv",
-        list(comparison_rows[0]),
-        comparison_rows,
-    )
 
     available = sum(row["status"] == "AVAILABLE" for row in sequence_rows)
     summary = {
@@ -348,13 +311,7 @@ def main() -> int:
         "removed_curve_points": sum(
             row["raw_point_count"] - row["retained_pareto_point_count"] for row in curve_audit
         ),
-        "newly_resolved_comparisons": sum(row["newly_resolved"] for row in comparison_rows),
-        "newly_resolved_samples": sorted(
-            {
-                f'{row["dataset"]}/{row["sample"]}'
-                for row in comparison_rows if row["newly_resolved"]
-            }
-        ),
+
     }
     (output / "summary.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"

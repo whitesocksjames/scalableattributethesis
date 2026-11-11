@@ -7,7 +7,6 @@ import MinkowskiEngine as ME
 import numpy as np
 sys.path.append(os.path.split(__file__)[0])
 from resnet import ResNetBlock
-from transformer import TransformerBlock
 
 
 ######################## lossy attribute ########################
@@ -55,11 +54,13 @@ class Backbone(torch.nn.Module):
                     global_residual=False, 
                     activation=activation))
             elif block_type in ['tf']:
+                from transformer import TransformerBlock
                 self.block_list.append(TransformerBlock(
                     channels=channels, 
                     knn=knn,
                     block_layers=block_layers))
             elif block_type in ['convtf']:
+                from transformer import TransformerBlock
                 self.block_list.append(torch.nn.Sequential(ResNetBlock(
                     channels=channels, 
                     kernel_size=kernel_size, 
@@ -108,6 +109,7 @@ class Backbone(torch.nn.Module):
 class ConvTransformerBlock(torch.nn.Module):
     def __init__(self, channels=128, kernel_size=3, knn=16, block_layers=3, block_type='resnet', global_residual=False, activation='relu'):
         super().__init__()
+        from transformer import TransformerBlock
         self.convnet = ResNetBlock(
             channels=channels, 
             kernel_size=kernel_size, 
@@ -144,11 +146,13 @@ def make_convNet(channels, in_channels, out_channels, kernel_size=3, block_layer
                         block_type='resnet', global_residual=False, activation=activation),
             ME.MinkowskiLinear(channels, out_channels))
     if block_type=='tf':
+        from transformer import TransformerBlock
         return torch.nn.Sequential(
             ME.MinkowskiLinear(in_channels, channels),
             TransformerBlock(block_layers=block_layers, channels=channels, knn=16),
             ME.MinkowskiLinear(channels, out_channels))
     if block_type=='convtf':
+        from transformer import TransformerBlock
         return torch.nn.Sequential(
             ME.MinkowskiLinear(in_channels, channels),
             ResNetBlock(channels=channels, kernel_size=kernel_size, block_layers=block_layers, 

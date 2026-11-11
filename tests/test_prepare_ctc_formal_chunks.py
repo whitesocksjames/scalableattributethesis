@@ -467,8 +467,13 @@ def test_partition_provenance_rejects_non_equivalent_body(tmp_path: Path) -> Non
         )
 
 
-def test_cli_requires_partition_source() -> None:
-    with pytest.raises(SystemExit):
-        MODULE._build_parser().parse_args(
-            ["--input", "source.ply", "--output-root", "out"]
-        )
+def test_cli_default_preserves_frozen_partition_identity() -> None:
+    args = MODULE._build_parser().parse_args(
+        ["--input", "source.ply", "--output-root", "out"]
+    )
+    assert hashlib.sha256(Path(args.partition_source).read_bytes()).hexdigest() == MODULE.EXPECTED_PARTITION_SHA256
+    function, _ = MODULE._partition_provenance(
+        PARTITION_SOURCE.parents[2], args.partition_source,
+        args.expected_partition_sha256,
+    )
+    assert callable(function)

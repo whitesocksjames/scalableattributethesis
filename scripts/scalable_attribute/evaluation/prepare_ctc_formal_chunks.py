@@ -1153,7 +1153,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--manifest-tsv", help="explicit TSV manifest path")
     parser.add_argument(
         "--partition-source",
-        required=True,
+        default=str(Path(__file__).resolve().parents[3] / "third_party/unicorn_partition.py.txt"),
         help="pinned upstream partition.py used for provenance verification",
     )
     parser.add_argument(

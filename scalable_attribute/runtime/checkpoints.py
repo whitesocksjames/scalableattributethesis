@@ -1,62 +1,43 @@
-"""Strict checkpoint restoration for canonical Base and scalable models."""
+"""Strict loading of seven self-contained pretrained inference models."""
 
-import os
-
-import torch
-
-
-FINE_TUNE_ARCHITECTURE = "canonical_scalable_mvub_finetune_v1"
+FORMAT = "scalable_attribute_inference_v1"
+POINTS = {"512": 512, "1k": 1024, "2k": 2048, "4k": 4096,
+          "8k": 8192, "16k": 16384, "32k": 32768}
 
 
-def load_frozen_base(base_model, checkpoint, released_checkpoint, base_lambda,
-                     released_checkpoint_lineage=None):
-    """Load either canonical Base checkpoint format and freeze the whole Base.
-
-    ``canonical_base_rescue_v1`` owns a fine-tuned Prefix as well as
-    BaseSynthesis, so its complete ``base_model`` state must be restored.
-    """
-    state = torch.load(checkpoint, map_location="cpu")
-    architecture = state.get("architecture")
-    if architecture not in (
-            "canonical_base_predict_correct", "canonical_base_rescue_v1"):
-        raise ValueError("Canonical Base checkpoint architecture mismatch")
-    if state.get("config") != base_model.config.to_dict():
-        raise ValueError("Canonical Base checkpoint config mismatch")
-    checkpoint_lambda = state.get(
-        "base_lambda", state.get("conditioning_lambda", -1))
-    if int(checkpoint_lambda) != int(base_lambda):
-        raise ValueError("Canonical Base checkpoint lambda mismatch")
-    checkpoint_released = state.get(
-        "base_checkpoint", state.get("released_checkpoint", ""))
-    expected_lineage = (released_checkpoint if released_checkpoint_lineage is None
-                        else released_checkpoint_lineage)
-    normalize = (os.path.realpath if released_checkpoint_lineage is None
-                 else os.path.normpath)
-    if normalize(checkpoint_released) != normalize(expected_lineage):
-        raise ValueError("Canonical Base released checkpoint mismatch")
-    if architecture == "canonical_base_predict_correct":
-        base_model.base_synthesis.load_state_dict(
-            state["base_synthesis"], strict=True)
-    else:
-        if "base_model" not in state:
-            raise ValueError("Base rescue checkpoint lacks complete model state")
-        base_model.load_state_dict(state["base_model"], strict=True)
-    base_model.requires_grad_(False)
-    base_model.eval()
-    return base_model
-
-
-def load_finetuned_scalable(model, checkpoint, conditioning_lambda=None):
-    """Load one complete fine-tuned Prefix+Base+Enhancement checkpoint."""
-    state = (torch.load(checkpoint, map_location="cpu")
-             if isinstance(checkpoint, (str, os.PathLike)) else checkpoint)
-    if state.get("architecture") != FINE_TUNE_ARCHITECTURE:
-        raise ValueError("Fine-tuned scalable checkpoint architecture mismatch")
-    expected_lambda = (model.conditioning_lambda if conditioning_lambda is None
-                       else conditioning_lambda)
-    if int(state.get("conditioning_lambda", -1)) != int(expected_lambda):
-        raise ValueError("Fine-tuned scalable checkpoint lambda mismatch")
-    if "scalable_model" not in state:
-        raise ValueError("Fine-tuned scalable checkpoint lacks complete model state")
-    model.load_state_dict(state["scalable_model"], strict=True)
+def read_checkpoint(path):
+    import torch
+    try:
+        state = torch.load(path, map_location="cpu", weights_only=True)
+    except TypeError:  # PyTorch 1.13 compatibility.
+        state = torch.load(path, map_location="cpu")
+    if state.get("format") != FORMAT:
+        raise ValueError("Expected a self-contained OURS inference checkpoint")
+    point = state.get("point")
+    if point not in POINTS or state.get("conditioning_lambda") != POINTS[point]:
+        raise ValueError("Checkpoint point/lambda mismatch")
+    if state.get("prefix_config") != {"scale": 5, "stage": 1, "vmode": 1}:
+        raise ValueError("Unsupported Prefix architecture")
+    weights = state.get("model_state")
+    if not isinstance(weights, dict) or not weights:
+        raise ValueError("Missing complete model state")
+    for prefix in ("base.prefix.model.", "base.base_synthesis.", "enhancement.vae."):
+        if not any(key.startswith(prefix) for key in weights):
+            raise ValueError("Incomplete model state: " + prefix)
+    if not all(torch.is_tensor(t) for t in weights.values()):
+        raise ValueError("Model state must contain only tensors")
     return state
+
+
+def load_model(path, device="cuda"):
+    """Restore the full graph from one file without historical weight paths."""
+    from scalable_attribute.models.config import BaseSynthesisConfig
+    from scalable_attribute.models.base import CanonicalBaseModel
+    from scalable_attribute.models.scalable import CanonicalScalableModel
+    state = read_checkpoint(path)
+    base = CanonicalBaseModel(None, BaseSynthesisConfig(**state["base_config"]))
+    base.freeze()
+    model = CanonicalScalableModel(base, state["conditioning_lambda"])
+    model.load_state_dict(state["model_state"], strict=True)
+    model.requires_grad_(False)
+    return model.to(device).eval()

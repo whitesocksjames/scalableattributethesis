@@ -121,9 +121,9 @@ def istopk_global(data, k):
     return mask.bool().to(data.device)
 
 
-from pytorch3d.ops.knn import knn_points, knn_gather
-
 def knn_fn(coords0, coords1, feats0, knn):
+    from pytorch3d.ops.knn import knn_points, knn_gather
+
     coords0 = coords0.unsqueeze(0)# [1,n0,3]
     coords1 = coords1.unsqueeze(0)# [1,n1,3]
     dists, knn_idxs, _ = knn_points(coords1, coords0, K=knn, 

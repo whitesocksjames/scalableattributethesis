@@ -1,14 +1,10 @@
-# Scalable attribute command-line tools
+# Evaluation support
 
-Use these directories as the reading and invocation entry points:
+The main inference interface is `python -m scalable_attribute.evaluate`.
 
-| Directory | Responsibility |
-| --- | --- |
-| `training/` | Current Base, Enhancement, and joint endpoint training commands |
-| `evaluation/` | Current Base/Full, external-sequence, and Unicorn-reference evaluators |
-| `analysis/` | Final Pareto-frontier BD-BR analysis and raw-RD plotting |
+- `evaluation/prepare_ctc_formal_chunks.py` preserves the deterministic CTC preprocessing contract.
+- `evaluation/aggregate_formal_chunk_results.py` validates and merges chunk reconstructions before full-sample metrics.
+- `analysis/recompute_pareto_bdbr.py` recomputes the final BD-BR tables from raw RD points.
+- `analysis/plot_final_static_rgb_rd.py` redraws the final RD figures.
 
-Model architecture lives in `scalable_attribute/models/`; reusable training,
-evaluation, and checkpoint support lives in the corresponding package
-directories. This script tree contains executable entry points, not model
-definitions.
+See [evaluation documentation](../../docs/EVALUATION.md) for commands and rate/metric definitions.

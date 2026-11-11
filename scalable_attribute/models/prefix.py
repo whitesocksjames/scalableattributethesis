@@ -34,7 +34,7 @@ class FrozenUnicornPrefix(torch.nn.Module):
 
     residual_stages = 4
 
-    def __init__(self, checkpoint, scale=5, stage=1, vmode=1):
+    def __init__(self, checkpoint=None, scale=5, stage=1, vmode=1):
         super().__init__()
         if scale != 5 or stage != 1:
             raise ValueError("Canonical r4 split requires scale=5 and stage=1")
@@ -42,15 +42,10 @@ class FrozenUnicornPrefix(torch.nn.Module):
             from lossy_attribute.model import MultiscaleVAE
 
         self.model = MultiscaleVAE(stage=stage)
-        state = torch.load(checkpoint, map_location="cpu")["model"]
-        expected = self.model.state_dict()
-        if set(state) != set(expected):
-            missing = sorted(set(expected) - set(state))
-            unexpected = sorted(set(state) - set(expected))
-            raise RuntimeError(
-                "Released checkpoint mismatch: missing={} unexpected={}".format(
-                    missing, unexpected))
-        self.model.load_state_dict(state)
+        # Published files restore the complete graph after construction.
+        if checkpoint is not None:
+            state = torch.load(checkpoint, map_location="cpu")["model"]
+            self.model.load_state_dict(state, strict=True)
         self._trainable = False
         self.model.requires_grad_(False)
         self.model.eval()
