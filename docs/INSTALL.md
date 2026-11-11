@@ -64,22 +64,19 @@ Outputs are `$THESIS_BUILD_ROOT/tmc13-build/tmc3/tmc3` and `$THESIS_BUILD_ROOT/d
 
 ## Models and evaluation
 
-Seven complete checkpoints are mandatory external assets of the handover, rather than ordinary Git files. Distribution on both platforms is currently blocked; [CHECKPOINTS.md](CHECKPOINTS.md) records the exact status. No personal HPC directory is part of the installation procedure. Datasets are not bundled.
+Seven complete checkpoints are supplied as external [GitHub Release assets](https://github.com/whitesocksjames/scalableattributethesis/releases/tag/thesis-handover-v1), keeping ordinary Git files small. No personal HPC directory is part of the installation procedure. Datasets are not bundled.
 
-When an authorized platform copy becomes available, put `ours_8k.pth` in `checkpoints/` and verify it before evaluation:
-
-```bash
-(cd checkpoints && sha256sum --ignore-missing -c ../configs/SHA256SUMS)
-```
-
-Require `ours_8k.pth: OK`. For the complete seven-file set, omit `--ignore-missing`. Expected filenames, sizes and hashes are in [checkpoints.json](../configs/checkpoints.json); the loader format is defined by `scalable_attribute/runtime/checkpoints.py`.
+Download a model and run the Quick Test from the cloned repository root:
 
 ```bash
+python -m scalable_attribute.download --point 8k --output checkpoints
 python -m scalable_attribute.evaluate \
   --checkpoint checkpoints/ours_8k.pth \
   --input examples/example.ply --output outputs/example \
   --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d
 ```
+
+The downloader checks the expected file size and SHA-256 before accepting a download or reusing a local file. Use `--point all` for all seven, then independently check `(cd checkpoints && sha256sum -c ../configs/SHA256SUMS)`. [checkpoints.json](../configs/checkpoints.json) contains exact filenames, sizes and hashes. [CHECKPOINTS.md](CHECKPOINTS.md) records platform availability; the loader format is defined by `scalable_attribute/runtime/checkpoints.py`.
 
 The output directory must be new. Use one backend for encoding and decoding; CPU/GPU bit-exact equivalence and payload interchange are not certified. The synthetic example exercises the interface, while [EVALUATION.md](EVALUATION.md) defines the final benchmark protocol.
 

@@ -18,31 +18,36 @@ Total: **952,005,347 bytes**. Each file contains the complete Prefix/BaseSynthes
 
 The audited models are those of `b70c25b`. All seven passed strict CPU loading, exact tensor preservation and same-backend original/export equivalence on the synthetic example. GPU and fresh-process GPU decoding checks covered 8k, 2k and 4k. Other GPU points and a fresh dependency installation were not certified. These are previous audit results, not claims of testing downloads from either platform.
 
-## Current platform availability
+## Platform downloads
 
-| Platform | Intended storage | Actual status |
+| Platform | Storage | Status |
 | --- | --- | --- |
-| [GitHub](https://github.com/whitesocksjames/scalableattributethesis) | Seven individual Release assets, plus manifest and SHA256SUMS | No Release/assets published; permission unresolved |
-| GitLab | Seven individual Generic Package Registry files with same-platform Release links | Repository URL not supplied; no upload performed |
+| [GitHub Release](https://github.com/whitesocksjames/scalableattributethesis/releases/tag/thesis-handover-v1) | Seven individual model assets, `manifest.json` and `SHA256SUMS` | Available |
+| GitLab | Planned Generic Package Registry files with same-platform Release links | Repository URL not supplied; no upload performed |
 
-There are **no working platform model downloads yet**. No placeholder asset URL is advertised. Existing research storage is an internal source for the final files, not the supervisor delivery mechanism. Neither platform is complete until its own seven assets can be independently downloaded and verified.
+Each GitHub asset is linked from the manifest. The portable checksum list is identical in the source repository and Release. GitLab delivery remains incomplete until the target repository is supplied and all seven files are independently hosted and verified there.
 
-## Publication requirements
+## Download and verify
 
-Confirm permission covering both inherited source and derived weights before uploading to any public or private third-party destination; see [THIRD_PARTY.md](../THIRD_PARTY.md). Establish the actual GitLab target and upload permissions rather than guessing a project URL.
-
-After permission is established, publish the same source commit/tag on both platforms. Attach the seven unchanged model files and copies of the manifest/checksum list to the GitHub Release. Store a second full copy in the GitLab project's Generic Package Registry and link those local package files from its Release. Publish directly from the existing model source host or through an approved server-to-server route; no workstation relay is needed.
-
-GitHub permits each Release file below 2 GiB ([documentation](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)); each model is about 136 MB. GitLab.com permits Generic Package files up to 5 GB ([documentation](https://docs.gitlab.com/user/gitlab_com/#package-registry-limits)). A self-managed GitLab instance can impose different limits and quotas, which must be checked against the actual target ([instance limits](https://docs.gitlab.com/administration/instance_limits/#package-registry-limits)). GitLab [Generic Packages](https://docs.gitlab.com/user/packages/generic_packages/) and [Release links](https://docs.gitlab.com/user/project/releases/release_fields/) provide the intended native storage/access route.
-
-Only after uploading should the README gain exact, tested asset download commands. Download all seven from each destination into separate verification directories; compare both sizes and SHA-256 against this source manifest, without fetching from the other platform. Confirm remote source trees match the tagged commit and run the README Quick Test using a downloaded checkpoint. A local/source-storage checksum pass does not establish platform download success.
-
-## Verify downloaded files
-
-For all seven, run from the cloned repository root:
+From the cloned repository root, use the Python standard-library downloader:
 
 ```bash
+python -m scalable_attribute.download --point 8k --output checkpoints
+```
+
+It checks both size and SHA-256, including when reusing an existing file. Download and independently verify all seven with:
+
+```bash
+python -m scalable_attribute.download --point all --output checkpoints
 (cd checkpoints && sha256sum -c ../configs/SHA256SUMS)
 ```
 
-Require seven `OK` lines. For a single model, use `--ignore-missing` and explicitly require that model's `OK` line. Follow the [README Quick Test](../README.md#verify-a-checkpoint-and-run-the-quick-test) after verification. It writes Base/Full reconstruction, payloads, physical rates and quality metrics. The output directory must be new; encode and decode on the same backend.
+Require seven `OK` lines. Individual files can also be downloaded from the Release page and checked against [SHA256SUMS](../configs/SHA256SUMS). Each checkpoint is about 136 MB; the seven-file total is 952,005,347 bytes. No personal HPC access or cross-platform download service is required for GitHub delivery.
+
+Follow the [README Quick Test](../README.md#verify-a-checkpoint-and-run-the-quick-test). It writes Base/Full reconstruction, payloads, physical rates and quality metrics. The output directory must be new; encode and decode on the same backend. The recorded CPU/GPU checks above predate this upload and do not certify a fresh installation.
+
+## Attribution and remaining platform work
+
+The owner approved GitHub publication. Applicable upstream redistribution permission for inherited code and derived weights remains unconfirmed; [THIRD_PARTY.md](../THIRD_PARTY.md) records that distinction and attribution. Publication does not grant additional rights to inherited material.
+
+When the actual GitLab target is supplied, use the same source commit/tag and seven unchanged files. GitLab Generic Packages and its Release links provide a native storage/access route. Check the actual instance's limits and credentials before uploading; [GitLab.com limits](https://docs.gitlab.com/user/gitlab_com/#package-registry-limits) and [self-managed limits](https://docs.gitlab.com/administration/instance_limits/#package-registry-limits) may differ. Do not substitute GitHub links for the required second platform copy.

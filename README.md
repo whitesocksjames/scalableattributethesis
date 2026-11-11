@@ -16,7 +16,7 @@ BaseSynthesis completes the truncated prefix without extra payload bits. Full ad
 
 **Seven pretrained checkpoints are required for the complete handover**, supplied separately from Git objects. Each contains Prefix, BaseSynthesis and Enhancement states for both Base and Full; no Original Unicorn weight file is needed. The [manifest](configs/checkpoints.json) and [SHA-256 list](configs/SHA256SUMS) identify the audited files (952,005,347 bytes total).
 
-**Checkpoint delivery status: not yet published.** GitHub Release assets and a separate GitLab package copy are prepared as the distribution targets. Redistribution permission for inherited Unicorn code and derived weights remains unconfirmed, and the GitLab repository has not been specified. No checkpoint download is currently available on either platform; see [Checkpoint delivery](docs/CHECKPOINTS.md). Datasets are not bundled.
+**Pretrained models:** download any of the seven files from the [GitHub Release](https://github.com/whitesocksjames/scalableattributethesis/releases/tag/thesis-handover-v1), or use the verified downloader below. [Checkpoint delivery](docs/CHECKPOINTS.md) lists all files and the pending GitLab delivery. Datasets are not bundled.
 
 ## Final results
 
@@ -63,22 +63,17 @@ python scripts/scalable_attribute/analysis/plot_final_static_rgb_rd.py \
 
 ### Verify a checkpoint and run the Quick Test
 
-This step requires a verified checkpoint. The platform download step is blocked as described above. Once authorized assets are available, save `ours_8k.pth` in `checkpoints/` and check its identity before loading it:
+Download the 8k checkpoint, automatically verify its size and SHA-256, and run Base/Full inference:
 
 ```bash
-(cd checkpoints && sha256sum --ignore-missing -c ../configs/SHA256SUMS)
-```
-
-Check that the output explicitly says `ours_8k.pth: OK`; an absent file is not a successful verification of that point. For all seven models, omit `--ignore-missing`.
-
-Then run:
-
-```bash
+python -m scalable_attribute.download --point 8k --output checkpoints
 python -m scalable_attribute.evaluate \
   --checkpoint checkpoints/ours_8k.pth \
   --input examples/example.ply --output outputs/example \
   --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d
 ```
+
+Use `--point all` to download all seven models. To independently check the complete set, run `(cd checkpoints && sha256sum -c ../configs/SHA256SUMS)`. The files are also available individually on the [Release page](https://github.com/whitesocksjames/scalableattributethesis/releases/tag/thesis-handover-v1).
 
 The synthetic example produces `base.ply`, `full.ply`, payload containers and `rates.json`; it is not a thesis benchmark sample. Use a new output directory. `--endpoint base` exercises Base without an Enhancement payload. CPU and GPU outputs are not bit-exact interchangeable; use one backend for encoding and decoding. The containers are model-specific evaluation artifacts, with geometry/container overhead excluded under the frozen physical-rate convention.
 

@@ -1,6 +1,6 @@
 {
   "format": "scalable_attribute_inference_v1",
-  "publication_status": "blocked_pending_upstream_redistribution_permission",
+  "publication_status": "github_published_gitlab_target_pending",
   "models": [
     {
       "point": "512",
@@ -18,7 +18,8 @@
       },
       "strict_independent_load": "PASS",
       "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
+      "url": "https://github.com/whitesocksjames/scalableattributethesis/releases/download/thesis-handover-v1/ours_512.pth"
     },
     {
       "point": "1k",
@@ -36,7 +37,8 @@
       },
       "strict_independent_load": "PASS",
       "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
+      "url": "https://github.com/whitesocksjames/scalableattributethesis/releases/download/thesis-handover-v1/ours_1k.pth"
     },
     {
       "point": "2k",
@@ -55,7 +57,8 @@
       "strict_independent_load": "PASS",
       "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
       "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
-      "fresh_process_decode": "PASS_CUDA"
+      "fresh_process_decode": "PASS_CUDA",
+      "url": "https://github.com/whitesocksjames/scalableattributethesis/releases/download/thesis-handover-v1/ours_2k.pth"
     },
     {
       "point": "4k",
@@ -74,7 +77,8 @@
       "strict_independent_load": "PASS",
       "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
       "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
-      "fresh_process_decode": "PASS_CUDA"
+      "fresh_process_decode": "PASS_CUDA",
+      "url": "https://github.com/whitesocksjames/scalableattributethesis/releases/download/thesis-handover-v1/ours_4k.pth"
     },
     {
       "point": "8k",
@@ -93,7 +97,8 @@
       "strict_independent_load": "PASS",
       "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
       "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
-      "fresh_process_decode": "PASS_CUDA"
+      "fresh_process_decode": "PASS_CUDA",
+      "url": "https://github.com/whitesocksjames/scalableattributethesis/releases/download/thesis-handover-v1/ours_8k.pth"
     },
     {
       "point": "16k",
@@ -111,7 +116,8 @@
       },
       "strict_independent_load": "PASS",
       "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
+      "url": "https://github.com/whitesocksjames/scalableattributethesis/releases/download/thesis-handover-v1/ours_16k.pth"
     },
     {
       "point": "32k",
@@ -129,7 +135,8 @@
       },
       "strict_independent_load": "PASS",
       "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
+      "url": "https://github.com/whitesocksjames/scalableattributethesis/releases/download/thesis-handover-v1/ours_32k.pth"
     }
   ],
   "audited_model_source_commit": "b70c25b7f01090d79b24c8ac06b54665efdcf34b",
@@ -138,7 +145,9 @@
     "github": {
       "storage": "Release assets",
       "repository": "https://github.com/whitesocksjames/scalableattributethesis",
-      "status": "NOT_PUBLISHED"
+      "status": "PUBLISHED",
+      "tag": "thesis-handover-v1",
+      "release_url": "https://github.com/whitesocksjames/scalableattributethesis/releases/tag/thesis-handover-v1"
     },
     "gitlab": {
       "storage": "Generic Package Registry with Release links",
@@ -149,7 +158,6 @@
   "file_identity_recheck": {
     "date": "2026-11-12",
     "files": 7,
-    "size_and_sha256": "PASS_AT_EXISTING_SOURCE",
-    "platform_downloads": "NOT_RUN_NO_PUBLISHED_ASSETS"
+    "size_and_sha256": "PASS_AT_EXISTING_SOURCE"
   }
 }

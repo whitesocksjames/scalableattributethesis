@@ -8,9 +8,9 @@ OURS adds full-resolution BaseSynthesis, conditional Enhancement composition and
 
 The complete pinned Unicorn tree has no general code/weight license identified by this delivery review. Its explicit PCQM license files concern PCQM, which is not retained here. The official repository license endpoint returned 404. Public source access and an academic citation do not establish permission to redistribute inherited source or derivative weights. No blanket license is assigned to them here.
 
-**Applicable upstream redistribution permission for inherited source and derived weights remains unconfirmed.** The availability of source in this repository does not establish such permission or grant a license to inherited material. Checkpoint publication on both platforms remains withheld. A private repository, draft Release or private package is not automatically authorized redistribution; no checkpoint upload is performed while permission is unresolved.
+**Applicable upstream redistribution permission for inherited source and derived weights remains unconfirmed.** The availability of source in this repository does not establish such permission or grant a license to inherited material. The repository owner has approved publication of the seven checkpoint files on GitHub. This publication approval does not resolve upstream redistribution permission or assign a blanket license. A private repository or package does not automatically establish redistribution rights.
 
-Available delivery alternatives are author-owned results/figures/analysis only, an already authorized controlled evaluation, or an arrangement where the evaluator independently obtains upstream material through an authorized channel. A complete public source repository containing these inherited modules requires an applicable license or rightsholder authorization.
+Further redistribution should be assessed against an applicable upstream license or rightsholder authorization. Attribution and the availability of these files are not substitutes for that permission.
 
 ## Codec tools and dependencies
 
