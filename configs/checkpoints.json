@@ -56,8 +56,9 @@
         "full": "ca7ac7493a3d1ec0edb7cc4a9c2d7771fb9e811da60448ca7a784bf37a08a2f0"
       },
       "strict_independent_load": "PASS",
-      "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
+      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
+      "fresh_process_decode": "PASS_CUDA"
     },
     {
       "point": "4k",
@@ -75,8 +76,9 @@
         "full": "58d691eee4e4c58ede70231724d85e1cc2615b4bb6b931746090566596bf246b"
       },
       "strict_independent_load": "PASS",
-      "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
+      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
+      "fresh_process_decode": "PASS_CUDA"
     },
     {
       "point": "8k",
@@ -94,8 +96,9 @@
         "full": "95e3100235d9e871239ddd3b71274a929b722985b39353d1437098ae39b7fd17"
       },
       "strict_independent_load": "PASS",
-      "gpu_equivalence": "NOT_RUN",
-      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de"
+      "gpu_equivalence": "PASS_RTX3080_SYNTHETIC_512_POINTS",
+      "validation_input_sha256": "b9a9efeb042e18d3f1c7addcc8af436fcb3bff12802865d6a0358dd2f49f00de",
+      "fresh_process_decode": "PASS_CUDA"
     },
     {
       "point": "16k",

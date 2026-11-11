@@ -78,7 +78,7 @@ class SymmetricConditional(torch.nn.Module):
         scale = scale.to(loc.device)
         min_v = min_v.to(loc.device); max_v = max_v.to(loc.device)
         symbols = torch.arange(min_v.int(), max_v.int()+1).reshape(1,1,-1).to(loc.device)
-        symbols = symbols.repeat(loc.shape[0], self._channels, 1)# [N, C, S]
+        symbols = symbols.repeat(loc.shape[0], loc.shape[1], 1)# [N, C, S]
         pmf = self._likelihood(symbols.float(), loc, scale)
         pmf = torch.clamp(pmf, min=self._likelihood_bound)
         cdf = self._pmf_to_cdf(pmf)
@@ -109,6 +109,8 @@ class SymmetricConditional(torch.nn.Module):
             decompressed, excluding the batch dimension. [points, channels] (numpy)
         Returns: The decompressed `Tensor`. (torch)  # TODO
         """   
+        if channels is not None and int(channels) != loc.shape[-1]:
+            raise ValueError("Entropy decoder channel count does not match its prior")
         min_v, max_v = torch.tensor(min_v), torch.tensor(max_v)
         loc, scale = loc.unsqueeze(2), scale.unsqueeze(2) # [N, C, 1]
         cdf = self._get_cdf(loc, scale, min_v, max_v)

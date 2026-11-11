@@ -76,6 +76,10 @@ def decode_base(model, payload, geometry):
     """Decode Base with geometry support supplied independently by the caller."""
     if payload.get("schema") != "scalable-attribute-base-v1":
         raise ValueError("Unsupported Base payload schema")
+    if list(payload.get("geometry_stride", [])) != list(geometry.tensor_stride):
+        raise ValueError("Payload geometry stride does not match supplied geometry")
+    if len(payload.get("streams", [])) != model.base.prefix.residual_stages:
+        raise ValueError("Base payload must contain exactly four residual streams")
     if not torch.equal(payload["geometry_C"].to(geometry.C.device), geometry.C):
         raise ValueError("Payload geometry support does not match supplied geometry")
     model.eval()

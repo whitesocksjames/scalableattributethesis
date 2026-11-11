@@ -41,3 +41,5 @@ python -m pytest -q
 ```
 
 The BD-BR calculation and SVG plotting scripts use only the Python standard library. CTC chunk preparation and aggregation require NumPy. Codec execution additionally requires PyTorch, MinkowskiEngine, torchac, and the two codec/metric tools. To rebuild tools on another platform, use the pinned upstream versions and retain their notices from [THIRD_PARTY.md](../THIRD_PARTY.md).
+
+The final audit ran the quick command from a clean source extraction using the declared pre-existing dependencies; it did not build an entirely new environment. CPU and GPU execution differ on the example (including Enhancement bytes and reconstruction features). Use the same device/backend for encoding and decoding, and the original GPU protocol for comparisons with thesis measurements. See [FINAL_AUDIT.md](FINAL_AUDIT.md).

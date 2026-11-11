@@ -21,3 +21,5 @@ Codec time is CUDA-synchronized. Original Unicorn timing covers its physical enc
 For CTC, `prepare_ctc_formal_chunks.py` verifies the upstream KD-tree partition source and produces a source/chunk manifest. `scalable_attribute.evaluate --chunk-manifest ...` independently encodes and decodes each chunk, writes a per-chunk record, and emits `aggregate_command.txt` for `aggregate_formal_chunk_results.py` to merge reconstructions and calculate full-sample metrics.
 
 See [results/final](../results/final/README.md) for raw points, final BD-BR tables, figures, the frontier audit, and runtime evidence.
+
+The runtime is verified within each tested backend. CPU and RTX 3080 results on the synthetic demo are not bit-exact interchangeable: Full payloads differ by one byte and decoded feature differences are measurable. Original-stage and exported models agree exactly within the same backend, and fresh-process decoding succeeds on that backend. Cross-device payload interchange has not been certified; these findings do not modify the frozen GPU measurements. See [FINAL_AUDIT.md](FINAL_AUDIT.md).
