@@ -14,7 +14,9 @@ Base payload: x_low + r1-r4
 
 BaseSynthesis completes the truncated prefix without extra payload bits. Full adds an independently entropy-coded Enhancement payload and reuses the decoded Base state. The seven operating points are `512 / 1k / 2k / 4k / 8k / 16k / 32k`. See [Method](docs/METHOD.md) for the graph and training objective.
 
-**Model weights and datasets are not included.** The repository has no checkpoint download service or model Release requirement. Codec inference requires an independently supplied, authorized checkpoint in the format supported by the loader. Frozen state identifiers are recorded in [operating_points.json](configs/operating_points.json).
+**Seven pretrained checkpoints are required for the complete handover**, supplied separately from Git objects. Each contains Prefix, BaseSynthesis and Enhancement states for both Base and Full; no Original Unicorn weight file is needed. The [manifest](configs/checkpoints.json) and [SHA-256 list](configs/SHA256SUMS) identify the audited files (952,005,347 bytes total).
+
+**Delivery status: not yet published.** GitHub Release assets and a separate GitLab package copy are prepared as the distribution targets. Redistribution permission for inherited Unicorn code and derived weights remains unconfirmed, and the GitLab repository has not been specified. No checkpoint download is currently available on either platform; see [Checkpoint delivery](docs/CHECKPOINTS.md). Datasets are not bundled.
 
 ## Final results
 
@@ -41,7 +43,7 @@ Negative BD-BR indicates bitrate savings at equivalent quality. [Final results](
 | `scalable_attribute/evaluate.py` | RGB PLY inference, physical rates and optional quality metrics |
 | `basic_models/`, `lossy_attribute/`, `data_utils/`, `cfg/` | Required network, entropy, I/O and fixed configuration dependencies |
 | `results/final/` | Frozen measurements, BD-BR tables and RD figures |
-| `configs/`, `examples/` | Operating points, sample identities, environment record and synthetic example |
+| `configs/`, `examples/` | Checkpoint manifest/checksums, sample identities, environment record and synthetic example |
 | `scripts/scalable_attribute/` | CTC preprocessing/aggregation and result analysis |
 | `tests/`, `docs/`, `third_party/` | Focused regression tests, method/protocol, required tools and notices |
 
@@ -59,13 +61,21 @@ python scripts/scalable_attribute/analysis/plot_final_static_rgb_rd.py \
 (cd results/final && sha256sum -c SHA256SUMS)
 ```
 
-### Run inference with an externally supplied model
+### Verify a checkpoint and run the Quick Test
 
-After installing dependencies and obtaining an authorized self-contained checkpoint, provide its local path explicitly:
+This step requires a verified checkpoint. The platform download step is blocked as described above. Once authorized assets are available, save `ours_8k.pth` in `checkpoints/` and check its identity before loading it:
+
+```bash
+(cd checkpoints && sha256sum --ignore-missing -c ../configs/SHA256SUMS)
+```
+
+Check that the output explicitly says `ours_8k.pth: OK`; an absent file is not a successful verification of that point. For all seven models, omit `--ignore-missing`.
+
+Then run:
 
 ```bash
 python -m scalable_attribute.evaluate \
-  --checkpoint /path/to/authorized/ours_8k.pth \
+  --checkpoint checkpoints/ours_8k.pth \
   --input examples/example.ply --output outputs/example \
   --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d
 ```
@@ -78,7 +88,7 @@ For CTC, prepare lossless global-coordinate chunks, evaluate the chunk manifest 
 python scripts/scalable_attribute/evaluation/prepare_ctc_formal_chunks.py \
   --input /path/to/canonical_sample.ply --output-root outputs/chunks
 python -m scalable_attribute.evaluate \
-  --checkpoint /path/to/authorized/ours_8k.pth \
+  --checkpoint checkpoints/ours_8k.pth \
   --input /path/to/canonical_sample.ply --chunk-manifest outputs/chunks/manifest.json \
   --output outputs/chunk-evaluation \
   --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d

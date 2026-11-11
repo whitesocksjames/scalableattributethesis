@@ -26,8 +26,8 @@ The runtime is verified within each tested backend. CPU and RTX 3080 results on 
 
 ## Running evaluation
 
-Model weights and datasets are not included. With an independently supplied, authorized self-contained inference checkpoint, run the command in the repository README. Its format is defined by `scalable_attribute/runtime/checkpoints.py`: point/lambda, Prefix configuration, BaseSynthesis configuration, and the complete `model_state` are required. The seven formal state identifiers are in [operating_points.json](../configs/operating_points.json).
+Datasets are not bundled. Seven self-contained pretrained checkpoints are required external delivery assets; their [platform availability](CHECKPOINTS.md) is currently blocked. With an authorized, hash-verified checkpoint, run the command in the repository README. Its format is defined by `scalable_attribute/runtime/checkpoints.py`: point/lambda, Prefix configuration, BaseSynthesis configuration, and the complete `model_state` are required. The seven formal state identifiers are in [checkpoints.json](../configs/checkpoints.json).
 
-The shipped 512-point synthetic example exercises Base/Full reconstruction and reports physical bits and optional `pc_error` metrics. The output directory must be new. To evaluate CTC, prepare its deterministic chunks, run `scalable_attribute.evaluate --chunk-manifest`, and execute the emitted `aggregate_command.txt`. No model download or historical training directory is used.
+The shipped 512-point synthetic example exercises Base/Full reconstruction and reports physical bits and optional `pc_error` metrics. The output directory must be new. To evaluate CTC, prepare its deterministic chunks, run `scalable_attribute.evaluate --chunk-manifest`, and execute the emitted `aggregate_command.txt`. Each model loads independently of historical training directories and Original Unicorn weight files.
 
 Result analysis works without checkpoints: the plotting and BD-BR scripts consume `results/final/evidence/raw_rd_points.csv`. The frozen result files can be checked with `(cd results/final && sha256sum -c SHA256SUMS)`.

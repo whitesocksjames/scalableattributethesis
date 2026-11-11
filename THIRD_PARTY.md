@@ -2,13 +2,13 @@
 
 The implementation extends [NJUVISION/Unicorn](https://github.com/NJUVISION/Unicorn), pinned for the reference evaluation at commit `b50d6c1bd033185b9e893b755d5d316cca2d4448`. Retained source under `basic_models/`, `lossy_attribute/`, `data_utils/`, `cfg/` and the codec wrappers derives from that implementation. Existing author/copyright headers are preserved. Cite *A Versatile Point Cloud Compressor Using Universal Multiscale Conditional Coding — Part II: Attribute Compression* ([paper](https://ieeexplore.ieee.org/document/10682566)).
 
-OURS adds full-resolution BaseSynthesis, conditional Enhancement composition and associated runtime/evaluation support. Model weights are not included or downloaded by this repository. Their frozen identifiers document the evaluation states, not a distribution service or permission grant.
+OURS adds full-resolution BaseSynthesis, conditional Enhancement composition and associated runtime/evaluation support. Seven self-contained pretrained files are required handover assets, kept outside ordinary Git objects. Their [manifest](configs/checkpoints.json) preserves the source identities and audited file hashes. They contain inherited pretrained parameters as well as learned OURS parameters; exporting or removing optimizer states does not establish redistribution rights. See [Checkpoint delivery](docs/CHECKPOINTS.md).
 
 ## Inherited code permission
 
 The complete pinned Unicorn tree has no general code/weight license identified by this delivery review. Its explicit PCQM license files concern PCQM, which is not retained here. The official repository license endpoint returned 404. Public source access and an academic citation do not establish permission to redistribute inherited source or derivative weights. No blanket license is assigned to them here.
 
-**A public push containing the retained Unicorn-derived code is blocked pending confirmation of applicable redistribution permission.** Omitting checkpoints does not resolve the source-code permission issue. This condition applies to every distribution destination.
+**Publishing retained Unicorn-derived code or derived checkpoints is blocked pending confirmation of applicable redistribution permission.** This applies to both platforms. A private repository, draft Release or private package is not automatically authorized redistribution; no such upload is performed while permission is unresolved. Local preparation preserves the audited models without claiming delivery.
 
 Available delivery alternatives are author-owned results/figures/analysis only, an already authorized controlled evaluation, or an arrangement where the evaluator independently obtains upstream material through an authorized channel. A complete public source repository containing these inherited modules requires an applicable license or rightsholder authorization.
 

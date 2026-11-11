@@ -64,11 +64,19 @@ Outputs are `$THESIS_BUILD_ROOT/tmc13-build/tmc3/tmc3` and `$THESIS_BUILD_ROOT/d
 
 ## Models and evaluation
 
-**Weights and datasets are not distributed with this repository.** There is no automatic checkpoint downloader or model package prerequisite. To run the codec, independently supply an authorized complete inference checkpoint. The supported state identifiers are in [operating_points.json](../configs/operating_points.json), and the format is defined by `scalable_attribute/runtime/checkpoints.py`.
+Seven complete checkpoints are mandatory external assets of the handover, rather than ordinary Git files. Distribution on both platforms is currently blocked; [CHECKPOINTS.md](CHECKPOINTS.md) records the exact status. No personal HPC directory is part of the installation procedure. Datasets are not bundled.
+
+When an authorized platform copy becomes available, put `ours_8k.pth` in `checkpoints/` and verify it before evaluation:
+
+```bash
+(cd checkpoints && sha256sum --ignore-missing -c ../configs/SHA256SUMS)
+```
+
+Require `ours_8k.pth: OK`. For the complete seven-file set, omit `--ignore-missing`. Expected filenames, sizes and hashes are in [checkpoints.json](../configs/checkpoints.json); the loader format is defined by `scalable_attribute/runtime/checkpoints.py`.
 
 ```bash
 python -m scalable_attribute.evaluate \
-  --checkpoint /path/to/authorized/ours_8k.pth \
+  --checkpoint checkpoints/ours_8k.pth \
   --input examples/example.ply --output outputs/example \
   --gpcc third_party/tmc3_v21 --pc-error third_party/pc_error_d
 ```
